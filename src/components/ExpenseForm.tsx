@@ -4,12 +4,15 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { CATEGORIES, type Expense, type Category } from "@/types/expense";
+import { CATEGORIES, type Category } from "@/types/expense";
+import type { Tables } from "@/integrations/supabase/types";
+
+type Expense = Tables<"expenses">;
 
 interface ExpenseFormProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onSubmit: (expense: Omit<Expense, "id">) => void;
+  onSubmit: (data: { name: string; category: string; amount: number; date: string }) => void;
   editExpense?: Expense | null;
 }
 
@@ -22,7 +25,7 @@ export function ExpenseForm({ open, onOpenChange, onSubmit, editExpense }: Expen
   useEffect(() => {
     if (editExpense) {
       setName(editExpense.name);
-      setCategory(editExpense.category);
+      setCategory(editExpense.category as Category);
       setAmount(String(editExpense.amount));
       setDate(editExpense.date);
     } else {
@@ -55,20 +58,11 @@ export function ExpenseForm({ open, onOpenChange, onSubmit, editExpense }: Expen
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4 mt-2">
           <div className="space-y-2">
-            <Label htmlFor="name">Expense Name</Label>
-            <Input
-              id="name"
-              placeholder="e.g. Coffee"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              required
-              maxLength={100}
-              className="rounded-xl"
-            />
+            <Label htmlFor="expense-name">Expense Name</Label>
+            <Input id="expense-name" placeholder="e.g. Coffee" value={name} onChange={(e) => setName(e.target.value)} required maxLength={100} className="rounded-xl" />
           </div>
-
           <div className="space-y-2">
-            <Label htmlFor="category">Category</Label>
+            <Label htmlFor="expense-category">Category</Label>
             <Select value={category} onValueChange={(v) => setCategory(v as Category)}>
               <SelectTrigger className="rounded-xl">
                 <SelectValue />
@@ -80,34 +74,14 @@ export function ExpenseForm({ open, onOpenChange, onSubmit, editExpense }: Expen
               </SelectContent>
             </Select>
           </div>
-
           <div className="space-y-2">
-            <Label htmlFor="amount">Amount (₹)</Label>
-            <Input
-              id="amount"
-              type="number"
-              min="0.01"
-              step="0.01"
-              placeholder="0.00"
-              value={amount}
-              onChange={(e) => setAmount(e.target.value)}
-              required
-              className="rounded-xl"
-            />
+            <Label htmlFor="expense-amount">Amount (₹)</Label>
+            <Input id="expense-amount" type="number" min="0.01" step="0.01" placeholder="0.00" value={amount} onChange={(e) => setAmount(e.target.value)} required className="rounded-xl" />
           </div>
-
           <div className="space-y-2">
-            <Label htmlFor="date">Date</Label>
-            <Input
-              id="date"
-              type="date"
-              value={date}
-              onChange={(e) => setDate(e.target.value)}
-              required
-              className="rounded-xl"
-            />
+            <Label htmlFor="expense-date">Date</Label>
+            <Input id="expense-date" type="date" value={date} onChange={(e) => setDate(e.target.value)} required className="rounded-xl" />
           </div>
-
           <Button type="submit" className="w-full rounded-xl h-12 text-base font-semibold">
             {editExpense ? "Save Changes" : "Add Expense"}
           </Button>

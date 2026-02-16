@@ -1,7 +1,10 @@
 import { Pencil, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import type { Expense } from "@/types/expense";
-import { CATEGORY_ICONS, CATEGORY_COLORS } from "@/types/expense";
+import { CATEGORY_ICONS, CATEGORY_COLORS, type Category } from "@/types/expense";
+import type { Tables } from "@/integrations/supabase/types";
+import { motion, AnimatePresence } from "framer-motion";
+
+type Expense = Tables<"expenses">;
 
 interface ExpenseTableProps {
   expenses: Expense[];
@@ -22,7 +25,6 @@ export function ExpenseTable({ expenses, onEdit, onDelete }: ExpenseTableProps) 
 
   return (
     <div className="bg-card rounded-2xl shadow-card overflow-hidden">
-      {/* Header */}
       <div className="hidden sm:grid grid-cols-[1fr_120px_100px_100px_80px] gap-2 px-5 py-3 bg-muted/50 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
         <span>Name</span>
         <span>Category</span>
@@ -30,53 +32,42 @@ export function ExpenseTable({ expenses, onEdit, onDelete }: ExpenseTableProps) 
         <span className="text-right">Amount</span>
         <span />
       </div>
-
-      {/* Rows */}
       <div className="divide-y divide-border">
-        {expenses.map((expense) => (
-          <div
-            key={expense.id}
-            className="grid grid-cols-1 sm:grid-cols-[1fr_120px_100px_100px_80px] gap-1 sm:gap-2 px-5 py-4 items-center hover:bg-muted/30 transition-colors group"
-          >
-            <div className="font-medium text-foreground">{expense.name}</div>
-
-            <div>
-              <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-medium ${CATEGORY_COLORS[expense.category]}`}>
-                {CATEGORY_ICONS[expense.category]} {expense.category}
-              </span>
-            </div>
-
-            <div className="text-sm text-muted-foreground">
-              {new Date(expense.date).toLocaleDateString("en-IN", {
-                day: "numeric",
-                month: "short",
-              })}
-            </div>
-
-            <div className="text-right font-semibold text-foreground">
-              ₹{expense.amount.toLocaleString("en-IN", { minimumFractionDigits: 2 })}
-            </div>
-
-            <div className="flex justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity sm:opacity-0 sm:group-hover:opacity-100">
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-8 w-8 rounded-lg"
-                onClick={() => onEdit(expense)}
+        <AnimatePresence>
+          {expenses.map((expense) => {
+            const cat = expense.category as Category;
+            return (
+              <motion.div
+                key={expense.id}
+                initial={{ opacity: 0, x: -10 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: 10 }}
+                className="grid grid-cols-1 sm:grid-cols-[1fr_120px_100px_100px_80px] gap-1 sm:gap-2 px-5 py-4 items-center hover:bg-muted/30 transition-colors group"
               >
-                <Pencil className="h-4 w-4" />
-              </Button>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-8 w-8 rounded-lg text-destructive hover:text-destructive"
-                onClick={() => onDelete(expense.id)}
-              >
-                <Trash2 className="h-4 w-4" />
-              </Button>
-            </div>
-          </div>
-        ))}
+                <div className="font-medium text-foreground">{expense.name}</div>
+                <div>
+                  <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-medium ${CATEGORY_COLORS[cat] || "bg-gray-100 text-gray-700"}`}>
+                    {CATEGORY_ICONS[cat] || "📌"} {expense.category}
+                  </span>
+                </div>
+                <div className="text-sm text-muted-foreground">
+                  {new Date(expense.date).toLocaleDateString("en-IN", { day: "numeric", month: "short" })}
+                </div>
+                <div className="text-right font-semibold text-foreground">
+                  ₹{Number(expense.amount).toLocaleString("en-IN", { minimumFractionDigits: 2 })}
+                </div>
+                <div className="flex justify-end gap-1 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
+                  <Button variant="ghost" size="icon" className="h-8 w-8 rounded-lg" onClick={() => onEdit(expense)}>
+                    <Pencil className="h-4 w-4" />
+                  </Button>
+                  <Button variant="ghost" size="icon" className="h-8 w-8 rounded-lg text-destructive hover:text-destructive" onClick={() => onDelete(expense.id)}>
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </div>
+              </motion.div>
+            );
+          })}
+        </AnimatePresence>
       </div>
     </div>
   );
