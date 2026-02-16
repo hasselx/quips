@@ -9,14 +9,6 @@ export const CATEGORIES = [
 
 export type Category = (typeof CATEGORIES)[number];
 
-export interface Expense {
-  id: string;
-  name: string;
-  category: Category;
-  amount: number;
-  date: string; // ISO date string
-}
-
 export const CATEGORY_ICONS: Record<Category, string> = {
   Food: "🍔",
   Transport: "🚗",
