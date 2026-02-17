@@ -36,7 +36,6 @@ export function NotebookList({ onSelect }: NotebookListProps) {
     },
   });
 
-  // Also fetch expense counts per notebook
   const { data: expenseCounts = {} } = useQuery({
     queryKey: ["notebook-counts"],
     queryFn: async () => {
@@ -102,35 +101,32 @@ export function NotebookList({ onSelect }: NotebookListProps) {
     setName("");
   };
 
-  const openCreate = () => {
-    setEditNotebook(null);
-    setName("");
-    setDialogOpen(true);
-  };
-
-  const openEdit = (nb: Notebook) => {
-    setEditNotebook(nb);
-    setName(nb.name);
-    setDialogOpen(true);
-  };
+  const openCreate = () => { setEditNotebook(null); setName(""); setDialogOpen(true); };
+  const openEdit = (nb: Notebook) => { setEditNotebook(nb); setName(nb.name); setDialogOpen(true); };
 
   const NOTEBOOK_EMOJIS = ["📒", "📗", "📘", "📕", "📓", "📔"];
+
+  const formatDate = (dateStr: string) => {
+    return new Date(dateStr).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" });
+  };
 
   return (
     <div className="min-h-screen bg-background">
       <div className="max-w-2xl mx-auto px-4 py-8 pb-24">
-        {/* Header */}
-        <div className="flex items-center justify-between mb-8">
+        {/* Landing Header */}
+        <div className="flex items-center justify-between mb-2">
           <div>
             <h1 className="text-3xl font-extrabold text-foreground tracking-tight">💰 ExpenseBook</h1>
-            <p className="text-muted-foreground mt-1">Your expense notebooks</p>
           </div>
           <Button variant="ghost" size="icon" className="rounded-xl" onClick={signOut}>
             <LogOut className="h-5 w-5" />
           </Button>
         </div>
+        <p className="text-muted-foreground mb-8">
+          Track expenses across multiple notebooks. Create one for every trip, month, or purpose.
+        </p>
 
-        {/* Notebooks grid */}
+        {/* Notebooks */}
         {isLoading ? (
           <div className="text-center py-12 text-muted-foreground">Loading...</div>
         ) : notebooks.length === 0 ? (
@@ -138,6 +134,9 @@ export function NotebookList({ onSelect }: NotebookListProps) {
             <BookOpen className="h-12 w-12 text-muted-foreground mx-auto mb-3" />
             <p className="text-muted-foreground font-medium">No notebooks yet</p>
             <p className="text-sm text-muted-foreground mt-1">Create one to start tracking expenses</p>
+            <Button onClick={openCreate} className="mt-4 rounded-xl">
+              <Plus className="h-4 w-4 mr-2" /> Create Notebook
+            </Button>
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -175,6 +174,9 @@ export function NotebookList({ onSelect }: NotebookListProps) {
                     <h3 className="font-bold text-foreground text-lg">{nb.name}</h3>
                     <p className="text-sm text-muted-foreground mt-1">
                       {stats ? `${stats.count} expenses · ₹${stats.total.toLocaleString("en-IN", { minimumFractionDigits: 2 })}` : "No expenses"}
+                    </p>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Updated {formatDate(nb.updated_at)}
                     </p>
                   </motion.div>
                 );

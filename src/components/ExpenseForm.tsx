@@ -4,7 +4,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { CATEGORIES, type Category } from "@/types/expense";
 import type { Tables } from "@/integrations/supabase/types";
 
 type Expense = Tables<"expenses">;
@@ -14,34 +13,59 @@ interface ExpenseFormProps {
   onOpenChange: (open: boolean) => void;
   onSubmit: (data: { name: string; category: string; amount: number; date: string }) => void;
   editExpense?: Expense | null;
+  categories: string[];
+  onAddCustomCategory?: (name: string) => void;
 }
 
-export function ExpenseForm({ open, onOpenChange, onSubmit, editExpense }: ExpenseFormProps) {
+export function ExpenseForm({ open, onOpenChange, onSubmit, editExpense, categories, onAddCustomCategory }: ExpenseFormProps) {
   const [name, setName] = useState("");
-  const [category, setCategory] = useState<Category>("Food");
+  const [category, setCategory] = useState("Food");
+  const [customCategory, setCustomCategory] = useState("");
+  const [showCustomInput, setShowCustomInput] = useState(false);
   const [amount, setAmount] = useState("");
   const [date, setDate] = useState(new Date().toISOString().split("T")[0]);
 
   useEffect(() => {
     if (editExpense) {
       setName(editExpense.name);
-      setCategory(editExpense.category as Category);
+      setCategory(editExpense.category);
+      setShowCustomInput(false);
+      setCustomCategory("");
       setAmount(String(editExpense.amount));
       setDate(editExpense.date);
     } else {
       setName("");
       setCategory("Food");
+      setShowCustomInput(false);
+      setCustomCategory("");
       setAmount("");
       setDate(new Date().toISOString().split("T")[0]);
     }
   }, [editExpense, open]);
 
+  const handleCategoryChange = (val: string) => {
+    if (val === "__other__") {
+      setShowCustomInput(true);
+      setCategory("Other");
+    } else {
+      setShowCustomInput(false);
+      setCategory(val);
+    }
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!name.trim() || !amount || Number(amount) <= 0) return;
+
+    let finalCategory = category;
+    if (showCustomInput && customCategory.trim()) {
+      finalCategory = customCategory.trim();
+      onAddCustomCategory?.(finalCategory);
+    }
+
     onSubmit({
       name: name.trim(),
-      category,
+      category: finalCategory,
       amount: parseFloat(Number(amount).toFixed(2)),
       date,
     });
@@ -63,16 +87,26 @@ export function ExpenseForm({ open, onOpenChange, onSubmit, editExpense }: Expen
           </div>
           <div className="space-y-2">
             <Label htmlFor="expense-category">Category</Label>
-            <Select value={category} onValueChange={(v) => setCategory(v as Category)}>
+            <Select value={showCustomInput ? "__other__" : category} onValueChange={handleCategoryChange}>
               <SelectTrigger className="rounded-xl">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent className="bg-popover z-50">
-                {CATEGORIES.map((c) => (
+                {categories.map((c) => (
                   <SelectItem key={c} value={c}>{c}</SelectItem>
                 ))}
+                <SelectItem value="__other__">+ Add Custom Category</SelectItem>
               </SelectContent>
             </Select>
+            {showCustomInput && (
+              <Input
+                placeholder="Enter custom category name"
+                value={customCategory}
+                onChange={(e) => setCustomCategory(e.target.value)}
+                className="rounded-xl mt-2"
+                autoFocus
+              />
+            )}
           </div>
           <div className="space-y-2">
             <Label htmlFor="expense-amount">Amount (₹)</Label>
