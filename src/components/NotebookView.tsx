@@ -1,5 +1,5 @@
 import { useState, useMemo } from "react";
-import { ArrowLeft, Plus } from "lucide-react";
+import { ArrowLeft, Plus, Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -10,6 +10,9 @@ import type { Category } from "@/types/expense";
 import { DashboardSummary } from "@/components/DashboardSummary";
 import { ExpenseForm } from "@/components/ExpenseForm";
 import { ExpenseTable } from "@/components/ExpenseTable";
+import { ExpenseFilters, applyFilters, DEFAULT_FILTERS, type FilterState } from "@/components/ExpenseFilters";
+import { CategoryPieChart } from "@/components/CategoryPieChart";
+import { useCustomCategories } from "@/hooks/useCustomCategories";
 
 type Notebook = Tables<"notebooks">;
 type Expense = Tables<"expenses">;
@@ -24,6 +27,9 @@ export function NotebookView({ notebook, onBack }: NotebookViewProps) {
   const queryClient = useQueryClient();
   const [formOpen, setFormOpen] = useState(false);
   const [editExpense, setEditExpense] = useState<Expense | null>(null);
+  const [chartOpen, setChartOpen] = useState(false);
+  const [filters, setFilters] = useState<FilterState>(DEFAULT_FILTERS);
+  const { allCategories, addCategory } = useCustomCategories();
 
   const { data: expenses = [] } = useQuery({
     queryKey: ["expenses", notebook.id],
@@ -38,15 +44,16 @@ export function NotebookView({ notebook, onBack }: NotebookViewProps) {
     },
   });
 
-  const total = useMemo(() => expenses.reduce((s, e) => s + Number(e.amount), 0), [expenses]);
+  const filteredExpenses = useMemo(() => applyFilters(expenses, filters), [expenses, filters]);
+  const total = useMemo(() => filteredExpenses.reduce((s, e) => s + Number(e.amount), 0), [filteredExpenses]);
 
   const topCategory = useMemo(() => {
     const map: Record<string, number> = {};
-    expenses.forEach((e) => { map[e.category] = (map[e.category] || 0) + Number(e.amount); });
+    filteredExpenses.forEach((e) => { map[e.category] = (map[e.category] || 0) + Number(e.amount); });
     let max = 0, cat: string | null = null;
     Object.entries(map).forEach(([k, v]) => { if (v > max) { max = v; cat = k; } });
     return cat as Category | null;
-  }, [expenses]);
+  }, [filteredExpenses]);
 
   const invalidate = () => {
     queryClient.invalidateQueries({ queryKey: ["expenses", notebook.id] });
@@ -103,6 +110,24 @@ export function NotebookView({ notebook, onBack }: NotebookViewProps) {
     if (!open) setEditExpense(null);
   };
 
+  const handleAddCustomCategory = (name: string) => {
+    addCategory.mutate(name);
+  };
+
+  const exportCSV = () => {
+    const headers = ["Date", "Name", "Category", "Amount"];
+    const rows = filteredExpenses.map((e) => [e.date, e.name, e.category, String(e.amount)]);
+    const csv = [headers, ...rows].map((r) => r.map((c) => `"${c}"`).join(",")).join("\n");
+    const blob = new Blob([csv], { type: "text/csv" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `${notebook.name}-expenses.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+    toast.success("CSV exported!");
+  };
+
   return (
     <div className="min-h-screen bg-background">
       <div className="max-w-2xl mx-auto px-4 py-8 pb-24">
@@ -111,18 +136,26 @@ export function NotebookView({ notebook, onBack }: NotebookViewProps) {
           <Button variant="ghost" size="icon" className="rounded-xl shrink-0" onClick={onBack}>
             <ArrowLeft className="h-5 w-5" />
           </Button>
-          <div className="min-w-0">
+          <div className="min-w-0 flex-1">
             <h1 className="text-2xl font-extrabold text-foreground truncate">{notebook.name}</h1>
           </div>
+          <Button variant="outline" size="icon" className="rounded-xl shrink-0" onClick={exportCSV} title="Export CSV">
+            <Download className="h-4 w-4" />
+          </Button>
         </div>
 
         {/* Dashboard */}
-        <div className="mb-6">
-          <DashboardSummary total={total} count={expenses.length} topCategory={topCategory} />
+        <div className="mb-4">
+          <DashboardSummary total={total} count={filteredExpenses.length} topCategory={topCategory} onTotalClick={() => setChartOpen(true)} />
+        </div>
+
+        {/* Filters */}
+        <div className="mb-4">
+          <ExpenseFilters filters={filters} onChange={setFilters} categories={allCategories} />
         </div>
 
         {/* Table */}
-        <ExpenseTable expenses={expenses} onEdit={handleEdit} onDelete={(id) => deleteMutation.mutate(id)} />
+        <ExpenseTable expenses={filteredExpenses} onEdit={handleEdit} onDelete={(id) => deleteMutation.mutate(id)} />
       </div>
 
       {/* FAB */}
@@ -131,7 +164,17 @@ export function NotebookView({ notebook, onBack }: NotebookViewProps) {
       </Button>
 
       {/* Form */}
-      <ExpenseForm open={formOpen} onOpenChange={handleOpenChange} onSubmit={handleSubmit} editExpense={editExpense} />
+      <ExpenseForm
+        open={formOpen}
+        onOpenChange={handleOpenChange}
+        onSubmit={handleSubmit}
+        editExpense={editExpense}
+        categories={allCategories}
+        onAddCustomCategory={handleAddCustomCategory}
+      />
+
+      {/* Pie Chart */}
+      <CategoryPieChart open={chartOpen} onOpenChange={setChartOpen} expenses={filteredExpenses} />
     </div>
   );
 }
