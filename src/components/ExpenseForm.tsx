@@ -91,7 +91,7 @@ export function ExpenseForm({ open, onOpenChange, onSubmit, editExpense, categor
               <SelectTrigger className="rounded-xl">
                 <SelectValue />
               </SelectTrigger>
-              <SelectContent className="bg-popover z-50">
+              <SelectContent className="bg-popover z-50 max-h-60 overflow-y-auto">
                 {categories.map((c) => (
                   <SelectItem key={c} value={c}>{c}</SelectItem>
                 ))}
