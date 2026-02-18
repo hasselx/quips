@@ -18,6 +18,21 @@ export const CATEGORY_ICONS: Record<Category, string> = {
   Other: "📌",
 };
 
+// Pool of icons assigned to custom categories by index
+const CUSTOM_ICONS = [
+  "🏠", "💼", "🎓", "💊", "✈️", "🎵", "📱", "🏋️",
+  "🐾", "🌿", "☕", "🎁", "🔧", "📚", "💇", "🏥",
+  "🧾", "🎯", "🛒", "💡", "🚌", "🍕", "🎮", "👶",
+  "💰", "🏦", "🧳", "🪴", "🧹", "🎨",
+];
+
+export function getCategoryIcon(category: string, customCategories: string[] = []): string {
+  if (category in CATEGORY_ICONS) return CATEGORY_ICONS[category as Category];
+  const idx = customCategories.indexOf(category);
+  if (idx >= 0) return CUSTOM_ICONS[idx % CUSTOM_ICONS.length];
+  return "📌";
+}
+
 export const CATEGORY_COLORS: Record<Category, string> = {
   Food: "bg-orange-100 text-orange-700",
   Transport: "bg-blue-100 text-blue-700",

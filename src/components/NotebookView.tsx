@@ -146,7 +146,7 @@ export function NotebookView({ notebook, onBack }: NotebookViewProps) {
 
         {/* Dashboard */}
         <div className="mb-4">
-          <DashboardSummary total={total} count={filteredExpenses.length} topCategory={topCategory} onTotalClick={() => setChartOpen(true)} />
+          <DashboardSummary total={total} count={filteredExpenses.length} topCategory={topCategory} onTotalClick={() => setChartOpen(true)} customCategories={allCategories} />
         </div>
 
         {/* Filters */}
@@ -155,7 +155,7 @@ export function NotebookView({ notebook, onBack }: NotebookViewProps) {
         </div>
 
         {/* Table */}
-        <ExpenseTable expenses={filteredExpenses} onEdit={handleEdit} onDelete={(id) => deleteMutation.mutate(id)} />
+        <ExpenseTable expenses={filteredExpenses} onEdit={handleEdit} onDelete={(id) => deleteMutation.mutate(id)} customCategories={allCategories} />
       </div>
 
       {/* FAB */}
