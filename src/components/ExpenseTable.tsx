@@ -1,6 +1,6 @@
 import { Pencil, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { CATEGORY_ICONS, CATEGORY_COLORS, type Category } from "@/types/expense";
+import { getCategoryIcon, CATEGORY_COLORS, type Category } from "@/types/expense";
 import type { Tables } from "@/integrations/supabase/types";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -10,9 +10,10 @@ interface ExpenseTableProps {
   expenses: Expense[];
   onEdit: (expense: Expense) => void;
   onDelete: (id: string) => void;
+  customCategories?: string[];
 }
 
-export function ExpenseTable({ expenses, onEdit, onDelete }: ExpenseTableProps) {
+export function ExpenseTable({ expenses, onEdit, onDelete, customCategories = [] }: ExpenseTableProps) {
   if (expenses.length === 0) {
     return (
       <div className="bg-card rounded-2xl shadow-card p-12 text-center">
@@ -47,7 +48,7 @@ export function ExpenseTable({ expenses, onEdit, onDelete }: ExpenseTableProps) 
                 <div className="font-medium text-foreground">{expense.name}</div>
                 <div>
                   <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-medium ${CATEGORY_COLORS[cat] || "bg-gray-100 text-gray-700"}`}>
-                    {CATEGORY_ICONS[cat] || "📌"} {expense.category}
+                    {getCategoryIcon(expense.category, customCategories)} {expense.category}
                   </span>
                 </div>
                 <div className="text-sm text-muted-foreground">

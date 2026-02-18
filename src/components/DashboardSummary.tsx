@@ -1,15 +1,16 @@
 import { DollarSign, Hash, TrendingUp } from "lucide-react";
-import { CATEGORY_ICONS, type Category } from "@/types/expense";
+import { getCategoryIcon } from "@/types/expense";
 import { motion } from "framer-motion";
 
 interface DashboardSummaryProps {
   total: number;
   count: number;
-  topCategory: Category | null;
+  topCategory: string | null;
   onTotalClick?: () => void;
+  customCategories?: string[];
 }
 
-export function DashboardSummary({ total, count, topCategory, onTotalClick }: DashboardSummaryProps) {
+export function DashboardSummary({ total, count, topCategory, onTotalClick, customCategories = [] }: DashboardSummaryProps) {
   const cards = [
     {
       icon: <DollarSign className="h-6 w-6 text-primary" />,
@@ -28,7 +29,7 @@ export function DashboardSummary({ total, count, topCategory, onTotalClick }: Da
     {
       icon: <TrendingUp className="h-6 w-6 text-accent" />,
       label: "Top Category",
-      value: topCategory ? `${CATEGORY_ICONS[topCategory] || "📌"} ${topCategory}` : "—",
+      value: topCategory ? `${getCategoryIcon(topCategory, customCategories)} ${topCategory}` : "—",
       bg: "bg-accent/10",
     },
   ];
