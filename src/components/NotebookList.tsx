@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Plus, BookOpen, Pencil, Trash2, MoreVertical, LogOut } from "lucide-react";
+import { Plus, BookOpen, Pencil, Trash2, MoreVertical } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -118,9 +118,6 @@ export function NotebookList({ onSelect }: NotebookListProps) {
           <div>
             <h1 className="text-3xl font-extrabold text-foreground tracking-tight">💰 ExpenseBook</h1>
           </div>
-          <Button variant="ghost" size="icon" className="rounded-xl" onClick={signOut}>
-            <LogOut className="h-5 w-5" />
-          </Button>
         </div>
         <p className="text-muted-foreground mb-8">
           Track expenses across multiple notebooks. Create one for every trip, month, or purpose.
