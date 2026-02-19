@@ -184,7 +184,7 @@ export function NotebookList({ onSelect }: NotebookListProps) {
       </div>
 
       {/* FAB */}
-      <Button onClick={openCreate} className="fixed bottom-6 right-6 h-14 w-14 rounded-full shadow-elevated text-lg z-40" size="icon">
+      <Button onClick={openCreate} className="fixed bottom-20 right-6 h-14 w-14 rounded-full shadow-elevated text-lg z-40 md:bottom-6" size="icon">
         <Plus className="h-7 w-7" />
       </Button>
 
