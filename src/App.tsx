@@ -9,6 +9,7 @@ import HomePage from "./pages/HomePage";
 import Auth from "./pages/Auth";
 import Dashboard from "./pages/Dashboard";
 import SpendPage from "./pages/SpendPage";
+import SettingsPage from "./pages/SettingsPage";
 import AppLayout from "./components/AppLayout";
 import NotFound from "./pages/NotFound";
 
@@ -27,6 +28,7 @@ const App = () => (
             <Route path="/dashboard" element={<ProtectedRoute><AppLayout /></ProtectedRoute>}>
               <Route index element={<Dashboard />} />
               <Route path="spend" element={<SpendPage />} />
+              <Route path="settings" element={<SettingsPage />} />
             </Route>
             <Route path="*" element={<NotFound />} />
           </Routes>

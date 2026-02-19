@@ -1,17 +1,15 @@
 import { Outlet, useLocation, Link } from "react-router-dom";
-import { Home, Wallet, LogOut } from "lucide-react";
-import { useAuth } from "@/hooks/useAuth";
-import { Button } from "@/components/ui/button";
+import { Home, Wallet, Settings } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const NAV_ITEMS = [
   { label: "Home", icon: Home, path: "/dashboard" },
   { label: "Spend", icon: Wallet, path: "/dashboard/spend" },
+  { label: "Settings", icon: Settings, path: "/dashboard/settings" },
 ];
 
 export default function AppLayout() {
   const { pathname } = useLocation();
-  const { signOut } = useAuth();
 
   const isActive = (path: string) =>
     path === "/dashboard" ? pathname === "/dashboard" : pathname.startsWith(path);
@@ -41,17 +39,6 @@ export default function AppLayout() {
             </Link>
           ))}
         </nav>
-
-        <div className="p-3 border-t border-border">
-          <Button
-            variant="ghost"
-            className="w-full justify-start gap-3 rounded-xl text-muted-foreground hover:text-destructive"
-            onClick={signOut}
-          >
-            <LogOut className="h-5 w-5" />
-            <span>Sign Out</span>
-          </Button>
-        </div>
       </aside>
 
       {/* Main Content */}
@@ -76,13 +63,6 @@ export default function AppLayout() {
             <span>{item.label}</span>
           </Link>
         ))}
-        <button
-          onClick={signOut}
-          className="flex flex-col items-center gap-0.5 px-4 py-1.5 rounded-xl text-xs font-medium text-muted-foreground transition-colors"
-        >
-          <LogOut className="h-5 w-5" />
-          <span>Sign Out</span>
-        </button>
       </nav>
     </div>
   );
