@@ -2,6 +2,7 @@ import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { DollarSign, TrendingUp, Calendar } from "lucide-react";
 import { getCategoryIcon } from "@/types/expense";
 import { useCustomCategories } from "@/hooks/useCustomCategories";
@@ -11,8 +12,16 @@ import type { Tables } from "@/integrations/supabase/types";
 type Expense = Tables<"expenses">;
 type Period = "all" | "yearly" | "monthly";
 
+const MONTHS = [
+  "January", "February", "March", "April", "May", "June",
+  "July", "August", "September", "October", "November", "December",
+];
+
 export default function SpendPage() {
+  const now = new Date();
   const [period, setPeriod] = useState<Period>("all");
+  const [selectedYear, setSelectedYear] = useState(now.getFullYear());
+  const [selectedMonth, setSelectedMonth] = useState(now.getMonth());
   const { allCategories } = useCustomCategories();
 
   const { data: expenses = [] } = useQuery({
@@ -27,22 +36,25 @@ export default function SpendPage() {
     },
   });
 
+  // Derive available years from data
+  const availableYears = useMemo(() => {
+    const years = new Set(expenses.map((e) => new Date(e.date).getFullYear()));
+    years.add(now.getFullYear());
+    return Array.from(years).sort((a, b) => b - a);
+  }, [expenses]);
+
   const filtered = useMemo(() => {
-    const now = new Date();
     if (period === "yearly") {
-      const year = now.getFullYear();
-      return expenses.filter((e) => new Date(e.date).getFullYear() === year);
+      return expenses.filter((e) => new Date(e.date).getFullYear() === selectedYear);
     }
     if (period === "monthly") {
-      const year = now.getFullYear();
-      const month = now.getMonth();
       return expenses.filter((e) => {
         const d = new Date(e.date);
-        return d.getFullYear() === year && d.getMonth() === month;
+        return d.getFullYear() === selectedYear && d.getMonth() === selectedMonth;
       });
     }
     return expenses;
-  }, [expenses, period]);
+  }, [expenses, period, selectedYear, selectedMonth]);
 
   const total = useMemo(() => filtered.reduce((s, e) => s + Number(e.amount), 0), [filtered]);
 
@@ -56,15 +68,20 @@ export default function SpendPage() {
       .map(([cat, amount]) => ({ category: cat, amount }));
   }, [filtered]);
 
-  const periodLabel = period === "all" ? "All Time" : period === "yearly" ? new Date().getFullYear().toString() : new Date().toLocaleDateString("en-IN", { month: "long", year: "numeric" });
+  const periodLabel =
+    period === "all"
+      ? "All Time"
+      : period === "yearly"
+        ? selectedYear.toString()
+        : `${MONTHS[selectedMonth]} ${selectedYear}`;
 
   return (
-    <div className="max-w-2xl mx-auto px-4 py-8">
+    <div className="max-w-2xl mx-auto px-4 py-8 pb-24">
       <h1 className="text-2xl font-extrabold text-foreground mb-1">Spend Overview</h1>
       <p className="text-muted-foreground text-sm mb-6">See where your money goes</p>
 
       {/* Period Tabs */}
-      <Tabs value={period} onValueChange={(v) => setPeriod(v as Period)} className="mb-6">
+      <Tabs value={period} onValueChange={(v) => setPeriod(v as Period)} className="mb-4">
         <TabsList className="grid w-full grid-cols-3 rounded-xl">
           <TabsTrigger value="all" className="rounded-lg text-xs sm:text-sm">All Time</TabsTrigger>
           <TabsTrigger value="yearly" className="rounded-lg text-xs sm:text-sm">This Year</TabsTrigger>
@@ -72,10 +89,44 @@ export default function SpendPage() {
         </TabsList>
       </Tabs>
 
+      {/* Year & Month Selectors */}
+      {period !== "all" && (
+        <motion.div
+          initial={{ opacity: 0, height: 0 }}
+          animate={{ opacity: 1, height: "auto" }}
+          exit={{ opacity: 0, height: 0 }}
+          className="flex gap-3 mb-6"
+        >
+          <Select value={selectedYear.toString()} onValueChange={(v) => setSelectedYear(Number(v))}>
+            <SelectTrigger className="rounded-xl flex-1">
+              <SelectValue placeholder="Year" />
+            </SelectTrigger>
+            <SelectContent className="bg-popover z-50">
+              {availableYears.map((y) => (
+                <SelectItem key={y} value={y.toString()}>{y}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+
+          {period === "monthly" && (
+            <Select value={selectedMonth.toString()} onValueChange={(v) => setSelectedMonth(Number(v))}>
+              <SelectTrigger className="rounded-xl flex-1">
+                <SelectValue placeholder="Month" />
+              </SelectTrigger>
+              <SelectContent className="bg-popover z-50">
+                {MONTHS.map((m, i) => (
+                  <SelectItem key={i} value={i.toString()}>{m}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          )}
+        </motion.div>
+      )}
+
       {/* Summary Cards */}
       <div className="grid grid-cols-2 gap-3 mb-6">
         <motion.div
-          key={`total-${period}`}
+          key={`total-${period}-${selectedYear}-${selectedMonth}`}
           initial={{ opacity: 0, y: 8 }}
           animate={{ opacity: 1, y: 0 }}
           className="bg-card rounded-2xl p-4 shadow-card"
@@ -91,7 +142,7 @@ export default function SpendPage() {
         </motion.div>
 
         <motion.div
-          key={`count-${period}`}
+          key={`count-${period}-${selectedYear}-${selectedMonth}`}
           initial={{ opacity: 0, y: 8 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.05 }}
