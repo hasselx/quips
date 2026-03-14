@@ -145,6 +145,11 @@ export function NotebookView({ notebook, onBack }: NotebookViewProps) {
           </Button>
         </div>
 
+        {/* AI Insights */}
+        <div className="mb-4">
+          <AIInsightsCard expenses={expenses} notebookName={notebook.name} />
+        </div>
+
         {/* Dashboard */}
         <div className="mb-4">
           <DashboardSummary total={total} count={filteredExpenses.length} topCategory={topCategory} onTotalClick={() => setChartOpen(true)} customCategories={allCategories} />
