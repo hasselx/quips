@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+import { Link, Navigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { BookOpen, PieChart, Wallet, ArrowRight } from "lucide-react";
@@ -7,6 +7,9 @@ import { motion } from "framer-motion";
 export default function HomePage() {
   const { user } = useAuth();
 
+  if (user) {
+    return <Navigate to="/dashboard" replace />;
+  }
   return (
     <div className="min-h-screen bg-background flex flex-col">
       {/* Navbar */}
