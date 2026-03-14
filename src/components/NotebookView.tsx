@@ -13,6 +13,7 @@ import { ExpenseTable } from "@/components/ExpenseTable";
 import { ExpenseFilters, applyFilters, DEFAULT_FILTERS, type FilterState } from "@/components/ExpenseFilters";
 import { CategoryPieChart } from "@/components/CategoryPieChart";
 import { useCustomCategories } from "@/hooks/useCustomCategories";
+import { AIInsightsCard } from "@/components/AIInsightsCard";
 
 type Notebook = Tables<"notebooks">;
 type Expense = Tables<"expenses">;
@@ -142,6 +143,11 @@ export function NotebookView({ notebook, onBack }: NotebookViewProps) {
           <Button variant="outline" size="icon" className="rounded-xl shrink-0" onClick={exportCSV} title="Export CSV">
             <Download className="h-4 w-4" />
           </Button>
+        </div>
+
+        {/* AI Insights */}
+        <div className="mb-4">
+          <AIInsightsCard expenses={expenses} notebookName={notebook.name} />
         </div>
 
         {/* Dashboard */}

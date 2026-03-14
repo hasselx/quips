@@ -1,10 +1,11 @@
 import { Outlet, useLocation, Link } from "react-router-dom";
-import { Home, Wallet, Settings } from "lucide-react";
+import { Home, Wallet, Settings, BarChart3 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const NAV_ITEMS = [
   { label: "Home", icon: Home, path: "/dashboard" },
   { label: "Spend", icon: Wallet, path: "/dashboard/spend" },
+  { label: "Analytics", icon: BarChart3, path: "/dashboard/analytics" },
   { label: "Settings", icon: Settings, path: "/dashboard/settings" },
 ];
 
