@@ -94,60 +94,46 @@ export default function AnalyticsPage() {
   }, [expenses]);
 
   // Hierarchical heatmap: grouped by month, then weeks with day-of-week rows
-  const heatmapData = useMemo(() => {
+  // Hierarchical heatmap: rows = categories, columns = months
+  const heatmapMonths = useMemo(() => {
     const now = new Date();
-    const startDate = new Date(now);
-    startDate.setDate(startDate.getDate() - 179); // 6 months
+    const months: string[] = [];
+    for (let i = 5; i >= 0; i--) {
+      const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+      months.push(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`);
+    }
+    return months;
+  }, []);
 
-    const map: Record<string, number> = {};
+  const heatmapGrid = useMemo(() => {
+    // Build category -> month -> amount map
+    const catMonthMap: Record<string, Record<string, number>> = {};
+    const catTotals: Record<string, number> = {};
+
     expenses.forEach((e) => {
-      map[e.date] = (map[e.date] || 0) + Number(e.amount);
+      const d = new Date(e.date);
+      const monthKey = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
+      if (!heatmapMonths.includes(monthKey)) return;
+
+      if (!catMonthMap[e.category]) catMonthMap[e.category] = {};
+      catMonthMap[e.category][monthKey] = (catMonthMap[e.category][monthKey] || 0) + Number(e.amount);
+      catTotals[e.category] = (catTotals[e.category] || 0) + Number(e.amount);
     });
 
-    // Group by month
-    const months: { label: string; weeks: { date: string; amount: number; dayOfWeek: number; dayOfMonth: number }[][] }[] = [];
-    let currentMonth = -1;
-    let currentWeek: { date: string; amount: number; dayOfWeek: number; dayOfMonth: number }[] = [];
+    // Sort categories by total descending
+    const categories = Object.keys(catTotals).sort((a, b) => catTotals[b] - catTotals[a]);
 
-    for (let i = 0; i <= 179; i++) {
-      const d = new Date(startDate);
-      d.setDate(d.getDate() + i);
-      const key = d.toISOString().split("T")[0];
-      const month = d.getMonth();
-      const dayOfWeek = d.getDay();
-
-      if (month !== currentMonth) {
-        if (currentWeek.length > 0) {
-          months[months.length - 1]?.weeks.push(currentWeek);
-          currentWeek = [];
-        }
-        currentMonth = month;
-        months.push({ label: MONTHS_SHORT[month], weeks: [] });
-      }
-
-      currentWeek.push({
-        date: key,
-        amount: map[key] || 0,
-        dayOfWeek,
-        dayOfMonth: d.getDate(),
+    // Find max cell value for color scaling
+    let maxVal = 1;
+    categories.forEach((cat) => {
+      heatmapMonths.forEach((m) => {
+        const v = catMonthMap[cat]?.[m] || 0;
+        if (v > maxVal) maxVal = v;
       });
+    });
 
-      if (dayOfWeek === 6 || i === 179) {
-        months[months.length - 1].weeks.push(currentWeek);
-        currentWeek = [];
-      }
-    }
-
-    return months;
-  }, [expenses]);
-
-  const maxDaily = useMemo(() => {
-    let max = 1;
-    heatmapData.forEach((m) => m.weeks.forEach((w) => w.forEach((d) => { if (d.amount > max) max = d.amount; })));
-    return max;
-  }, [heatmapData]);
-
-  const DAY_LABELS = ["S", "M", "T", "W", "T", "F", "S"];
+    return { categories, catMonthMap, catTotals, maxVal };
+  }, [expenses, heatmapMonths]);
 
   // Week over week comparison
   const weeklyComparison = useMemo(() => {
