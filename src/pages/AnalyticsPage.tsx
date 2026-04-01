@@ -378,10 +378,10 @@ export default function AnalyticsPage() {
                 <tbody>
                   {heatmapGrid.categories.map((cat) => (
                     <tr key={cat}>
-                      <td className="py-1.5 px-2 font-medium text-foreground flex items-center gap-1.5">
-                        <span className="text-sm">{getCategoryIcon(cat, allCategories)}</span>
-                        <span className="truncate max-w-[80px]">{cat}</span>
-                      </td>
+                        <td className="py-1 px-1.5 sm:px-2 font-medium text-foreground flex items-center gap-1">
+                          <span className="text-xs sm:text-sm">{getCategoryIcon(cat, allCategories)}</span>
+                          <span className="truncate max-w-[50px] sm:max-w-[80px]">{cat}</span>
+                        </td>
                       {heatmapMonths.map((m) => {
                         const val = heatmapGrid.catMonthMap[cat]?.[m] || 0;
                         const intensity = val > 0 ? Math.max(0.12, val / heatmapGrid.maxVal) : 0;
