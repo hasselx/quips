@@ -221,8 +221,8 @@ export default function AnalyticsPage() {
       {/* Quick Stats */}
       <div className="grid grid-cols-2 gap-2 sm:gap-3 mb-6">
         <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="bg-card rounded-2xl p-3 sm:p-4 shadow-card">
-          <p className="text-xs text-muted-foreground font-medium">Total</p>
-          <p className="text-lg font-bold text-foreground">{formatINR(total)}</p>
+          <p className="text-[11px] text-muted-foreground font-medium">Total</p>
+          <p className="text-base sm:text-lg font-bold text-foreground">{formatINR(total)}</p>
         </motion.div>
         <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 }} className="bg-card rounded-2xl p-4 shadow-card">
           <p className="text-xs text-muted-foreground font-medium">This Week</p>
