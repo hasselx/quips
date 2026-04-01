@@ -224,22 +224,22 @@ export default function AnalyticsPage() {
           <p className="text-[11px] text-muted-foreground font-medium">Total</p>
           <p className="text-base sm:text-lg font-bold text-foreground">{formatINR(total)}</p>
         </motion.div>
-        <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 }} className="bg-card rounded-2xl p-4 shadow-card">
-          <p className="text-xs text-muted-foreground font-medium">This Week</p>
-          <p className="text-lg font-bold text-foreground">{formatINR(weeklyComparison.thisWeek)}</p>
-          <p className={`text-xs font-medium ${weeklyComparison.change > 0 ? "text-destructive" : "text-primary"}`}>
-            {weeklyComparison.change > 0 ? "↑" : "↓"} {Math.abs(weeklyComparison.change).toFixed(0)}% vs last week
+        <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 }} className="bg-card rounded-2xl p-3 sm:p-4 shadow-card">
+          <p className="text-[11px] text-muted-foreground font-medium">This Week</p>
+          <p className="text-base sm:text-lg font-bold text-foreground">{formatINR(weeklyComparison.thisWeek)}</p>
+          <p className={`text-[10px] sm:text-xs font-medium ${weeklyComparison.change > 0 ? "text-destructive" : "text-primary"}`}>
+            {weeklyComparison.change > 0 ? "↑" : "↓"} {Math.abs(weeklyComparison.change).toFixed(0)}%
           </p>
         </motion.div>
-        <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="bg-card rounded-2xl p-4 shadow-card">
-          <p className="text-xs text-muted-foreground font-medium">Month Forecast</p>
-          <p className="text-lg font-bold text-foreground">{formatINR(forecast.projected)}</p>
-          <p className="text-xs text-muted-foreground">{forecast.daysLeft} days left</p>
+        <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="bg-card rounded-2xl p-3 sm:p-4 shadow-card">
+          <p className="text-[11px] text-muted-foreground font-medium">Forecast</p>
+          <p className="text-base sm:text-lg font-bold text-foreground">{formatINR(forecast.projected)}</p>
+          <p className="text-[10px] sm:text-xs text-muted-foreground">{forecast.daysLeft}d left</p>
         </motion.div>
-        <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }} className="bg-card rounded-2xl p-4 shadow-card">
-          <p className="text-xs text-muted-foreground font-medium">Transactions</p>
-          <p className="text-lg font-bold text-foreground">{expenses.length}</p>
-          <p className="text-xs text-muted-foreground">{categoryData.length} categories</p>
+        <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }} className="bg-card rounded-2xl p-3 sm:p-4 shadow-card">
+          <p className="text-[11px] text-muted-foreground font-medium">Transactions</p>
+          <p className="text-base sm:text-lg font-bold text-foreground">{expenses.length}</p>
+          <p className="text-[10px] sm:text-xs text-muted-foreground">{categoryData.length} categories</p>
         </motion.div>
       </div>
 
