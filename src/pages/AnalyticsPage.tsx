@@ -318,106 +318,106 @@ export default function AnalyticsPage() {
           </CardContent>
         </Card>
 
-        {/* Heatmap */}
+        {/* Top 5 Categories (vertical bars) */}
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-semibold flex items-center gap-2">
-              <CalendarDays className="h-4 w-4 text-primary" /> Category × Month Heatmap
+              <BarChart3 className="h-4 w-4 text-primary" /> Top 5 Categories
             </CardTitle>
           </CardHeader>
           <CardContent>
-            {heatmapGrid.categories.length > 0 ? (
-              <div className="overflow-x-auto">
-                <table className="w-full text-xs border-separate border-spacing-[2px]">
-                  <thead>
-                    <tr>
-                      <th className="text-left font-medium text-muted-foreground py-1 px-2 min-w-[100px]">Category</th>
-                      {heatmapMonths.map((m) => {
-                        const [y, mo] = m.split("-");
-                        return (
-                          <th key={m} className="text-center font-medium text-muted-foreground py-1 px-2 min-w-[70px]">
-                            {MONTHS_SHORT[parseInt(mo) - 1]} {y.slice(2)}
-                          </th>
-                        );
-                      })}
-                      <th className="text-center font-medium text-muted-foreground py-1 px-2 min-w-[70px]">Total</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {heatmapGrid.categories.map((cat) => (
-                      <tr key={cat}>
-                        <td className="py-1.5 px-2 font-medium text-foreground flex items-center gap-1.5">
-                          <span className="text-sm">{getCategoryIcon(cat, allCategories)}</span>
-                          <span className="truncate max-w-[80px]">{cat}</span>
-                        </td>
-                        {heatmapMonths.map((m) => {
-                          const val = heatmapGrid.catMonthMap[cat]?.[m] || 0;
-                          const intensity = val > 0 ? Math.max(0.12, val / heatmapGrid.maxVal) : 0;
-                          const isHigh = val / heatmapGrid.maxVal > 0.7;
-                          const isMid = val / heatmapGrid.maxVal > 0.4;
-                          const bgColor = val === 0
-                            ? "hsl(var(--muted) / 0.4)"
-                            : isHigh
-                              ? `hsl(160 60% 38% / ${intensity})`
-                              : isMid
-                                ? `hsl(35 90% 55% / ${Math.max(0.3, intensity)})`
-                                : `hsl(160 60% 48% / ${intensity})`;
-                          return (
-                            <td key={m} className="py-1.5 px-2 text-center rounded-md transition-colors" style={{ background: bgColor }}>
-                              <span className={`font-semibold ${val === 0 ? "text-muted-foreground/50" : intensity > 0.6 ? "text-white" : "text-foreground"}`}>
-                                {val > 0 ? `₹${val >= 1000 ? `${(val / 1000).toFixed(1)}k` : val.toLocaleString("en-IN")}` : "–"}
-                              </span>
-                            </td>
-                          );
-                        })}
-                        <td className="py-1.5 px-2 text-center font-bold text-foreground bg-muted/30 rounded-md">
-                          ₹{(heatmapGrid.catTotals[cat] || 0) >= 1000 ? `${((heatmapGrid.catTotals[cat] || 0) / 1000).toFixed(1)}k` : (heatmapGrid.catTotals[cat] || 0).toLocaleString("en-IN")}
-                        </td>
-                      </tr>
+            {categoryData.length > 0 ? (
+              <ResponsiveContainer width="100%" height={220}>
+                <BarChart data={categoryData.slice(0, 5)}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" vertical={false} />
+                  <XAxis dataKey="name" tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }} interval={0} />
+                  <YAxis tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))" }} tickFormatter={(v) => `₹${(v / 1000).toFixed(0)}k`} />
+                  <Tooltip
+                    contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: 12, fontSize: 12 }}
+                    formatter={(v: number) => [formatINR(v), "Spent"]}
+                  />
+                  <Bar dataKey="value" radius={[6, 6, 0, 0]}>
+                    {categoryData.slice(0, 5).map((_, i) => (
+                      <Cell key={i} fill={CHART_COLORS[i % CHART_COLORS.length]} />
                     ))}
-                  </tbody>
-                </table>
-              </div>
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
             ) : (
               <p className="text-sm text-muted-foreground text-center py-8">No data yet</p>
             )}
-            <div className="flex items-center gap-3 mt-3 text-[10px] text-muted-foreground">
-              <span className="flex items-center gap-1"><span className="h-3 w-3 rounded-sm" style={{ background: "hsl(160 60% 48% / 0.2)" }} /> Low</span>
-              <span className="flex items-center gap-1"><span className="h-3 w-3 rounded-sm" style={{ background: "hsl(35 90% 55% / 0.5)" }} /> Medium</span>
-              <span className="flex items-center gap-1"><span className="h-3 w-3 rounded-sm" style={{ background: "hsl(160 60% 38% / 0.85)" }} /> High</span>
-            </div>
           </CardContent>
         </Card>
       </div>
 
-      {/* Weekly Bar Chart */}
+      {/* Heatmap (full width) */}
       <Card className="mb-6">
         <CardHeader className="pb-2">
           <CardTitle className="text-sm font-semibold flex items-center gap-2">
-            <BarChart3 className="h-4 w-4 text-primary" /> Top 5 Categories
+            <CalendarDays className="h-4 w-4 text-primary" /> Category × Month Heatmap
           </CardTitle>
         </CardHeader>
         <CardContent>
-          {categoryData.length > 0 ? (
-            <ResponsiveContainer width="100%" height={200}>
-              <BarChart data={categoryData.slice(0, 5)} layout="vertical">
-                <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" horizontal={false} />
-                <XAxis type="number" tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))" }} tickFormatter={(v) => `₹${(v / 1000).toFixed(0)}k`} />
-                <YAxis type="category" dataKey="name" tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))" }} width={80} />
-                <Tooltip
-                  contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: 12, fontSize: 12 }}
-                  formatter={(v: number) => [formatINR(v), "Spent"]}
-                />
-                <Bar dataKey="value" radius={[0, 6, 6, 0]}>
-                  {categoryData.slice(0, 5).map((_, i) => (
-                    <Cell key={i} fill={CHART_COLORS[i % CHART_COLORS.length]} />
+          {heatmapGrid.categories.length > 0 ? (
+            <div className="overflow-x-auto">
+              <table className="w-full text-xs border-separate border-spacing-[2px]">
+                <thead>
+                  <tr>
+                    <th className="text-left font-medium text-muted-foreground py-1 px-2 min-w-[100px]">Category</th>
+                    {heatmapMonths.map((m) => {
+                      const [y, mo] = m.split("-");
+                      return (
+                        <th key={m} className="text-center font-medium text-muted-foreground py-1 px-2 min-w-[70px]">
+                          {MONTHS_SHORT[parseInt(mo) - 1]} {y.slice(2)}
+                        </th>
+                      );
+                    })}
+                    <th className="text-center font-medium text-muted-foreground py-1 px-2 min-w-[70px]">Total</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {heatmapGrid.categories.map((cat) => (
+                    <tr key={cat}>
+                      <td className="py-1.5 px-2 font-medium text-foreground flex items-center gap-1.5">
+                        <span className="text-sm">{getCategoryIcon(cat, allCategories)}</span>
+                        <span className="truncate max-w-[80px]">{cat}</span>
+                      </td>
+                      {heatmapMonths.map((m) => {
+                        const val = heatmapGrid.catMonthMap[cat]?.[m] || 0;
+                        const intensity = val > 0 ? Math.max(0.12, val / heatmapGrid.maxVal) : 0;
+                        const isHigh = val / heatmapGrid.maxVal > 0.7;
+                        const isMid = val / heatmapGrid.maxVal > 0.4;
+                        const bgColor = val === 0
+                          ? "hsl(var(--muted) / 0.4)"
+                          : isHigh
+                            ? `hsl(160 60% 38% / ${intensity})`
+                            : isMid
+                              ? `hsl(35 90% 55% / ${Math.max(0.3, intensity)})`
+                              : `hsl(160 60% 48% / ${intensity})`;
+                        return (
+                          <td key={m} className="py-1.5 px-2 text-center rounded-md transition-colors" style={{ background: bgColor }}>
+                            <span className={`font-semibold ${val === 0 ? "text-muted-foreground/50" : intensity > 0.6 ? "text-white" : "text-foreground"}`}>
+                              {val > 0 ? `₹${val >= 1000 ? `${(val / 1000).toFixed(1)}k` : val.toLocaleString("en-IN")}` : "–"}
+                            </span>
+                          </td>
+                        );
+                      })}
+                      <td className="py-1.5 px-2 text-center font-bold text-foreground bg-muted/30 rounded-md">
+                        ₹{(heatmapGrid.catTotals[cat] || 0) >= 1000 ? `${((heatmapGrid.catTotals[cat] || 0) / 1000).toFixed(1)}k` : (heatmapGrid.catTotals[cat] || 0).toLocaleString("en-IN")}
+                      </td>
+                    </tr>
                   ))}
-                </Bar>
-              </BarChart>
-            </ResponsiveContainer>
+                </tbody>
+              </table>
+            </div>
           ) : (
             <p className="text-sm text-muted-foreground text-center py-8">No data yet</p>
           )}
+          <div className="flex items-center gap-3 mt-3 text-[10px] text-muted-foreground">
+            <span className="flex items-center gap-1"><span className="h-3 w-3 rounded-sm" style={{ background: "hsl(160 60% 48% / 0.2)" }} /> Low</span>
+            <span className="flex items-center gap-1"><span className="h-3 w-3 rounded-sm" style={{ background: "hsl(35 90% 55% / 0.5)" }} /> Medium</span>
+            <span className="flex items-center gap-1"><span className="h-3 w-3 rounded-sm" style={{ background: "hsl(160 60% 38% / 0.85)" }} /> High</span>
+          </div>
         </CardContent>
       </Card>
 
