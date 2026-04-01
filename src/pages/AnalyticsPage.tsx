@@ -395,7 +395,7 @@ export default function AnalyticsPage() {
                               ? `hsl(35 90% 55% / ${Math.max(0.3, intensity)})`
                               : `hsl(160 60% 48% / ${intensity})`;
                         return (
-                          <td key={m} className="py-1.5 px-2 text-center rounded-md transition-colors" style={{ background: bgColor }}>
+                          <td key={m} className="py-1 px-1 sm:px-2 text-center rounded-md transition-colors" style={{ background: bgColor }}>
                             <span className={`font-semibold ${val === 0 ? "text-muted-foreground/50" : intensity > 0.6 ? "text-white" : "text-foreground"}`}>
                               {val > 0 ? `₹${val >= 1000 ? `${(val / 1000).toFixed(1)}k` : val.toLocaleString("en-IN")}` : "–"}
                             </span>
