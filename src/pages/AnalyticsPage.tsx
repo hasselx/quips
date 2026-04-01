@@ -93,30 +93,61 @@ export default function AnalyticsPage() {
       .map(([name, value]) => ({ name, value }));
   }, [expenses]);
 
-  // Daily spending for heatmap (last 90 days)
-  const dailySpending = useMemo(() => {
+  // Hierarchical heatmap: grouped by month, then weeks with day-of-week rows
+  const heatmapData = useMemo(() => {
     const now = new Date();
-    const days: { date: string; amount: number; day: number; week: number }[] = [];
+    const startDate = new Date(now);
+    startDate.setDate(startDate.getDate() - 179); // 6 months
+
     const map: Record<string, number> = {};
     expenses.forEach((e) => {
       map[e.date] = (map[e.date] || 0) + Number(e.amount);
     });
 
-    for (let i = 89; i >= 0; i--) {
-      const d = new Date(now);
-      d.setDate(d.getDate() - i);
+    // Group by month
+    const months: { label: string; weeks: { date: string; amount: number; dayOfWeek: number; dayOfMonth: number }[][] }[] = [];
+    let currentMonth = -1;
+    let currentWeek: { date: string; amount: number; dayOfWeek: number; dayOfMonth: number }[] = [];
+
+    for (let i = 0; i <= 179; i++) {
+      const d = new Date(startDate);
+      d.setDate(d.getDate() + i);
       const key = d.toISOString().split("T")[0];
-      days.push({
+      const month = d.getMonth();
+      const dayOfWeek = d.getDay();
+
+      if (month !== currentMonth) {
+        if (currentWeek.length > 0) {
+          months[months.length - 1]?.weeks.push(currentWeek);
+          currentWeek = [];
+        }
+        currentMonth = month;
+        months.push({ label: MONTHS_SHORT[month], weeks: [] });
+      }
+
+      currentWeek.push({
         date: key,
         amount: map[key] || 0,
-        day: d.getDay(),
-        week: Math.floor((89 - i) / 7),
+        dayOfWeek,
+        dayOfMonth: d.getDate(),
       });
+
+      if (dayOfWeek === 6 || i === 179) {
+        months[months.length - 1].weeks.push(currentWeek);
+        currentWeek = [];
+      }
     }
-    return days;
+
+    return months;
   }, [expenses]);
 
-  const maxDaily = useMemo(() => Math.max(...dailySpending.map((d) => d.amount), 1), [dailySpending]);
+  const maxDaily = useMemo(() => {
+    let max = 1;
+    heatmapData.forEach((m) => m.weeks.forEach((w) => w.forEach((d) => { if (d.amount > max) max = d.amount; })));
+    return max;
+  }, [heatmapData]);
+
+  const DAY_LABELS = ["S", "M", "T", "W", "T", "F", "S"];
 
   // Week over week comparison
   const weeklyComparison = useMemo(() => {
