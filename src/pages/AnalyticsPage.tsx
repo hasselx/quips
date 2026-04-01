@@ -271,7 +271,7 @@ export default function AnalyticsPage() {
       </Card>
 
       {/* Category Breakdown + Heatmap */}
-      <div className="grid md:grid-cols-2 gap-6 mb-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 mb-6">
         {/* Pie Chart */}
         <Card>
           <CardHeader className="pb-2">
