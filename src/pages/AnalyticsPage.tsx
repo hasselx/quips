@@ -282,7 +282,7 @@ export default function AnalyticsPage() {
           <CardContent>
             {categoryData.length > 0 ? (
               <>
-                <ResponsiveContainer width="100%" height={200}>
+                <ResponsiveContainer width="100%" height={170}>
                   <PieChart>
                     <Pie
                       data={categoryData}
