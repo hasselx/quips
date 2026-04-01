@@ -360,10 +360,10 @@ export default function AnalyticsPage() {
         <CardContent>
           {heatmapGrid.categories.length > 0 ? (
             <div className="overflow-x-auto">
-              <table className="w-full text-xs border-separate border-spacing-[2px]">
-                <thead>
-                  <tr>
-                    <th className="text-left font-medium text-muted-foreground py-1 px-2 min-w-[100px]">Category</th>
+              <table className="w-full text-[11px] sm:text-xs border-separate border-spacing-[2px]">
+                  <thead>
+                    <tr>
+                      <th className="text-left font-medium text-muted-foreground py-1 px-1.5 sm:px-2 min-w-[70px] sm:min-w-[100px]">Category</th>
                     {heatmapMonths.map((m) => {
                       const [y, mo] = m.split("-");
                       return (
