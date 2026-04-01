@@ -336,28 +336,48 @@ export default function AnalyticsPage() {
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-semibold flex items-center gap-2">
-              <CalendarDays className="h-4 w-4 text-info" /> Daily Heatmap (90 days)
+              <CalendarDays className="h-4 w-4 text-primary" /> Daily Heatmap (6 months)
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-13 gap-[3px]">
-              {dailySpending.map((d) => {
-                const intensity = d.amount > 0 ? Math.max(0.15, d.amount / maxDaily) : 0;
-                return (
-                  <div
-                    key={d.date}
-                    className="aspect-square rounded-[2px] border border-border/30"
-                    style={{
-                      background: intensity > 0
-                        ? `hsl(160 60% 38% / ${intensity})`
-                        : "hsl(var(--muted))",
-                    }}
-                    title={`${d.date}: ₹${d.amount.toLocaleString("en-IN")}`}
-                  />
-                );
-              })}
+            <div className="flex gap-4 overflow-x-auto pb-2">
+              {/* Day labels */}
+              <div className="flex flex-col gap-[3px] shrink-0 pt-5">
+                {DAY_LABELS.map((label, i) => (
+                  <div key={i} className="h-[14px] text-[10px] text-muted-foreground leading-[14px]">{label}</div>
+                ))}
+              </div>
+              {/* Month columns */}
+              {heatmapData.map((month) => (
+                <div key={month.label} className="flex flex-col shrink-0">
+                  <div className="text-[10px] font-medium text-muted-foreground mb-1 text-center">{month.label}</div>
+                  <div className="flex gap-[3px]">
+                    {month.weeks.map((week, wi) => (
+                      <div key={wi} className="flex flex-col gap-[3px]">
+                        {Array.from({ length: 7 }).map((_, dayIdx) => {
+                          const cell = week.find((d) => d.dayOfWeek === dayIdx);
+                          if (!cell) return <div key={dayIdx} className="h-[14px] w-[14px]" />;
+                          const intensity = cell.amount > 0 ? Math.max(0.15, cell.amount / maxDaily) : 0;
+                          return (
+                            <div
+                              key={dayIdx}
+                              className="h-[14px] w-[14px] rounded-[3px] transition-colors cursor-default"
+                              style={{
+                                background: intensity > 0
+                                  ? `hsl(160 60% 38% / ${intensity})`
+                                  : "hsl(var(--muted))",
+                              }}
+                              title={`${cell.date}: ₹${cell.amount.toLocaleString("en-IN")}`}
+                            />
+                          );
+                        })}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ))}
             </div>
-            <div className="flex items-center justify-between mt-2 text-xs text-muted-foreground">
+            <div className="flex items-center justify-between mt-3 text-xs text-muted-foreground">
               <span>Less</span>
               <div className="flex gap-1">
                 {[0, 0.25, 0.5, 0.75, 1].map((v) => (
