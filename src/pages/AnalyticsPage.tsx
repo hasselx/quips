@@ -372,7 +372,7 @@ export default function AnalyticsPage() {
                         </th>
                       );
                     })}
-                    <th className="text-center font-medium text-muted-foreground py-1 px-2 min-w-[70px]">Total</th>
+                    <th className="text-center font-medium text-muted-foreground py-1 px-1 sm:px-2 min-w-[48px] sm:min-w-[70px]">Total</th>
                   </tr>
                 </thead>
                 <tbody>
