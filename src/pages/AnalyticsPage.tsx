@@ -252,7 +252,7 @@ export default function AnalyticsPage() {
         </CardHeader>
         <CardContent>
           {monthlyTrend.length > 0 ? (
-            <ResponsiveContainer width="100%" height={240}>
+            <ResponsiveContainer width="100%" height={180}>
               <LineChart data={monthlyTrend}>
                 <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
                 <XAxis dataKey="month" tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))" }} />
