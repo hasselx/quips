@@ -402,7 +402,7 @@ export default function AnalyticsPage() {
                           </td>
                         );
                       })}
-                      <td className="py-1.5 px-2 text-center font-bold text-foreground bg-muted/30 rounded-md">
+                      <td className="py-1 px-1 sm:px-2 text-center font-bold text-foreground bg-muted/30 rounded-md">
                         ₹{(heatmapGrid.catTotals[cat] || 0) >= 1000 ? `${((heatmapGrid.catTotals[cat] || 0) / 1000).toFixed(1)}k` : (heatmapGrid.catTotals[cat] || 0).toLocaleString("en-IN")}
                       </td>
                     </tr>
