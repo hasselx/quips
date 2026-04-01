@@ -367,8 +367,8 @@ export default function AnalyticsPage() {
                     {heatmapMonths.map((m) => {
                       const [y, mo] = m.split("-");
                       return (
-                        <th key={m} className="text-center font-medium text-muted-foreground py-1 px-2 min-w-[70px]">
-                          {MONTHS_SHORT[parseInt(mo) - 1]} {y.slice(2)}
+                          <th key={m} className="text-center font-medium text-muted-foreground py-1 px-1 sm:px-2 min-w-[48px] sm:min-w-[70px]">
+                            {MONTHS_SHORT[parseInt(mo) - 1]}
                         </th>
                       );
                     })}
