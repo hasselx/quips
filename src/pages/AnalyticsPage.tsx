@@ -322,55 +322,69 @@ export default function AnalyticsPage() {
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-semibold flex items-center gap-2">
-              <CalendarDays className="h-4 w-4 text-primary" /> Daily Heatmap (6 months)
+              <CalendarDays className="h-4 w-4 text-primary" /> Category × Month Heatmap
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="flex gap-4 overflow-x-auto pb-2">
-              {/* Day labels */}
-              <div className="flex flex-col gap-[3px] shrink-0 pt-5">
-                {DAY_LABELS.map((label, i) => (
-                  <div key={i} className="h-[14px] text-[10px] text-muted-foreground leading-[14px]">{label}</div>
-                ))}
-              </div>
-              {/* Month columns */}
-              {heatmapData.map((month) => (
-                <div key={month.label} className="flex flex-col shrink-0">
-                  <div className="text-[10px] font-medium text-muted-foreground mb-1 text-center">{month.label}</div>
-                  <div className="flex gap-[3px]">
-                    {month.weeks.map((week, wi) => (
-                      <div key={wi} className="flex flex-col gap-[3px]">
-                        {Array.from({ length: 7 }).map((_, dayIdx) => {
-                          const cell = week.find((d) => d.dayOfWeek === dayIdx);
-                          if (!cell) return <div key={dayIdx} className="h-[14px] w-[14px]" />;
-                          const intensity = cell.amount > 0 ? Math.max(0.15, cell.amount / maxDaily) : 0;
+            {heatmapGrid.categories.length > 0 ? (
+              <div className="overflow-x-auto">
+                <table className="w-full text-xs border-separate border-spacing-[2px]">
+                  <thead>
+                    <tr>
+                      <th className="text-left font-medium text-muted-foreground py-1 px-2 min-w-[100px]">Category</th>
+                      {heatmapMonths.map((m) => {
+                        const [y, mo] = m.split("-");
+                        return (
+                          <th key={m} className="text-center font-medium text-muted-foreground py-1 px-2 min-w-[70px]">
+                            {MONTHS_SHORT[parseInt(mo) - 1]} {y.slice(2)}
+                          </th>
+                        );
+                      })}
+                      <th className="text-center font-medium text-muted-foreground py-1 px-2 min-w-[70px]">Total</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {heatmapGrid.categories.map((cat) => (
+                      <tr key={cat}>
+                        <td className="py-1.5 px-2 font-medium text-foreground flex items-center gap-1.5">
+                          <span className="text-sm">{getCategoryIcon(cat, allCategories)}</span>
+                          <span className="truncate max-w-[80px]">{cat}</span>
+                        </td>
+                        {heatmapMonths.map((m) => {
+                          const val = heatmapGrid.catMonthMap[cat]?.[m] || 0;
+                          const intensity = val > 0 ? Math.max(0.12, val / heatmapGrid.maxVal) : 0;
+                          const isHigh = val / heatmapGrid.maxVal > 0.7;
+                          const isMid = val / heatmapGrid.maxVal > 0.4;
+                          const bgColor = val === 0
+                            ? "hsl(var(--muted) / 0.4)"
+                            : isHigh
+                              ? `hsl(160 60% 38% / ${intensity})`
+                              : isMid
+                                ? `hsl(35 90% 55% / ${Math.max(0.3, intensity)})`
+                                : `hsl(160 60% 48% / ${intensity})`;
                           return (
-                            <div
-                              key={dayIdx}
-                              className="h-[14px] w-[14px] rounded-[3px] transition-colors cursor-default"
-                              style={{
-                                background: intensity > 0
-                                  ? `hsl(160 60% 38% / ${intensity})`
-                                  : "hsl(var(--muted))",
-                              }}
-                              title={`${cell.date}: ₹${cell.amount.toLocaleString("en-IN")}`}
-                            />
+                            <td key={m} className="py-1.5 px-2 text-center rounded-md transition-colors" style={{ background: bgColor }}>
+                              <span className={`font-semibold ${val === 0 ? "text-muted-foreground/50" : intensity > 0.6 ? "text-white" : "text-foreground"}`}>
+                                {val > 0 ? `₹${val >= 1000 ? `${(val / 1000).toFixed(1)}k` : val.toLocaleString("en-IN")}` : "–"}
+                              </span>
+                            </td>
                           );
                         })}
-                      </div>
+                        <td className="py-1.5 px-2 text-center font-bold text-foreground bg-muted/30 rounded-md">
+                          ₹{(heatmapGrid.catTotals[cat] || 0) >= 1000 ? `${((heatmapGrid.catTotals[cat] || 0) / 1000).toFixed(1)}k` : (heatmapGrid.catTotals[cat] || 0).toLocaleString("en-IN")}
+                        </td>
+                      </tr>
                     ))}
-                  </div>
-                </div>
-              ))}
-            </div>
-            <div className="flex items-center justify-between mt-3 text-xs text-muted-foreground">
-              <span>Less</span>
-              <div className="flex gap-1">
-                {[0, 0.25, 0.5, 0.75, 1].map((v) => (
-                  <div key={v} className="h-3 w-3 rounded-[2px]" style={{ background: v === 0 ? "hsl(var(--muted))" : `hsl(160 60% 38% / ${v})` }} />
-                ))}
+                  </tbody>
+                </table>
               </div>
-              <span>More</span>
+            ) : (
+              <p className="text-sm text-muted-foreground text-center py-8">No data yet</p>
+            )}
+            <div className="flex items-center gap-3 mt-3 text-[10px] text-muted-foreground">
+              <span className="flex items-center gap-1"><span className="h-3 w-3 rounded-sm" style={{ background: "hsl(160 60% 48% / 0.2)" }} /> Low</span>
+              <span className="flex items-center gap-1"><span className="h-3 w-3 rounded-sm" style={{ background: "hsl(35 90% 55% / 0.5)" }} /> Medium</span>
+              <span className="flex items-center gap-1"><span className="h-3 w-3 rounded-sm" style={{ background: "hsl(160 60% 38% / 0.85)" }} /> High</span>
             </div>
           </CardContent>
         </Card>
