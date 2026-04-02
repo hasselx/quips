@@ -51,8 +51,8 @@ export function useAIAnalysis(notebookId?: string) {
   }, [notebookId, user]);
 
   const clearAnalysis = useCallback(async () => {
-    if (!notebookId) return;
-    await supabase.from("ai_analyses").delete().eq("notebook_id", notebookId);
+    if (!notebookId || !user) return;
+    await supabase.from("ai_analyses").delete().eq("notebook_id", notebookId).eq("user_id", user.id);
     setAnalysis("");
   }, [notebookId]);
 
