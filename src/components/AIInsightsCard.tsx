@@ -19,12 +19,6 @@ export function AIInsightsCard({ expenses, notebookName, notebookId }: AIInsight
   const { analysis, isLoading, error, analyze, cachedLoaded } = useAIAnalysis(notebookId);
   const [expanded, setExpanded] = useState(false);
 
-  // Auto-expand if cached analysis loaded
-  useEffect(() => {
-    if (cachedLoaded && analysis) {
-      setExpanded(true);
-    }
-  }, [cachedLoaded, analysis]);
 
   const handleAnalyze = () => {
     setExpanded(true);
