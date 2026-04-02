@@ -21,7 +21,6 @@ export function AIInsightsCard({ expenses, notebookName, notebookId }: AIInsight
 
 
   const handleAnalyze = () => {
-    setExpanded(true);
     analyze(expenses, notebookName);
   };
 
