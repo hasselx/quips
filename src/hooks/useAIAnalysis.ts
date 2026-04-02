@@ -34,18 +34,25 @@ export function useAIAnalysis(notebookId?: string) {
 
   const saveAnalysis = useCallback(async (content: string) => {
     if (!notebookId || !user) return;
-    // Upsert: delete old then insert (unique index on notebook_id)
-    await supabase.from("ai_analyses").delete().eq("notebook_id", notebookId);
-    await supabase.from("ai_analyses").insert({
+    // Try upsert: delete old then insert
+    const { error: delError } = await supabase
+      .from("ai_analyses")
+      .delete()
+      .eq("notebook_id", notebookId)
+      .eq("user_id", user.id);
+    console.log("ai_analyses delete result:", { delError });
+    
+    const { error: insError } = await supabase.from("ai_analyses").insert({
       notebook_id: notebookId,
       user_id: user.id,
       content,
     });
+    console.log("ai_analyses insert result:", { insError });
   }, [notebookId, user]);
 
   const clearAnalysis = useCallback(async () => {
-    if (!notebookId) return;
-    await supabase.from("ai_analyses").delete().eq("notebook_id", notebookId);
+    if (!notebookId || !user) return;
+    await supabase.from("ai_analyses").delete().eq("notebook_id", notebookId).eq("user_id", user.id);
     setAnalysis("");
   }, [notebookId]);
 
