@@ -215,7 +215,7 @@ export default function AnalyticsPage() {
 
       {/* AI Insights */}
       <div className="mb-6">
-        <AIInsightsCard expenses={expenses} notebookName={scope === "all" ? undefined : selectedNotebook?.name} />
+        <AIInsightsCard expenses={expenses} notebookName={scope === "all" ? undefined : selectedNotebook?.name} notebookId={scope === "all" ? GLOBAL_ANALYSIS_ID : scope} />
       </div>
 
       {/* Quick Stats */}
