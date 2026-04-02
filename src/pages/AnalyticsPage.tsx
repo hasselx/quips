@@ -17,6 +17,7 @@ import {
   BarChart, Bar,
 } from "recharts";
 import { AIInsightsCard } from "@/components/AIInsightsCard";
+import { GLOBAL_ANALYSIS_ID } from "@/hooks/useAIAnalysis";
 import { toast } from "sonner";
 
 type Expense = Tables<"expenses">;

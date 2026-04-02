@@ -7,6 +7,8 @@ type Expense = Tables<"expenses">;
 
 const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/analyze-spending`;
 
+export const GLOBAL_ANALYSIS_ID = "all-notebooks-global";
+
 export function useAIAnalysis(notebookId?: string) {
   const { user } = useAuth();
   const [analysis, setAnalysis] = useState("");

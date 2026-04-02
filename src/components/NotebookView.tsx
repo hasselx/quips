@@ -56,9 +56,17 @@ export function NotebookView({ notebook, onBack }: NotebookViewProps) {
     return cat as Category | null;
   }, [filteredExpenses]);
 
+  const clearAnalysesOnChange = async () => {
+    // Clear notebook-specific and global analytics cache
+    await supabase.from("ai_analyses").delete().eq("notebook_id", notebook.id);
+    await supabase.from("ai_analyses").delete().eq("notebook_id", "all-notebooks-global");
+  };
+
   const invalidate = () => {
     queryClient.invalidateQueries({ queryKey: ["expenses", notebook.id] });
     queryClient.invalidateQueries({ queryKey: ["notebook-counts"] });
+    queryClient.invalidateQueries({ queryKey: ["all-expenses-analytics"] });
+    clearAnalysesOnChange();
   };
 
   const addMutation = useMutation({
