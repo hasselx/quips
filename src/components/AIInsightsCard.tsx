@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Brain, RefreshCw, Sparkles, ChevronDown, ChevronUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -19,12 +19,6 @@ export function AIInsightsCard({ expenses, notebookName, notebookId }: AIInsight
   const { analysis, isLoading, error, analyze, cachedLoaded } = useAIAnalysis(notebookId);
   const [expanded, setExpanded] = useState(false);
 
-  // Auto-expand if cached analysis loaded
-  useEffect(() => {
-    if (cachedLoaded && analysis) {
-      setExpanded(true);
-    }
-  }, [cachedLoaded, analysis]);
 
   const handleAnalyze = () => {
     setExpanded(true);
