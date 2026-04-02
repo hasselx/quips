@@ -1,14 +1,51 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
 import type { Tables } from "@/integrations/supabase/types";
 
 type Expense = Tables<"expenses">;
 
 const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/analyze-spending`;
 
-export function useAIAnalysis() {
+export function useAIAnalysis(notebookId?: string) {
+  const { user } = useAuth();
   const [analysis, setAnalysis] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [cachedLoaded, setCachedLoaded] = useState(false);
+
+  // Load cached analysis on mount
+  useEffect(() => {
+    if (!notebookId || !user) return;
+    supabase
+      .from("ai_analyses")
+      .select("content")
+      .eq("notebook_id", notebookId)
+      .maybeSingle()
+      .then(({ data }) => {
+        if (data?.content) {
+          setAnalysis(data.content);
+        }
+        setCachedLoaded(true);
+      });
+  }, [notebookId, user]);
+
+  const saveAnalysis = useCallback(async (content: string) => {
+    if (!notebookId || !user) return;
+    // Upsert: delete old then insert (unique index on notebook_id)
+    await supabase.from("ai_analyses").delete().eq("notebook_id", notebookId);
+    await supabase.from("ai_analyses").insert({
+      notebook_id: notebookId,
+      user_id: user.id,
+      content,
+    });
+  }, [notebookId, user]);
+
+  const clearAnalysis = useCallback(async () => {
+    if (!notebookId) return;
+    await supabase.from("ai_analyses").delete().eq("notebook_id", notebookId);
+    setAnalysis("");
+  }, [notebookId]);
 
   const analyze = useCallback(async (expenses: Expense[], notebookName?: string) => {
     setIsLoading(true);
@@ -84,12 +121,17 @@ export function useAIAnalysis() {
           } catch { /* ignore */ }
         }
       }
+
+      // Save completed analysis
+      if (fullText) {
+        await saveAnalysis(fullText);
+      }
     } catch (e: any) {
       setError(e.message || "Analysis failed");
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [saveAnalysis]);
 
-  return { analysis, isLoading, error, analyze };
+  return { analysis, isLoading, error, analyze, clearAnalysis, cachedLoaded };
 }

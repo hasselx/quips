@@ -147,7 +147,7 @@ export function NotebookView({ notebook, onBack }: NotebookViewProps) {
 
         {/* AI Insights */}
         <div className="mb-4">
-          <AIInsightsCard expenses={expenses} notebookName={notebook.name} />
+          <AIInsightsCard expenses={expenses} notebookName={notebook.name} notebookId={notebook.id} />
         </div>
 
         {/* Dashboard */}
