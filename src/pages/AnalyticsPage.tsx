@@ -190,10 +190,10 @@ export default function AnalyticsPage() {
   const formatINR = (v: number) => `₹${v.toLocaleString("en-IN", { maximumFractionDigits: 0 })}`;
 
   return (
-    <div className="max-w-4xl mx-auto px-3 sm:px-4 py-6 pb-24">
+    <div className="max-w-4xl mx-auto px-2 sm:px-4 py-4 sm:py-6 pb-24">
       <div className="flex items-center justify-between mb-1">
-        <h1 className="text-2xl font-extrabold text-foreground">Analytics</h1>
-        <Button variant="outline" size="sm" className="rounded-xl gap-1.5" onClick={exportCSV}>
+        <h1 className="text-xl sm:text-2xl font-extrabold text-foreground">Analytics</h1>
+        <Button variant="outline" size="sm" className="rounded-xl gap-1 sm:gap-1.5 text-xs sm:text-sm" onClick={exportCSV}>
           <Download className="h-3.5 w-3.5" /> Export
         </Button>
       </div>
@@ -220,49 +220,49 @@ export default function AnalyticsPage() {
       </div>
 
       {/* Quick Stats */}
-      <div className="grid grid-cols-2 gap-2 sm:gap-3 mb-6">
-        <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="bg-card rounded-2xl p-3 sm:p-4 shadow-card">
-          <p className="text-[11px] text-muted-foreground font-medium">Total</p>
-          <p className="text-base sm:text-lg font-bold text-foreground">{formatINR(total)}</p>
+      <div className="grid grid-cols-2 gap-2 mb-4 sm:mb-6">
+        <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="bg-card rounded-xl sm:rounded-2xl p-2.5 sm:p-4 shadow-card">
+          <p className="text-[10px] sm:text-[11px] text-muted-foreground font-medium">Total</p>
+          <p className="text-sm sm:text-lg font-bold text-foreground">{formatINR(total)}</p>
         </motion.div>
-        <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 }} className="bg-card rounded-2xl p-3 sm:p-4 shadow-card">
-          <p className="text-[11px] text-muted-foreground font-medium">This Week</p>
-          <p className="text-base sm:text-lg font-bold text-foreground">{formatINR(weeklyComparison.thisWeek)}</p>
-          <p className={`text-[10px] sm:text-xs font-medium ${weeklyComparison.change > 0 ? "text-destructive" : "text-primary"}`}>
+        <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 }} className="bg-card rounded-xl sm:rounded-2xl p-2.5 sm:p-4 shadow-card">
+          <p className="text-[10px] sm:text-[11px] text-muted-foreground font-medium">This Week</p>
+          <p className="text-sm sm:text-lg font-bold text-foreground">{formatINR(weeklyComparison.thisWeek)}</p>
+          <p className={`text-[10px] font-medium ${weeklyComparison.change > 0 ? "text-destructive" : "text-primary"}`}>
             {weeklyComparison.change > 0 ? "↑" : "↓"} {Math.abs(weeklyComparison.change).toFixed(0)}%
           </p>
         </motion.div>
-        <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="bg-card rounded-2xl p-3 sm:p-4 shadow-card">
-          <p className="text-[11px] text-muted-foreground font-medium">Forecast</p>
-          <p className="text-base sm:text-lg font-bold text-foreground">{formatINR(forecast.projected)}</p>
-          <p className="text-[10px] sm:text-xs text-muted-foreground">{forecast.daysLeft}d left</p>
+        <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="bg-card rounded-xl sm:rounded-2xl p-2.5 sm:p-4 shadow-card">
+          <p className="text-[10px] sm:text-[11px] text-muted-foreground font-medium">Forecast</p>
+          <p className="text-sm sm:text-lg font-bold text-foreground">{formatINR(forecast.projected)}</p>
+          <p className="text-[10px] text-muted-foreground">{forecast.daysLeft}d left</p>
         </motion.div>
-        <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }} className="bg-card rounded-2xl p-3 sm:p-4 shadow-card">
-          <p className="text-[11px] text-muted-foreground font-medium">Transactions</p>
-          <p className="text-base sm:text-lg font-bold text-foreground">{expenses.length}</p>
-          <p className="text-[10px] sm:text-xs text-muted-foreground">{categoryData.length} categories</p>
+        <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }} className="bg-card rounded-xl sm:rounded-2xl p-2.5 sm:p-4 shadow-card">
+          <p className="text-[10px] sm:text-[11px] text-muted-foreground font-medium">Transactions</p>
+          <p className="text-sm sm:text-lg font-bold text-foreground">{expenses.length}</p>
+          <p className="text-[10px] text-muted-foreground">{categoryData.length} categories</p>
         </motion.div>
       </div>
 
       {/* Spending Trend */}
-      <Card className="mb-6">
-        <CardHeader className="pb-2">
-          <CardTitle className="text-sm font-semibold flex items-center gap-2">
-            <TrendingUp className="h-4 w-4 text-primary" /> Monthly Spending Trend
+      <Card className="mb-4 sm:mb-6">
+        <CardHeader className="pb-1 sm:pb-2 px-3 sm:px-6">
+          <CardTitle className="text-xs sm:text-sm font-semibold flex items-center gap-2">
+            <TrendingUp className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-primary" /> Monthly Spending Trend
           </CardTitle>
         </CardHeader>
-        <CardContent>
+        <CardContent className="px-2 sm:px-6">
           {monthlyTrend.length > 0 ? (
-            <ResponsiveContainer width="100%" height={180}>
-              <LineChart data={monthlyTrend}>
+            <ResponsiveContainer width="100%" height={150}>
+              <LineChart data={monthlyTrend} margin={{ left: -10, right: 5, top: 5, bottom: 0 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-                <XAxis dataKey="month" tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))" }} />
-                <YAxis tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))" }} tickFormatter={(v) => `₹${(v / 1000).toFixed(0)}k`} />
+                <XAxis dataKey="month" tick={{ fontSize: 9, fill: "hsl(var(--muted-foreground))" }} />
+                <YAxis tick={{ fontSize: 9, fill: "hsl(var(--muted-foreground))" }} tickFormatter={(v) => `₹${(v / 1000).toFixed(0)}k`} width={40} />
                 <Tooltip
-                  contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: 12, fontSize: 12 }}
+                  contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: 12, fontSize: 11 }}
                   formatter={(v: number) => [formatINR(v), "Spent"]}
                 />
-                <Line type="monotone" dataKey="amount" stroke="hsl(var(--primary))" strokeWidth={2.5} dot={{ r: 3, fill: "hsl(var(--primary))" }} />
+                <Line type="monotone" dataKey="amount" stroke="hsl(var(--primary))" strokeWidth={2} dot={{ r: 2, fill: "hsl(var(--primary))" }} />
               </LineChart>
             </ResponsiveContainer>
           ) : (
@@ -272,25 +272,25 @@ export default function AnalyticsPage() {
       </Card>
 
       {/* Category Breakdown + Heatmap */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 mb-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-6 mb-4 sm:mb-6">
         {/* Pie Chart */}
         <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-semibold flex items-center gap-2">
-              <PieChartIcon className="h-4 w-4 text-accent" /> Category Breakdown
+          <CardHeader className="pb-1 sm:pb-2 px-3 sm:px-6">
+            <CardTitle className="text-xs sm:text-sm font-semibold flex items-center gap-2">
+              <PieChartIcon className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-accent" /> Category Breakdown
             </CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent className="px-2 sm:px-6">
             {categoryData.length > 0 ? (
               <>
-                <ResponsiveContainer width="100%" height={170}>
+                <ResponsiveContainer width="100%" height={140}>
                   <PieChart>
                     <Pie
                       data={categoryData}
                       cx="50%"
                       cy="50%"
-                      innerRadius={50}
-                      outerRadius={80}
+                      innerRadius={38}
+                      outerRadius={65}
                       dataKey="value"
                       stroke="none"
                     >
@@ -299,15 +299,15 @@ export default function AnalyticsPage() {
                       ))}
                     </Pie>
                     <Tooltip
-                      contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: 12, fontSize: 12 }}
+                      contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: 12, fontSize: 11 }}
                       formatter={(v: number) => [formatINR(v), ""]}
                     />
                   </PieChart>
                 </ResponsiveContainer>
-                <div className="flex flex-wrap gap-2 mt-2">
+                <div className="flex flex-wrap gap-1.5 sm:gap-2 mt-1.5">
                   {categoryData.slice(0, 5).map((c, i) => (
-                    <span key={c.name} className="flex items-center gap-1 text-xs text-muted-foreground">
-                      <span className="h-2 w-2 rounded-full shrink-0" style={{ background: CHART_COLORS[i % CHART_COLORS.length] }} />
+                    <span key={c.name} className="flex items-center gap-1 text-[10px] sm:text-xs text-muted-foreground">
+                      <span className="h-1.5 w-1.5 sm:h-2 sm:w-2 rounded-full shrink-0" style={{ background: CHART_COLORS[i % CHART_COLORS.length] }} />
                       {getCategoryIcon(c.name, allCategories)} {c.name}
                     </span>
                   ))}
@@ -321,20 +321,20 @@ export default function AnalyticsPage() {
 
         {/* Top 5 Categories (vertical bars) */}
         <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-semibold flex items-center gap-2">
-              <BarChart3 className="h-4 w-4 text-primary" /> Top 5 Categories
+          <CardHeader className="pb-1 sm:pb-2 px-3 sm:px-6">
+            <CardTitle className="text-xs sm:text-sm font-semibold flex items-center gap-2">
+              <BarChart3 className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-primary" /> Top 5 Categories
             </CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent className="px-2 sm:px-6">
             {categoryData.length > 0 ? (
-              <ResponsiveContainer width="100%" height={180}>
-                <BarChart data={categoryData.slice(0, 5)}>
+              <ResponsiveContainer width="100%" height={150}>
+                <BarChart data={categoryData.slice(0, 5)} margin={{ left: -10, right: 5, top: 5, bottom: 0 }}>
                   <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" vertical={false} />
-                  <XAxis dataKey="name" tick={{ fontSize: 9, fill: "hsl(var(--muted-foreground))" }} interval={0} angle={-20} textAnchor="end" height={40} />
-                  <YAxis tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))" }} tickFormatter={(v) => `₹${(v / 1000).toFixed(0)}k`} />
+                  <XAxis dataKey="name" tick={{ fontSize: 8, fill: "hsl(var(--muted-foreground))" }} interval={0} angle={-20} textAnchor="end" height={35} />
+                  <YAxis tick={{ fontSize: 9, fill: "hsl(var(--muted-foreground))" }} tickFormatter={(v) => `₹${(v / 1000).toFixed(0)}k`} width={40} />
                   <Tooltip
-                    contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: 12, fontSize: 12 }}
+                    contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: 12, fontSize: 11 }}
                     formatter={(v: number) => [formatINR(v), "Spent"]}
                   />
                   <Bar dataKey="value" radius={[6, 6, 0, 0]}>
@@ -352,36 +352,36 @@ export default function AnalyticsPage() {
       </div>
 
       {/* Heatmap (full width) */}
-      <Card className="mb-6">
-        <CardHeader className="pb-2">
-          <CardTitle className="text-sm font-semibold flex items-center gap-2">
-            <CalendarDays className="h-4 w-4 text-primary" /> Category × Month Heatmap
+      <Card className="mb-4 sm:mb-6">
+        <CardHeader className="pb-1 sm:pb-2 px-3 sm:px-6">
+          <CardTitle className="text-xs sm:text-sm font-semibold flex items-center gap-2">
+            <CalendarDays className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-primary" /> Category × Month Heatmap
           </CardTitle>
         </CardHeader>
-        <CardContent>
+        <CardContent className="px-1.5 sm:px-6">
           {heatmapGrid.categories.length > 0 ? (
-            <div className="overflow-x-auto">
-              <table className="w-full text-[11px] sm:text-xs border-separate border-spacing-[2px]">
+            <div className="overflow-x-auto -mx-1">
+              <table className="w-full text-[9px] sm:text-xs border-separate border-spacing-[1px] sm:border-spacing-[2px]">
                   <thead>
                     <tr>
-                      <th className="text-left font-medium text-muted-foreground py-1 px-1.5 sm:px-2 min-w-[70px] sm:min-w-[100px]">Category</th>
+                      <th className="text-left font-medium text-muted-foreground py-0.5 sm:py-1 px-1 sm:px-2 min-w-[55px] sm:min-w-[100px]">Category</th>
                     {heatmapMonths.map((m) => {
                       const [y, mo] = m.split("-");
                       return (
-                          <th key={m} className="text-center font-medium text-muted-foreground py-1 px-1 sm:px-2 min-w-[48px] sm:min-w-[70px]">
+                          <th key={m} className="text-center font-medium text-muted-foreground py-0.5 sm:py-1 px-0.5 sm:px-2 min-w-[36px] sm:min-w-[70px]">
                             {MONTHS_SHORT[parseInt(mo) - 1]}
                         </th>
                       );
                     })}
-                    <th className="text-center font-medium text-muted-foreground py-1 px-1 sm:px-2 min-w-[48px] sm:min-w-[70px]">Total</th>
+                    <th className="text-center font-medium text-muted-foreground py-0.5 sm:py-1 px-0.5 sm:px-2 min-w-[36px] sm:min-w-[70px]">Total</th>
                   </tr>
                 </thead>
                 <tbody>
                   {heatmapGrid.categories.map((cat) => (
                     <tr key={cat}>
-                        <td className="py-1 px-1.5 sm:px-2 font-medium text-foreground flex items-center gap-1">
-                          <span className="text-xs sm:text-sm">{getCategoryIcon(cat, allCategories)}</span>
-                          <span className="truncate max-w-[50px] sm:max-w-[80px]">{cat}</span>
+                        <td className="py-0.5 sm:py-1 px-1 sm:px-2 font-medium text-foreground flex items-center gap-0.5 sm:gap-1">
+                          <span className="text-[10px] sm:text-sm">{getCategoryIcon(cat, allCategories)}</span>
+                          <span className="truncate max-w-[40px] sm:max-w-[80px]">{cat}</span>
                         </td>
                       {heatmapMonths.map((m) => {
                         const val = heatmapGrid.catMonthMap[cat]?.[m] || 0;
@@ -396,14 +396,14 @@ export default function AnalyticsPage() {
                               ? `hsl(35 90% 55% / ${Math.max(0.3, intensity)})`
                               : `hsl(160 60% 48% / ${intensity})`;
                         return (
-                          <td key={m} className="py-1 px-1 sm:px-2 text-center rounded-md transition-colors" style={{ background: bgColor }}>
+                          <td key={m} className="py-0.5 sm:py-1 px-0.5 sm:px-2 text-center rounded-sm sm:rounded-md transition-colors" style={{ background: bgColor }}>
                             <span className={`font-semibold ${val === 0 ? "text-muted-foreground/50" : intensity > 0.6 ? "text-white" : "text-foreground"}`}>
                               {val > 0 ? `₹${val >= 1000 ? `${(val / 1000).toFixed(1)}k` : val.toLocaleString("en-IN")}` : "–"}
                             </span>
                           </td>
                         );
                       })}
-                      <td className="py-1 px-1 sm:px-2 text-center font-bold text-foreground bg-muted/30 rounded-md">
+                      <td className="py-0.5 sm:py-1 px-0.5 sm:px-2 text-center font-bold text-foreground bg-muted/30 rounded-sm sm:rounded-md">
                         ₹{(heatmapGrid.catTotals[cat] || 0) >= 1000 ? `${((heatmapGrid.catTotals[cat] || 0) / 1000).toFixed(1)}k` : (heatmapGrid.catTotals[cat] || 0).toLocaleString("en-IN")}
                       </td>
                     </tr>
@@ -414,33 +414,33 @@ export default function AnalyticsPage() {
           ) : (
             <p className="text-sm text-muted-foreground text-center py-8">No data yet</p>
           )}
-          <div className="flex items-center gap-3 mt-3 text-[10px] text-muted-foreground">
-            <span className="flex items-center gap-1"><span className="h-3 w-3 rounded-sm" style={{ background: "hsl(160 60% 48% / 0.2)" }} /> Low</span>
-            <span className="flex items-center gap-1"><span className="h-3 w-3 rounded-sm" style={{ background: "hsl(35 90% 55% / 0.5)" }} /> Medium</span>
-            <span className="flex items-center gap-1"><span className="h-3 w-3 rounded-sm" style={{ background: "hsl(160 60% 38% / 0.85)" }} /> High</span>
+          <div className="flex items-center gap-2 sm:gap-3 mt-2 sm:mt-3 text-[9px] sm:text-[10px] text-muted-foreground">
+            <span className="flex items-center gap-1"><span className="h-2.5 w-2.5 sm:h-3 sm:w-3 rounded-sm" style={{ background: "hsl(160 60% 48% / 0.2)" }} /> Low</span>
+            <span className="flex items-center gap-1"><span className="h-2.5 w-2.5 sm:h-3 sm:w-3 rounded-sm" style={{ background: "hsl(35 90% 55% / 0.5)" }} /> Medium</span>
+            <span className="flex items-center gap-1"><span className="h-2.5 w-2.5 sm:h-3 sm:w-3 rounded-sm" style={{ background: "hsl(160 60% 38% / 0.85)" }} /> High</span>
           </div>
         </CardContent>
       </Card>
 
       {/* Forecast Card */}
       <Card>
-        <CardHeader className="pb-2">
-          <CardTitle className="text-sm font-semibold flex items-center gap-2">
-            <Brain className="h-4 w-4 text-accent" /> Monthly Forecast
+        <CardHeader className="pb-1 sm:pb-2 px-3 sm:px-6">
+          <CardTitle className="text-xs sm:text-sm font-semibold flex items-center gap-2">
+            <Brain className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-accent" /> Monthly Forecast
           </CardTitle>
         </CardHeader>
-        <CardContent>
-          <div className="flex items-end gap-4">
+        <CardContent className="px-3 sm:px-6">
+          <div className="flex items-end gap-3 sm:gap-4">
             <div>
-              <p className="text-xs text-muted-foreground">Spent so far</p>
-              <p className="text-2xl font-bold text-foreground">{formatINR(forecast.current)}</p>
+              <p className="text-[10px] sm:text-xs text-muted-foreground">Spent so far</p>
+              <p className="text-lg sm:text-2xl font-bold text-foreground">{formatINR(forecast.current)}</p>
             </div>
             <div className="text-right">
-              <p className="text-xs text-muted-foreground">Projected total</p>
-              <p className="text-2xl font-bold text-primary">{formatINR(forecast.projected)}</p>
+              <p className="text-[10px] sm:text-xs text-muted-foreground">Projected total</p>
+              <p className="text-lg sm:text-2xl font-bold text-primary">{formatINR(forecast.projected)}</p>
             </div>
           </div>
-          <div className="mt-3 h-2 bg-muted rounded-full overflow-hidden">
+          <div className="mt-2 sm:mt-3 h-1.5 sm:h-2 bg-muted rounded-full overflow-hidden">
             <motion.div
               className="h-full bg-primary rounded-full"
               initial={{ width: 0 }}
@@ -448,7 +448,7 @@ export default function AnalyticsPage() {
               transition={{ duration: 0.6 }}
             />
           </div>
-          <p className="text-xs text-muted-foreground mt-2">{forecast.daysLeft} days remaining this month</p>
+          <p className="text-[10px] sm:text-xs text-muted-foreground mt-1.5 sm:mt-2">{forecast.daysLeft} days remaining this month</p>
         </CardContent>
       </Card>
     </div>
