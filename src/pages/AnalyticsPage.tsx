@@ -352,36 +352,36 @@ export default function AnalyticsPage() {
       </div>
 
       {/* Heatmap (full width) */}
-      <Card className="mb-6">
-        <CardHeader className="pb-2">
-          <CardTitle className="text-sm font-semibold flex items-center gap-2">
-            <CalendarDays className="h-4 w-4 text-primary" /> Category × Month Heatmap
+      <Card className="mb-4 sm:mb-6">
+        <CardHeader className="pb-1 sm:pb-2 px-3 sm:px-6">
+          <CardTitle className="text-xs sm:text-sm font-semibold flex items-center gap-2">
+            <CalendarDays className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-primary" /> Category × Month Heatmap
           </CardTitle>
         </CardHeader>
-        <CardContent>
+        <CardContent className="px-1.5 sm:px-6">
           {heatmapGrid.categories.length > 0 ? (
-            <div className="overflow-x-auto">
-              <table className="w-full text-[11px] sm:text-xs border-separate border-spacing-[2px]">
+            <div className="overflow-x-auto -mx-1">
+              <table className="w-full text-[9px] sm:text-xs border-separate border-spacing-[1px] sm:border-spacing-[2px]">
                   <thead>
                     <tr>
-                      <th className="text-left font-medium text-muted-foreground py-1 px-1.5 sm:px-2 min-w-[70px] sm:min-w-[100px]">Category</th>
+                      <th className="text-left font-medium text-muted-foreground py-0.5 sm:py-1 px-1 sm:px-2 min-w-[55px] sm:min-w-[100px]">Category</th>
                     {heatmapMonths.map((m) => {
                       const [y, mo] = m.split("-");
                       return (
-                          <th key={m} className="text-center font-medium text-muted-foreground py-1 px-1 sm:px-2 min-w-[48px] sm:min-w-[70px]">
+                          <th key={m} className="text-center font-medium text-muted-foreground py-0.5 sm:py-1 px-0.5 sm:px-2 min-w-[36px] sm:min-w-[70px]">
                             {MONTHS_SHORT[parseInt(mo) - 1]}
                         </th>
                       );
                     })}
-                    <th className="text-center font-medium text-muted-foreground py-1 px-1 sm:px-2 min-w-[48px] sm:min-w-[70px]">Total</th>
+                    <th className="text-center font-medium text-muted-foreground py-0.5 sm:py-1 px-0.5 sm:px-2 min-w-[36px] sm:min-w-[70px]">Total</th>
                   </tr>
                 </thead>
                 <tbody>
                   {heatmapGrid.categories.map((cat) => (
                     <tr key={cat}>
-                        <td className="py-1 px-1.5 sm:px-2 font-medium text-foreground flex items-center gap-1">
-                          <span className="text-xs sm:text-sm">{getCategoryIcon(cat, allCategories)}</span>
-                          <span className="truncate max-w-[50px] sm:max-w-[80px]">{cat}</span>
+                        <td className="py-0.5 sm:py-1 px-1 sm:px-2 font-medium text-foreground flex items-center gap-0.5 sm:gap-1">
+                          <span className="text-[10px] sm:text-sm">{getCategoryIcon(cat, allCategories)}</span>
+                          <span className="truncate max-w-[40px] sm:max-w-[80px]">{cat}</span>
                         </td>
                       {heatmapMonths.map((m) => {
                         const val = heatmapGrid.catMonthMap[cat]?.[m] || 0;
@@ -396,14 +396,14 @@ export default function AnalyticsPage() {
                               ? `hsl(35 90% 55% / ${Math.max(0.3, intensity)})`
                               : `hsl(160 60% 48% / ${intensity})`;
                         return (
-                          <td key={m} className="py-1 px-1 sm:px-2 text-center rounded-md transition-colors" style={{ background: bgColor }}>
+                          <td key={m} className="py-0.5 sm:py-1 px-0.5 sm:px-2 text-center rounded-sm sm:rounded-md transition-colors" style={{ background: bgColor }}>
                             <span className={`font-semibold ${val === 0 ? "text-muted-foreground/50" : intensity > 0.6 ? "text-white" : "text-foreground"}`}>
                               {val > 0 ? `₹${val >= 1000 ? `${(val / 1000).toFixed(1)}k` : val.toLocaleString("en-IN")}` : "–"}
                             </span>
                           </td>
                         );
                       })}
-                      <td className="py-1 px-1 sm:px-2 text-center font-bold text-foreground bg-muted/30 rounded-md">
+                      <td className="py-0.5 sm:py-1 px-0.5 sm:px-2 text-center font-bold text-foreground bg-muted/30 rounded-sm sm:rounded-md">
                         ₹{(heatmapGrid.catTotals[cat] || 0) >= 1000 ? `${((heatmapGrid.catTotals[cat] || 0) / 1000).toFixed(1)}k` : (heatmapGrid.catTotals[cat] || 0).toLocaleString("en-IN")}
                       </td>
                     </tr>
@@ -414,10 +414,10 @@ export default function AnalyticsPage() {
           ) : (
             <p className="text-sm text-muted-foreground text-center py-8">No data yet</p>
           )}
-          <div className="flex items-center gap-3 mt-3 text-[10px] text-muted-foreground">
-            <span className="flex items-center gap-1"><span className="h-3 w-3 rounded-sm" style={{ background: "hsl(160 60% 48% / 0.2)" }} /> Low</span>
-            <span className="flex items-center gap-1"><span className="h-3 w-3 rounded-sm" style={{ background: "hsl(35 90% 55% / 0.5)" }} /> Medium</span>
-            <span className="flex items-center gap-1"><span className="h-3 w-3 rounded-sm" style={{ background: "hsl(160 60% 38% / 0.85)" }} /> High</span>
+          <div className="flex items-center gap-2 sm:gap-3 mt-2 sm:mt-3 text-[9px] sm:text-[10px] text-muted-foreground">
+            <span className="flex items-center gap-1"><span className="h-2.5 w-2.5 sm:h-3 sm:w-3 rounded-sm" style={{ background: "hsl(160 60% 48% / 0.2)" }} /> Low</span>
+            <span className="flex items-center gap-1"><span className="h-2.5 w-2.5 sm:h-3 sm:w-3 rounded-sm" style={{ background: "hsl(35 90% 55% / 0.5)" }} /> Medium</span>
+            <span className="flex items-center gap-1"><span className="h-2.5 w-2.5 sm:h-3 sm:w-3 rounded-sm" style={{ background: "hsl(160 60% 38% / 0.85)" }} /> High</span>
           </div>
         </CardContent>
       </Card>
