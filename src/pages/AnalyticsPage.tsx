@@ -328,16 +328,16 @@ export default function AnalyticsPage() {
           </CardHeader>
           <CardContent className="px-2 sm:px-6">
             {categoryData.length > 0 ? (
-              <ResponsiveContainer width="100%" height={150}>
-                <BarChart data={categoryData.slice(0, 5)} margin={{ left: -10, right: 5, top: 5, bottom: 0 }}>
+              <ResponsiveContainer width="100%" height={130}>
+                <BarChart data={categoryData.slice(0, 5)} margin={{ left: -15, right: 2, top: 5, bottom: 0 }}>
                   <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" vertical={false} />
-                  <XAxis dataKey="name" tick={{ fontSize: 8, fill: "hsl(var(--muted-foreground))" }} interval={0} angle={-20} textAnchor="end" height={35} />
-                  <YAxis tick={{ fontSize: 9, fill: "hsl(var(--muted-foreground))" }} tickFormatter={(v) => `₹${(v / 1000).toFixed(0)}k`} width={40} />
+                  <XAxis dataKey="name" tick={{ fontSize: 7, fill: "hsl(var(--muted-foreground))" }} interval={0} angle={-25} textAnchor="end" height={30} />
+                  <YAxis tick={{ fontSize: 8, fill: "hsl(var(--muted-foreground))" }} tickFormatter={(v) => `₹${(v / 1000).toFixed(0)}k`} width={32} />
                   <Tooltip
-                    contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: 12, fontSize: 11 }}
+                    contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: 12, fontSize: 10 }}
                     formatter={(v: number) => [formatINR(v), "Spent"]}
                   />
-                  <Bar dataKey="value" radius={[6, 6, 0, 0]}>
+                  <Bar dataKey="value" radius={[4, 4, 0, 0]}>
                     {categoryData.slice(0, 5).map((_, i) => (
                       <Cell key={i} fill={CHART_COLORS[i % CHART_COLORS.length]} />
                     ))}
