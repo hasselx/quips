@@ -272,25 +272,25 @@ export default function AnalyticsPage() {
       </Card>
 
       {/* Category Breakdown + Heatmap */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 mb-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-6 mb-4 sm:mb-6">
         {/* Pie Chart */}
         <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-semibold flex items-center gap-2">
-              <PieChartIcon className="h-4 w-4 text-accent" /> Category Breakdown
+          <CardHeader className="pb-1 sm:pb-2 px-3 sm:px-6">
+            <CardTitle className="text-xs sm:text-sm font-semibold flex items-center gap-2">
+              <PieChartIcon className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-accent" /> Category Breakdown
             </CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent className="px-2 sm:px-6">
             {categoryData.length > 0 ? (
               <>
-                <ResponsiveContainer width="100%" height={170}>
+                <ResponsiveContainer width="100%" height={140}>
                   <PieChart>
                     <Pie
                       data={categoryData}
                       cx="50%"
                       cy="50%"
-                      innerRadius={50}
-                      outerRadius={80}
+                      innerRadius={38}
+                      outerRadius={65}
                       dataKey="value"
                       stroke="none"
                     >
@@ -299,15 +299,15 @@ export default function AnalyticsPage() {
                       ))}
                     </Pie>
                     <Tooltip
-                      contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: 12, fontSize: 12 }}
+                      contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: 12, fontSize: 11 }}
                       formatter={(v: number) => [formatINR(v), ""]}
                     />
                   </PieChart>
                 </ResponsiveContainer>
-                <div className="flex flex-wrap gap-2 mt-2">
+                <div className="flex flex-wrap gap-1.5 sm:gap-2 mt-1.5">
                   {categoryData.slice(0, 5).map((c, i) => (
-                    <span key={c.name} className="flex items-center gap-1 text-xs text-muted-foreground">
-                      <span className="h-2 w-2 rounded-full shrink-0" style={{ background: CHART_COLORS[i % CHART_COLORS.length] }} />
+                    <span key={c.name} className="flex items-center gap-1 text-[10px] sm:text-xs text-muted-foreground">
+                      <span className="h-1.5 w-1.5 sm:h-2 sm:w-2 rounded-full shrink-0" style={{ background: CHART_COLORS[i % CHART_COLORS.length] }} />
                       {getCategoryIcon(c.name, allCategories)} {c.name}
                     </span>
                   ))}
@@ -321,20 +321,20 @@ export default function AnalyticsPage() {
 
         {/* Top 5 Categories (vertical bars) */}
         <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-semibold flex items-center gap-2">
-              <BarChart3 className="h-4 w-4 text-primary" /> Top 5 Categories
+          <CardHeader className="pb-1 sm:pb-2 px-3 sm:px-6">
+            <CardTitle className="text-xs sm:text-sm font-semibold flex items-center gap-2">
+              <BarChart3 className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-primary" /> Top 5 Categories
             </CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent className="px-2 sm:px-6">
             {categoryData.length > 0 ? (
-              <ResponsiveContainer width="100%" height={180}>
-                <BarChart data={categoryData.slice(0, 5)}>
+              <ResponsiveContainer width="100%" height={150}>
+                <BarChart data={categoryData.slice(0, 5)} margin={{ left: -10, right: 5, top: 5, bottom: 0 }}>
                   <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" vertical={false} />
-                  <XAxis dataKey="name" tick={{ fontSize: 9, fill: "hsl(var(--muted-foreground))" }} interval={0} angle={-20} textAnchor="end" height={40} />
-                  <YAxis tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))" }} tickFormatter={(v) => `₹${(v / 1000).toFixed(0)}k`} />
+                  <XAxis dataKey="name" tick={{ fontSize: 8, fill: "hsl(var(--muted-foreground))" }} interval={0} angle={-20} textAnchor="end" height={35} />
+                  <YAxis tick={{ fontSize: 9, fill: "hsl(var(--muted-foreground))" }} tickFormatter={(v) => `₹${(v / 1000).toFixed(0)}k`} width={40} />
                   <Tooltip
-                    contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: 12, fontSize: 12 }}
+                    contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: 12, fontSize: 11 }}
                     formatter={(v: number) => [formatINR(v), "Spent"]}
                   />
                   <Bar dataKey="value" radius={[6, 6, 0, 0]}>
