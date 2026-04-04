@@ -424,23 +424,23 @@ export default function AnalyticsPage() {
 
       {/* Forecast Card */}
       <Card>
-        <CardHeader className="pb-2">
-          <CardTitle className="text-sm font-semibold flex items-center gap-2">
-            <Brain className="h-4 w-4 text-accent" /> Monthly Forecast
+        <CardHeader className="pb-1 sm:pb-2 px-3 sm:px-6">
+          <CardTitle className="text-xs sm:text-sm font-semibold flex items-center gap-2">
+            <Brain className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-accent" /> Monthly Forecast
           </CardTitle>
         </CardHeader>
-        <CardContent>
-          <div className="flex items-end gap-4">
+        <CardContent className="px-3 sm:px-6">
+          <div className="flex items-end gap-3 sm:gap-4">
             <div>
-              <p className="text-xs text-muted-foreground">Spent so far</p>
-              <p className="text-2xl font-bold text-foreground">{formatINR(forecast.current)}</p>
+              <p className="text-[10px] sm:text-xs text-muted-foreground">Spent so far</p>
+              <p className="text-lg sm:text-2xl font-bold text-foreground">{formatINR(forecast.current)}</p>
             </div>
             <div className="text-right">
-              <p className="text-xs text-muted-foreground">Projected total</p>
-              <p className="text-2xl font-bold text-primary">{formatINR(forecast.projected)}</p>
+              <p className="text-[10px] sm:text-xs text-muted-foreground">Projected total</p>
+              <p className="text-lg sm:text-2xl font-bold text-primary">{formatINR(forecast.projected)}</p>
             </div>
           </div>
-          <div className="mt-3 h-2 bg-muted rounded-full overflow-hidden">
+          <div className="mt-2 sm:mt-3 h-1.5 sm:h-2 bg-muted rounded-full overflow-hidden">
             <motion.div
               className="h-full bg-primary rounded-full"
               initial={{ width: 0 }}
@@ -448,7 +448,7 @@ export default function AnalyticsPage() {
               transition={{ duration: 0.6 }}
             />
           </div>
-          <p className="text-xs text-muted-foreground mt-2">{forecast.daysLeft} days remaining this month</p>
+          <p className="text-[10px] sm:text-xs text-muted-foreground mt-1.5 sm:mt-2">{forecast.daysLeft} days remaining this month</p>
         </CardContent>
       </Card>
     </div>
