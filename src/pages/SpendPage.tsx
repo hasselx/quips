@@ -124,18 +124,18 @@ export default function SpendPage() {
       )}
 
       {/* Summary Cards */}
-      <div className="grid grid-cols-2 gap-3 mb-6">
+      <div className="grid grid-cols-3 gap-3 mb-6">
         <motion.div
           key={`total-${period}-${selectedYear}-${selectedMonth}`}
           initial={{ opacity: 0, y: 8 }}
           animate={{ opacity: 1, y: 0 }}
-          className="bg-card rounded-2xl p-4 shadow-card"
+          className="col-span-2 bg-card rounded-2xl p-4 shadow-card"
         >
           <div className="flex items-center gap-2 mb-1">
             <DollarSign className="h-4 w-4 text-primary" />
             <span className="text-xs text-muted-foreground font-medium">Total Spent</span>
           </div>
-          <p className="text-xl font-bold text-foreground">
+          <p className="text-2xl font-bold text-foreground">
             ₹{total.toLocaleString("en-IN", { minimumFractionDigits: 2 })}
           </p>
           <p className="text-xs text-muted-foreground mt-1">{periodLabel}</p>
@@ -146,14 +146,14 @@ export default function SpendPage() {
           initial={{ opacity: 0, y: 8 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.05 }}
-          className="bg-card rounded-2xl p-4 shadow-card"
+          className="col-span-1 bg-card rounded-2xl p-4 shadow-card"
         >
           <div className="flex items-center gap-2 mb-1">
             <Calendar className="h-4 w-4 text-info" />
             <span className="text-xs text-muted-foreground font-medium">Transactions</span>
           </div>
           <p className="text-xl font-bold text-foreground">{filtered.length}</p>
-          <p className="text-xs text-muted-foreground mt-1">{categoryBreakdown.length} categories</p>
+          <p className="text-xs text-muted-foreground mt-1">{categoryBreakdown.length} cat.</p>
         </motion.div>
       </div>
 
