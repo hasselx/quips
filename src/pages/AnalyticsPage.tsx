@@ -253,16 +253,16 @@ export default function AnalyticsPage() {
         </CardHeader>
         <CardContent className="px-2 sm:px-6">
           {monthlyTrend.length > 0 ? (
-            <ResponsiveContainer width="100%" height={150}>
-              <LineChart data={monthlyTrend} margin={{ left: -10, right: 5, top: 5, bottom: 0 }}>
+            <ResponsiveContainer width="100%" height={130}>
+              <LineChart data={monthlyTrend} margin={{ left: -15, right: 2, top: 5, bottom: 0 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-                <XAxis dataKey="month" tick={{ fontSize: 9, fill: "hsl(var(--muted-foreground))" }} />
-                <YAxis tick={{ fontSize: 9, fill: "hsl(var(--muted-foreground))" }} tickFormatter={(v) => `₹${(v / 1000).toFixed(0)}k`} width={40} />
+                <XAxis dataKey="month" tick={{ fontSize: 8, fill: "hsl(var(--muted-foreground))" }} tickMargin={2} />
+                <YAxis tick={{ fontSize: 8, fill: "hsl(var(--muted-foreground))" }} tickFormatter={(v) => `₹${(v / 1000).toFixed(0)}k`} width={32} />
                 <Tooltip
-                  contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: 12, fontSize: 11 }}
+                  contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: 12, fontSize: 10 }}
                   formatter={(v: number) => [formatINR(v), "Spent"]}
                 />
-                <Line type="monotone" dataKey="amount" stroke="hsl(var(--primary))" strokeWidth={2} dot={{ r: 2, fill: "hsl(var(--primary))" }} />
+                <Line type="monotone" dataKey="amount" stroke="hsl(var(--primary))" strokeWidth={2} dot={{ r: 1.5, fill: "hsl(var(--primary))" }} />
               </LineChart>
             </ResponsiveContainer>
           ) : (
