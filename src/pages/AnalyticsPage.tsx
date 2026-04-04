@@ -283,14 +283,14 @@ export default function AnalyticsPage() {
           <CardContent className="px-2 sm:px-6">
             {categoryData.length > 0 ? (
               <>
-                <ResponsiveContainer width="100%" height={140}>
+                <ResponsiveContainer width="100%" height={120}>
                   <PieChart>
                     <Pie
                       data={categoryData}
                       cx="50%"
                       cy="50%"
-                      innerRadius={38}
-                      outerRadius={65}
+                      innerRadius={30}
+                      outerRadius={52}
                       dataKey="value"
                       stroke="none"
                     >
@@ -299,7 +299,7 @@ export default function AnalyticsPage() {
                       ))}
                     </Pie>
                     <Tooltip
-                      contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: 12, fontSize: 11 }}
+                      contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: 12, fontSize: 10 }}
                       formatter={(v: number) => [formatINR(v), ""]}
                     />
                   </PieChart>
