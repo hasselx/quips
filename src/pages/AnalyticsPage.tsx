@@ -190,7 +190,7 @@ export default function AnalyticsPage() {
   const formatINR = (v: number) => `₹${v.toLocaleString("en-IN", { maximumFractionDigits: 0 })}`;
 
   return (
-    <div className="max-w-4xl mx-auto px-3 sm:px-4 py-6 pb-24">
+    <div className="max-w-4xl mx-auto px-2 sm:px-4 py-4 sm:py-6 pb-24">
       <div className="flex items-center justify-between mb-1">
         <h1 className="text-2xl font-extrabold text-foreground">Analytics</h1>
         <Button variant="outline" size="sm" className="rounded-xl gap-1.5" onClick={exportCSV}>
