@@ -245,24 +245,24 @@ export default function AnalyticsPage() {
       </div>
 
       {/* Spending Trend */}
-      <Card className="mb-6">
-        <CardHeader className="pb-2">
-          <CardTitle className="text-sm font-semibold flex items-center gap-2">
-            <TrendingUp className="h-4 w-4 text-primary" /> Monthly Spending Trend
+      <Card className="mb-4 sm:mb-6">
+        <CardHeader className="pb-1 sm:pb-2 px-3 sm:px-6">
+          <CardTitle className="text-xs sm:text-sm font-semibold flex items-center gap-2">
+            <TrendingUp className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-primary" /> Monthly Spending Trend
           </CardTitle>
         </CardHeader>
-        <CardContent>
+        <CardContent className="px-2 sm:px-6">
           {monthlyTrend.length > 0 ? (
-            <ResponsiveContainer width="100%" height={180}>
-              <LineChart data={monthlyTrend}>
+            <ResponsiveContainer width="100%" height={150}>
+              <LineChart data={monthlyTrend} margin={{ left: -10, right: 5, top: 5, bottom: 0 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-                <XAxis dataKey="month" tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))" }} />
-                <YAxis tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))" }} tickFormatter={(v) => `₹${(v / 1000).toFixed(0)}k`} />
+                <XAxis dataKey="month" tick={{ fontSize: 9, fill: "hsl(var(--muted-foreground))" }} />
+                <YAxis tick={{ fontSize: 9, fill: "hsl(var(--muted-foreground))" }} tickFormatter={(v) => `₹${(v / 1000).toFixed(0)}k`} width={40} />
                 <Tooltip
-                  contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: 12, fontSize: 12 }}
+                  contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: 12, fontSize: 11 }}
                   formatter={(v: number) => [formatINR(v), "Spent"]}
                 />
-                <Line type="monotone" dataKey="amount" stroke="hsl(var(--primary))" strokeWidth={2.5} dot={{ r: 3, fill: "hsl(var(--primary))" }} />
+                <Line type="monotone" dataKey="amount" stroke="hsl(var(--primary))" strokeWidth={2} dot={{ r: 2, fill: "hsl(var(--primary))" }} />
               </LineChart>
             </ResponsiveContainer>
           ) : (
