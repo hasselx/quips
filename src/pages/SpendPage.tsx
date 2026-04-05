@@ -3,10 +3,11 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { DollarSign, TrendingUp, Calendar } from "lucide-react";
+import { DollarSign, TrendingUp, Calendar, BarChart3 } from "lucide-react";
 import { getCategoryIcon } from "@/types/expense";
 import { useCustomCategories } from "@/hooks/useCustomCategories";
 import { motion, AnimatePresence } from "framer-motion";
+import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid } from "recharts";
 import type { Tables } from "@/integrations/supabase/types";
 
 type Expense = Tables<"expenses">;
