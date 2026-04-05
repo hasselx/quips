@@ -98,7 +98,7 @@ export function NotebookList({ onSelect }: NotebookListProps) {
     if (editNotebook) {
       updateMutation.mutate({ id: editNotebook.id, newName: name.trim() });
     } else {
-      createMutation.mutate(name.trim());
+      createMutation.mutate({ notebookName: name.trim(), type: notebookType });
     }
     setDialogOpen(false);
     setEditNotebook(null);
