@@ -108,7 +108,12 @@ export function NotebookList({ onSelect }: NotebookListProps) {
   const openCreate = () => { setEditNotebook(null); setName(""); setNotebookType("Notebook"); setDialogOpen(true); };
   const openEdit = (nb: Notebook) => { setEditNotebook(nb); setName(nb.name); setNotebookType("Notebook"); setDialogOpen(true); };
 
-  const NOTEBOOK_EMOJIS = ["📒", "📗", "📘", "📕", "📓", "📔"];
+  const TYPE_CONFIG: Record<string, { emoji: string; borderClass: string; bgClass: string }> = {
+    "Notebook": { emoji: "📒", borderClass: "border-l-amber-400", bgClass: "bg-amber-50 dark:bg-amber-950/20" },
+    "Normal Expense": { emoji: "💳", borderClass: "border-l-emerald-400", bgClass: "bg-emerald-50 dark:bg-emerald-950/20" },
+    "Recurring Bills": { emoji: "🔁", borderClass: "border-l-violet-400", bgClass: "bg-violet-50 dark:bg-violet-950/20" },
+  };
+  const FALLBACK_EMOJIS = ["📗", "📘", "📕", "📓", "📔"];
 
   const formatDate = (dateStr: string) => {
     return new Date(dateStr).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" });
