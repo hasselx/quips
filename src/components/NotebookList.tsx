@@ -105,8 +105,8 @@ export function NotebookList({ onSelect }: NotebookListProps) {
     setName("");
   };
 
-  const openCreate = () => { setEditNotebook(null); setName(""); setDialogOpen(true); };
-  const openEdit = (nb: Notebook) => { setEditNotebook(nb); setName(nb.name); setDialogOpen(true); };
+  const openCreate = () => { setEditNotebook(null); setName(""); setNotebookType("Notebook"); setDialogOpen(true); };
+  const openEdit = (nb: Notebook) => { setEditNotebook(nb); setName(nb.name); setNotebookType("Notebook"); setDialogOpen(true); };
 
   const NOTEBOOK_EMOJIS = ["📒", "📗", "📘", "📕", "📓", "📔"];
 
