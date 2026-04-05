@@ -181,9 +181,13 @@ export function NotebookList({ onSelect }: NotebookListProps) {
                       </DropdownMenu>
                     </div>
                     <div className="flex items-center gap-2 mb-1">
-                      <span className="text-2xl">{(TYPE_CONFIG[(nb as any).type] || TYPE_CONFIG["Notebook"]).emoji}</span>
-                      <span className="text-xs font-medium text-muted-foreground bg-muted px-2 py-0.5 rounded-full">
-                        {(nb as any).type || "Notebook"}
+                      <span className="text-2xl">{(TYPE_CONFIG[nb.type] || TYPE_CONFIG["Notebook"]).emoji}</span>
+                      <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${
+                        nb.type === "Recurring Bills" ? "bg-violet-100 text-violet-700 dark:bg-violet-900/30 dark:text-violet-300" :
+                        nb.type === "Normal Expense" ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300" :
+                        "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300"
+                      }`}>
+                        {nb.type || "Notebook"}
                       </span>
                     </div>
                     <h3 className="font-bold text-foreground text-lg">{nb.name}</h3>
