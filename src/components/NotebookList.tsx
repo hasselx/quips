@@ -24,6 +24,9 @@ export function NotebookList({ onSelect }: NotebookListProps) {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editNotebook, setEditNotebook] = useState<Notebook | null>(null);
   const [name, setName] = useState("");
+  const [notebookType, setNotebookType] = useState("Notebook");
+
+  const NOTEBOOK_TYPES = ["Notebook", "Normal Expense", "Recurring Bills"];
 
   const { data: notebooks = [], isLoading } = useQuery({
     queryKey: ["notebooks"],
