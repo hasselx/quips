@@ -23,6 +23,7 @@ export default function SpendPage() {
   const [period, setPeriod] = useState<Period>("all");
   const [selectedYear, setSelectedYear] = useState(now.getFullYear());
   const [selectedMonth, setSelectedMonth] = useState(now.getMonth());
+  const [showChart, setShowChart] = useState(false);
   const { allCategories } = useCustomCategories();
 
   const { data: expenses = [] } = useQuery({
