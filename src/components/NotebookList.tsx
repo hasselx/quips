@@ -106,7 +106,7 @@ export function NotebookList({ onSelect }: NotebookListProps) {
   };
 
   const openCreate = () => { setEditNotebook(null); setName(""); setNotebookType("Notebook"); setDialogOpen(true); };
-  const openEdit = (nb: Notebook) => { setEditNotebook(nb); setName(nb.name); setNotebookType("Notebook"); setDialogOpen(true); };
+  const openEdit = (nb: Notebook) => { setEditNotebook(nb); setName(nb.name); setNotebookType(nb.type || "Notebook"); setDialogOpen(true); };
 
   const TYPE_CONFIG: Record<string, { emoji: string; borderClass: string; bgClass: string }> = {
     "Notebook": { emoji: "📒", borderClass: "border-l-amber-400", bgClass: "bg-amber-50 dark:bg-amber-950/20" },
