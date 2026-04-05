@@ -3,10 +3,11 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { DollarSign, TrendingUp, Calendar } from "lucide-react";
+import { DollarSign, TrendingUp, Calendar, BarChart3 } from "lucide-react";
 import { getCategoryIcon } from "@/types/expense";
 import { useCustomCategories } from "@/hooks/useCustomCategories";
 import { motion, AnimatePresence } from "framer-motion";
+import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid } from "recharts";
 import type { Tables } from "@/integrations/supabase/types";
 
 type Expense = Tables<"expenses">;
@@ -22,6 +23,7 @@ export default function SpendPage() {
   const [period, setPeriod] = useState<Period>("all");
   const [selectedYear, setSelectedYear] = useState(now.getFullYear());
   const [selectedMonth, setSelectedMonth] = useState(now.getMonth());
+  const [showChart, setShowChart] = useState(false);
   const { allCategories } = useCustomCategories();
 
   const { data: expenses = [] } = useQuery({
@@ -67,6 +69,38 @@ export default function SpendPage() {
       .sort(([, a], [, b]) => b - a)
       .map(([cat, amount]) => ({ category: cat, amount }));
   }, [filtered]);
+
+  // Yearly bar chart data (for "all time" view: group by year)
+  const yearlyChartData = useMemo(() => {
+    if (period === "all") {
+      const map: Record<number, number> = {};
+      expenses.forEach((e) => {
+        const y = new Date(e.date).getFullYear();
+        map[y] = (map[y] || 0) + Number(e.amount);
+      });
+      return Object.entries(map)
+        .sort(([a], [b]) => Number(a) - Number(b))
+        .map(([year, amount]) => ({ label: year, amount }));
+    }
+    if (period === "yearly") {
+      const MONTHS_SHORT = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+      const map: Record<number, number> = {};
+      filtered.forEach((e) => {
+        const m = new Date(e.date).getMonth();
+        map[m] = (map[m] || 0) + Number(e.amount);
+      });
+      return MONTHS_SHORT.map((label, i) => ({ label, amount: map[i] || 0 }));
+    }
+    // monthly: group by day
+    const map: Record<number, number> = {};
+    filtered.forEach((e) => {
+      const d = new Date(e.date).getDate();
+      map[d] = (map[d] || 0) + Number(e.amount);
+    });
+    return Object.entries(map)
+      .sort(([a], [b]) => Number(a) - Number(b))
+      .map(([day, amount]) => ({ label: day, amount }));
+  }, [expenses, filtered, period]);
 
   const periodLabel =
     period === "all"
@@ -158,10 +192,44 @@ export default function SpendPage() {
       </div>
 
       {/* Category Breakdown */}
-      <h2 className="text-sm font-semibold text-foreground mb-3 flex items-center gap-2">
-        <TrendingUp className="h-4 w-4 text-accent" />
-        By Category
-      </h2>
+      <div className="flex items-center justify-between mb-3">
+        <h2 className="text-sm font-semibold text-foreground flex items-center gap-2">
+          <TrendingUp className="h-4 w-4 text-accent" />
+          By Category
+        </h2>
+        <button
+          onClick={() => setShowChart((v) => !v)}
+          className={`p-1.5 rounded-lg transition-colors ${showChart ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground hover:bg-muted"}`}
+          aria-label="Toggle chart"
+        >
+          <BarChart3 className="h-4 w-4" />
+        </button>
+      </div>
+
+      {/* Bar Chart */}
+      <AnimatePresence>
+        {showChart && yearlyChartData.length > 0 && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: "auto" }}
+            exit={{ opacity: 0, height: 0 }}
+            className="bg-card rounded-2xl shadow-card p-3 mb-4 overflow-hidden"
+          >
+            <ResponsiveContainer width="100%" height={200}>
+              <BarChart data={yearlyChartData}>
+                <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                <XAxis dataKey="label" tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))" }} />
+                <YAxis tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }} width={50} tickFormatter={(v) => `₹${(v / 1000).toFixed(0)}k`} />
+                <Tooltip
+                  formatter={(value: number) => [`₹${value.toLocaleString("en-IN", { minimumFractionDigits: 2 })}`, "Spent"]}
+                  contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: 12, fontSize: 12 }}
+                />
+                <Bar dataKey="amount" fill="hsl(var(--primary))" radius={[6, 6, 0, 0]} />
+              </BarChart>
+            </ResponsiveContainer>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {categoryBreakdown.length === 0 ? (
         <div className="bg-card rounded-2xl p-8 shadow-card text-center">

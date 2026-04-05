@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { ArrowLeft, Plus, Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
@@ -31,6 +31,26 @@ export function NotebookView({ notebook, onBack }: NotebookViewProps) {
   const [chartOpen, setChartOpen] = useState(false);
   const [filters, setFilters] = useState<FilterState>(DEFAULT_FILTERS);
   const { allCategories, addCategory } = useCustomCategories();
+
+  // Auto-copy recurring bills when opening a recurring notebook
+  useEffect(() => {
+    if ((notebook as any).type === "Recurring Bills") {
+      const copyRecurring = async () => {
+        try {
+          const { data, error } = await supabase.functions.invoke("copy-recurring-bills", {
+            body: { notebook_id: notebook.id },
+          });
+          if (!error && data?.copied > 0) {
+            toast.success(`${data.copied} recurring bills copied to this month`);
+            queryClient.invalidateQueries({ queryKey: ["expenses", notebook.id] });
+          }
+        } catch {
+          // Silently fail - not critical
+        }
+      };
+      copyRecurring();
+    }
+  }, [notebook.id]);
 
   const { data: expenses = [] } = useQuery({
     queryKey: ["expenses", notebook.id],

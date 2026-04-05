@@ -1,0 +1,1 @@
+ALTER TABLE public.notebooks ADD COLUMN type text NOT NULL DEFAULT 'Notebook';

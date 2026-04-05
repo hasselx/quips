@@ -56,8 +56,8 @@ export function NotebookList({ onSelect }: NotebookListProps) {
   });
 
   const createMutation = useMutation({
-    mutationFn: async (notebookName: string) => {
-      const { error } = await supabase.from("notebooks").insert({ name: notebookName, user_id: user!.id });
+    mutationFn: async ({ notebookName, type }: { notebookName: string; type: string }) => {
+      const { error } = await supabase.from("notebooks").insert({ name: notebookName, user_id: user!.id, type });
       if (error) throw error;
     },
     onSuccess: () => {
@@ -98,7 +98,7 @@ export function NotebookList({ onSelect }: NotebookListProps) {
     if (editNotebook) {
       updateMutation.mutate({ id: editNotebook.id, newName: name.trim() });
     } else {
-      createMutation.mutate(name.trim());
+      createMutation.mutate({ notebookName: name.trim(), type: notebookType });
     }
     setDialogOpen(false);
     setEditNotebook(null);
@@ -108,7 +108,12 @@ export function NotebookList({ onSelect }: NotebookListProps) {
   const openCreate = () => { setEditNotebook(null); setName(""); setNotebookType("Notebook"); setDialogOpen(true); };
   const openEdit = (nb: Notebook) => { setEditNotebook(nb); setName(nb.name); setNotebookType("Notebook"); setDialogOpen(true); };
 
-  const NOTEBOOK_EMOJIS = ["📒", "📗", "📘", "📕", "📓", "📔"];
+  const TYPE_CONFIG: Record<string, { emoji: string; borderClass: string; bgClass: string }> = {
+    "Notebook": { emoji: "📒", borderClass: "border-l-amber-400", bgClass: "bg-amber-50 dark:bg-amber-950/20" },
+    "Normal Expense": { emoji: "💳", borderClass: "border-l-emerald-400", bgClass: "bg-emerald-50 dark:bg-emerald-950/20" },
+    "Recurring Bills": { emoji: "🔁", borderClass: "border-l-violet-400", bgClass: "bg-violet-50 dark:bg-violet-950/20" },
+  };
+  const FALLBACK_EMOJIS = ["📗", "📘", "📕", "📓", "📔"];
 
   const formatDate = (dateStr: string) => {
     return new Date(dateStr).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" });
@@ -151,7 +156,9 @@ export function NotebookList({ onSelect }: NotebookListProps) {
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, scale: 0.95 }}
                     transition={{ delay: i * 0.03 }}
-                    className="bg-card rounded-2xl shadow-card p-5 cursor-pointer hover:shadow-elevated transition-shadow relative group"
+                    className={`rounded-2xl shadow-card p-5 cursor-pointer hover:shadow-elevated transition-shadow relative group border-l-4 ${
+                      (TYPE_CONFIG[(nb as any).type] || TYPE_CONFIG["Notebook"]).borderClass
+                    } ${(TYPE_CONFIG[(nb as any).type] || TYPE_CONFIG["Notebook"]).bgClass}`}
                     onClick={() => onSelect(nb)}
                   >
                     <div className="absolute top-3 right-3 z-10" onClick={(e) => e.stopPropagation()}>
@@ -171,7 +178,12 @@ export function NotebookList({ onSelect }: NotebookListProps) {
                         </DropdownMenuContent>
                       </DropdownMenu>
                     </div>
-                    <div className="text-3xl mb-2">{NOTEBOOK_EMOJIS[i % NOTEBOOK_EMOJIS.length]}</div>
+                    <div className="flex items-center gap-2 mb-1">
+                      <span className="text-2xl">{(TYPE_CONFIG[(nb as any).type] || TYPE_CONFIG["Notebook"]).emoji}</span>
+                      <span className="text-xs font-medium text-muted-foreground bg-muted px-2 py-0.5 rounded-full">
+                        {(nb as any).type || "Notebook"}
+                      </span>
+                    </div>
                     <h3 className="font-bold text-foreground text-lg">{nb.name}</h3>
                     <p className="text-sm text-muted-foreground mt-1">
                       {stats ? `${stats.count} expenses · ₹${stats.total.toLocaleString("en-IN", { minimumFractionDigits: 2 })}` : "No expenses"}
