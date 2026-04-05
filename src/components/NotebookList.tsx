@@ -68,13 +68,15 @@ export function NotebookList({ onSelect }: NotebookListProps) {
   });
 
   const updateMutation = useMutation({
-    mutationFn: async ({ id, newName }: { id: string; newName: string }) => {
-      const { error } = await supabase.from("notebooks").update({ name: newName }).eq("id", id);
+    mutationFn: async ({ id, newName, type }: { id: string; newName: string; type?: string }) => {
+      const updateData: any = { name: newName };
+      if (type) updateData.type = type;
+      const { error } = await supabase.from("notebooks").update(updateData).eq("id", id);
       if (error) throw error;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["notebooks"] });
-      toast.success("Notebook renamed!");
+      toast.success("Notebook updated!");
     },
     onError: (err: any) => toast.error(err.message),
   });
