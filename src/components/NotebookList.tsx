@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
@@ -23,6 +24,9 @@ export function NotebookList({ onSelect }: NotebookListProps) {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editNotebook, setEditNotebook] = useState<Notebook | null>(null);
   const [name, setName] = useState("");
+  const [notebookType, setNotebookType] = useState("Notebook");
+
+  const NOTEBOOK_TYPES = ["Notebook", "Normal Expense", "Recurring Bills"];
 
   const { data: notebooks = [], isLoading } = useQuery({
     queryKey: ["notebooks"],
@@ -101,8 +105,8 @@ export function NotebookList({ onSelect }: NotebookListProps) {
     setName("");
   };
 
-  const openCreate = () => { setEditNotebook(null); setName(""); setDialogOpen(true); };
-  const openEdit = (nb: Notebook) => { setEditNotebook(nb); setName(nb.name); setDialogOpen(true); };
+  const openCreate = () => { setEditNotebook(null); setName(""); setNotebookType("Notebook"); setDialogOpen(true); };
+  const openEdit = (nb: Notebook) => { setEditNotebook(nb); setName(nb.name); setNotebookType("Notebook"); setDialogOpen(true); };
 
   const NOTEBOOK_EMOJIS = ["📒", "📗", "📘", "📕", "📓", "📔"];
 
@@ -197,7 +201,31 @@ export function NotebookList({ onSelect }: NotebookListProps) {
             </DialogTitle>
           </DialogHeader>
           <form onSubmit={handleSubmit} className="space-y-4 mt-2">
+            {!editNotebook && (
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-foreground">Type</label>
+                <Select
+                  value={notebookType}
+                  onValueChange={(val) => {
+                    setNotebookType(val);
+                    if (!name || NOTEBOOK_TYPES.includes(name)) {
+                      setName(val);
+                    }
+                  }}
+                >
+                  <SelectTrigger className="rounded-xl">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {NOTEBOOK_TYPES.map((t) => (
+                      <SelectItem key={t} value={t}>{t}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
             <div className="space-y-2">
+              <label className="text-sm font-medium text-foreground">Name</label>
               <Input
                 placeholder="e.g. Trip to Delhi"
                 value={name}
