@@ -192,10 +192,44 @@ export default function SpendPage() {
       </div>
 
       {/* Category Breakdown */}
-      <h2 className="text-sm font-semibold text-foreground mb-3 flex items-center gap-2">
-        <TrendingUp className="h-4 w-4 text-accent" />
-        By Category
-      </h2>
+      <div className="flex items-center justify-between mb-3">
+        <h2 className="text-sm font-semibold text-foreground flex items-center gap-2">
+          <TrendingUp className="h-4 w-4 text-accent" />
+          By Category
+        </h2>
+        <button
+          onClick={() => setShowChart((v) => !v)}
+          className={`p-1.5 rounded-lg transition-colors ${showChart ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground hover:bg-muted"}`}
+          aria-label="Toggle chart"
+        >
+          <BarChart3 className="h-4 w-4" />
+        </button>
+      </div>
+
+      {/* Bar Chart */}
+      <AnimatePresence>
+        {showChart && yearlyChartData.length > 0 && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: "auto" }}
+            exit={{ opacity: 0, height: 0 }}
+            className="bg-card rounded-2xl shadow-card p-3 mb-4 overflow-hidden"
+          >
+            <ResponsiveContainer width="100%" height={200}>
+              <BarChart data={yearlyChartData}>
+                <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                <XAxis dataKey="label" tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))" }} />
+                <YAxis tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }} width={50} tickFormatter={(v) => `₹${(v / 1000).toFixed(0)}k`} />
+                <Tooltip
+                  formatter={(value: number) => [`₹${value.toLocaleString("en-IN", { minimumFractionDigits: 2 })}`, "Spent"]}
+                  contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: 12, fontSize: 12 }}
+                />
+                <Bar dataKey="amount" fill="hsl(var(--primary))" radius={[6, 6, 0, 0]} />
+              </BarChart>
+            </ResponsiveContainer>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {categoryBreakdown.length === 0 ? (
         <div className="bg-card rounded-2xl p-8 shadow-card text-center">
