@@ -56,8 +56,8 @@ export function NotebookList({ onSelect }: NotebookListProps) {
   });
 
   const createMutation = useMutation({
-    mutationFn: async (notebookName: string) => {
-      const { error } = await supabase.from("notebooks").insert({ name: notebookName, user_id: user!.id });
+    mutationFn: async ({ notebookName, type }: { notebookName: string; type: string }) => {
+      const { error } = await supabase.from("notebooks").insert({ name: notebookName, user_id: user!.id, type });
       if (error) throw error;
     },
     onSuccess: () => {
