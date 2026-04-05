@@ -98,7 +98,7 @@ export function NotebookList({ onSelect }: NotebookListProps) {
     e.preventDefault();
     if (!name.trim()) return;
     if (editNotebook) {
-      updateMutation.mutate({ id: editNotebook.id, newName: name.trim() });
+      updateMutation.mutate({ id: editNotebook.id, newName: name.trim(), type: notebookType });
     } else {
       createMutation.mutate({ notebookName: name.trim(), type: notebookType });
     }
