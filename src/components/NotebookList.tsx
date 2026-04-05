@@ -68,13 +68,15 @@ export function NotebookList({ onSelect }: NotebookListProps) {
   });
 
   const updateMutation = useMutation({
-    mutationFn: async ({ id, newName }: { id: string; newName: string }) => {
-      const { error } = await supabase.from("notebooks").update({ name: newName }).eq("id", id);
+    mutationFn: async ({ id, newName, type }: { id: string; newName: string; type?: string }) => {
+      const updateData: any = { name: newName };
+      if (type) updateData.type = type;
+      const { error } = await supabase.from("notebooks").update(updateData).eq("id", id);
       if (error) throw error;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["notebooks"] });
-      toast.success("Notebook renamed!");
+      toast.success("Notebook updated!");
     },
     onError: (err: any) => toast.error(err.message),
   });
@@ -96,7 +98,7 @@ export function NotebookList({ onSelect }: NotebookListProps) {
     e.preventDefault();
     if (!name.trim()) return;
     if (editNotebook) {
-      updateMutation.mutate({ id: editNotebook.id, newName: name.trim() });
+      updateMutation.mutate({ id: editNotebook.id, newName: name.trim(), type: notebookType });
     } else {
       createMutation.mutate({ notebookName: name.trim(), type: notebookType });
     }
@@ -106,7 +108,7 @@ export function NotebookList({ onSelect }: NotebookListProps) {
   };
 
   const openCreate = () => { setEditNotebook(null); setName(""); setNotebookType("Notebook"); setDialogOpen(true); };
-  const openEdit = (nb: Notebook) => { setEditNotebook(nb); setName(nb.name); setNotebookType("Notebook"); setDialogOpen(true); };
+  const openEdit = (nb: Notebook) => { setEditNotebook(nb); setName(nb.name); setNotebookType(nb.type || "Notebook"); setDialogOpen(true); };
 
   const TYPE_CONFIG: Record<string, { emoji: string; borderClass: string; bgClass: string }> = {
     "Notebook": { emoji: "📒", borderClass: "border-l-amber-400", bgClass: "bg-amber-50 dark:bg-amber-950/20" },
@@ -157,8 +159,8 @@ export function NotebookList({ onSelect }: NotebookListProps) {
                     exit={{ opacity: 0, scale: 0.95 }}
                     transition={{ delay: i * 0.03 }}
                     className={`rounded-2xl shadow-card p-5 cursor-pointer hover:shadow-elevated transition-shadow relative group border-l-4 ${
-                      (TYPE_CONFIG[(nb as any).type] || TYPE_CONFIG["Notebook"]).borderClass
-                    } ${(TYPE_CONFIG[(nb as any).type] || TYPE_CONFIG["Notebook"]).bgClass}`}
+                      (TYPE_CONFIG[nb.type] || TYPE_CONFIG["Notebook"]).borderClass
+                    } ${(TYPE_CONFIG[nb.type] || TYPE_CONFIG["Notebook"]).bgClass}`}
                     onClick={() => onSelect(nb)}
                   >
                     <div className="absolute top-3 right-3 z-10" onClick={(e) => e.stopPropagation()}>
@@ -179,9 +181,13 @@ export function NotebookList({ onSelect }: NotebookListProps) {
                       </DropdownMenu>
                     </div>
                     <div className="flex items-center gap-2 mb-1">
-                      <span className="text-2xl">{(TYPE_CONFIG[(nb as any).type] || TYPE_CONFIG["Notebook"]).emoji}</span>
-                      <span className="text-xs font-medium text-muted-foreground bg-muted px-2 py-0.5 rounded-full">
-                        {(nb as any).type || "Notebook"}
+                      <span className="text-2xl">{(TYPE_CONFIG[nb.type] || TYPE_CONFIG["Notebook"]).emoji}</span>
+                      <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${
+                        nb.type === "Recurring Bills" ? "bg-violet-100 text-violet-700 dark:bg-violet-900/30 dark:text-violet-300" :
+                        nb.type === "Normal Expense" ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300" :
+                        "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300"
+                      }`}>
+                        {nb.type || "Notebook"}
                       </span>
                     </div>
                     <h3 className="font-bold text-foreground text-lg">{nb.name}</h3>
@@ -213,7 +219,7 @@ export function NotebookList({ onSelect }: NotebookListProps) {
             </DialogTitle>
           </DialogHeader>
           <form onSubmit={handleSubmit} className="space-y-4 mt-2">
-            {!editNotebook && (
+            {(
               <div className="space-y-2">
                 <label className="text-sm font-medium text-foreground">Type</label>
                 <Select
