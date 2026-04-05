@@ -159,8 +159,8 @@ export function NotebookList({ onSelect }: NotebookListProps) {
                     exit={{ opacity: 0, scale: 0.95 }}
                     transition={{ delay: i * 0.03 }}
                     className={`rounded-2xl shadow-card p-5 cursor-pointer hover:shadow-elevated transition-shadow relative group border-l-4 ${
-                      (TYPE_CONFIG[(nb as any).type] || TYPE_CONFIG["Notebook"]).borderClass
-                    } ${(TYPE_CONFIG[(nb as any).type] || TYPE_CONFIG["Notebook"]).bgClass}`}
+                      (TYPE_CONFIG[nb.type] || TYPE_CONFIG["Notebook"]).borderClass
+                    } ${(TYPE_CONFIG[nb.type] || TYPE_CONFIG["Notebook"]).bgClass}`}
                     onClick={() => onSelect(nb)}
                   >
                     <div className="absolute top-3 right-3 z-10" onClick={(e) => e.stopPropagation()}>
