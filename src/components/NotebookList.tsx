@@ -219,7 +219,7 @@ export function NotebookList({ onSelect }: NotebookListProps) {
             </DialogTitle>
           </DialogHeader>
           <form onSubmit={handleSubmit} className="space-y-4 mt-2">
-            {!editNotebook && (
+            {(
               <div className="space-y-2">
                 <label className="text-sm font-medium text-foreground">Type</label>
                 <Select
