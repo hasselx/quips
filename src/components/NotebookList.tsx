@@ -156,7 +156,9 @@ export function NotebookList({ onSelect }: NotebookListProps) {
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, scale: 0.95 }}
                     transition={{ delay: i * 0.03 }}
-                    className="bg-card rounded-2xl shadow-card p-5 cursor-pointer hover:shadow-elevated transition-shadow relative group"
+                    className={`rounded-2xl shadow-card p-5 cursor-pointer hover:shadow-elevated transition-shadow relative group border-l-4 ${
+                      (TYPE_CONFIG[(nb as any).type] || TYPE_CONFIG["Notebook"]).borderClass
+                    } ${(TYPE_CONFIG[(nb as any).type] || TYPE_CONFIG["Notebook"]).bgClass}`}
                     onClick={() => onSelect(nb)}
                   >
                     <div className="absolute top-3 right-3 z-10" onClick={(e) => e.stopPropagation()}>
@@ -176,7 +178,12 @@ export function NotebookList({ onSelect }: NotebookListProps) {
                         </DropdownMenuContent>
                       </DropdownMenu>
                     </div>
-                    <div className="text-3xl mb-2">{NOTEBOOK_EMOJIS[i % NOTEBOOK_EMOJIS.length]}</div>
+                    <div className="flex items-center gap-2 mb-1">
+                      <span className="text-2xl">{(TYPE_CONFIG[(nb as any).type] || TYPE_CONFIG["Notebook"]).emoji}</span>
+                      <span className="text-xs font-medium text-muted-foreground bg-muted px-2 py-0.5 rounded-full">
+                        {(nb as any).type || "Notebook"}
+                      </span>
+                    </div>
                     <h3 className="font-bold text-foreground text-lg">{nb.name}</h3>
                     <p className="text-sm text-muted-foreground mt-1">
                       {stats ? `${stats.count} expenses · ₹${stats.total.toLocaleString("en-IN", { minimumFractionDigits: 2 })}` : "No expenses"}
