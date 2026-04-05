@@ -70,6 +70,38 @@ export default function SpendPage() {
       .map(([cat, amount]) => ({ category: cat, amount }));
   }, [filtered]);
 
+  // Yearly bar chart data (for "all time" view: group by year)
+  const yearlyChartData = useMemo(() => {
+    if (period === "all") {
+      const map: Record<number, number> = {};
+      expenses.forEach((e) => {
+        const y = new Date(e.date).getFullYear();
+        map[y] = (map[y] || 0) + Number(e.amount);
+      });
+      return Object.entries(map)
+        .sort(([a], [b]) => Number(a) - Number(b))
+        .map(([year, amount]) => ({ label: year, amount }));
+    }
+    if (period === "yearly") {
+      const MONTHS_SHORT = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+      const map: Record<number, number> = {};
+      filtered.forEach((e) => {
+        const m = new Date(e.date).getMonth();
+        map[m] = (map[m] || 0) + Number(e.amount);
+      });
+      return MONTHS_SHORT.map((label, i) => ({ label, amount: map[i] || 0 }));
+    }
+    // monthly: group by day
+    const map: Record<number, number> = {};
+    filtered.forEach((e) => {
+      const d = new Date(e.date).getDate();
+      map[d] = (map[d] || 0) + Number(e.amount);
+    });
+    return Object.entries(map)
+      .sort(([a], [b]) => Number(a) - Number(b))
+      .map(([day, amount]) => ({ label: day, amount }));
+  }, [expenses, filtered, period]);
+
   const periodLabel =
     period === "all"
       ? "All Time"
