@@ -192,13 +192,6 @@ export function NotebookView({ notebook, onBack }: NotebookViewProps) {
     }
   };
 
-  const handleOpenChange = (open: boolean) => {
-    setFormOpen(open);
-    if (!open) {
-      setEditExpense(null);
-      setPrefillData(null);
-    }
-  };
 
   const exportCSV = () => {
     const headers = ["Date", "Name", "Category", "Amount"];
