@@ -146,6 +146,25 @@ export function NotebookView({ notebook, onBack }: NotebookViewProps) {
     addCategory.mutate(name);
   };
 
+  const compressImage = (file: File, maxWidth = 1024, quality = 0.6): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement("canvas");
+        let w = img.width, h = img.height;
+        if (w > maxWidth) { h = (maxWidth / w) * h; w = maxWidth; }
+        canvas.width = w;
+        canvas.height = h;
+        const ctx = canvas.getContext("2d")!;
+        ctx.drawImage(img, 0, 0, w, h);
+        const dataUrl = canvas.toDataURL("image/jpeg", quality);
+        resolve(dataUrl.split(",")[1]);
+      };
+      img.onerror = reject;
+      img.src = URL.createObjectURL(file);
+    });
+  };
+
   const handleReceiptUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -162,18 +181,10 @@ export function NotebookView({ notebook, onBack }: NotebookViewProps) {
     toast.info("Scanning receipt...");
 
     try {
-      const reader = new FileReader();
-      const base64 = await new Promise<string>((resolve, reject) => {
-        reader.onload = () => {
-          const result = reader.result as string;
-          resolve(result.split(",")[1]);
-        };
-        reader.onerror = reject;
-        reader.readAsDataURL(file);
-      });
+      const base64 = await compressImage(file);
 
       const { data, error } = await supabase.functions.invoke("parse-receipt", {
-        body: { imageBase64: base64, mimeType: file.type },
+        body: { imageBase64: base64, mimeType: "image/jpeg" },
       });
 
       if (error) throw error;
