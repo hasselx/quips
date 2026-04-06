@@ -130,6 +130,10 @@ export function ExpenseForm({ open, onOpenChange, onSubmit, editExpense, prefill
             <Label htmlFor="expense-date">Date</Label>
             <Input id="expense-date" type="date" value={date} onChange={(e) => setDate(e.target.value)} required className="rounded-xl" />
           </div>
+          <div className="space-y-2">
+            <Label htmlFor="expense-description">Description <span className="text-muted-foreground text-xs">(optional)</span></Label>
+            <Textarea id="expense-description" placeholder="Add notes about this expense..." value={description} onChange={(e) => setDescription(e.target.value)} maxLength={500} className="rounded-xl resize-none" rows={2} />
+          </div>
           <Button type="submit" className="w-full rounded-xl h-12 text-base font-semibold">
             {editExpense ? "Save Changes" : "Add Expense"}
           </Button>
