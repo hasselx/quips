@@ -65,6 +65,7 @@ export type Database = {
           category: string
           created_at: string
           date: string
+          description: string
           id: string
           name: string
           notebook_id: string
@@ -76,6 +77,7 @@ export type Database = {
           category?: string
           created_at?: string
           date?: string
+          description?: string
           id?: string
           name: string
           notebook_id: string
@@ -87,6 +89,7 @@ export type Database = {
           category?: string
           created_at?: string
           date?: string
+          description?: string
           id?: string
           name?: string
           notebook_id?: string
