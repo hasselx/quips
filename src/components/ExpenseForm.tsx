@@ -26,6 +26,7 @@ export function ExpenseForm({ open, onOpenChange, onSubmit, editExpense, prefill
   const [showCustomInput, setShowCustomInput] = useState(false);
   const [amount, setAmount] = useState("");
   const [date, setDate] = useState(new Date().toISOString().split("T")[0]);
+  const [description, setDescription] = useState("");
 
   useEffect(() => {
     if (editExpense) {
