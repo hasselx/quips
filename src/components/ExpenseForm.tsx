@@ -14,7 +14,7 @@ interface ExpenseFormProps {
   onOpenChange: (open: boolean) => void;
   onSubmit: (data: { name: string; category: string; amount: number; date: string; description?: string }) => void;
   editExpense?: Expense | null;
-  prefillData?: { name: string; category: string; amount: number; date: string } | null;
+  prefillData?: { name: string; category: string; amount: number; date: string; description?: string } | null;
   categories: string[];
   onAddCustomCategory?: (name: string) => void;
 }
