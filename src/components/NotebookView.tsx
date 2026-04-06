@@ -93,7 +93,7 @@ export function NotebookView({ notebook, onBack }: NotebookViewProps) {
   };
 
   const addMutation = useMutation({
-    mutationFn: async (data: { name: string; category: string; amount: number; date: string }) => {
+    mutationFn: async (data: { name: string; category: string; amount: number; date: string; description?: string }) => {
       const { error } = await supabase.from("expenses").insert({
         ...data,
         notebook_id: notebook.id,
