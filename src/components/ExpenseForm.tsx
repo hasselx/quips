@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
 import type { Tables } from "@/integrations/supabase/types";
 
 type Expense = Tables<"expenses">;
@@ -11,9 +12,9 @@ type Expense = Tables<"expenses">;
 interface ExpenseFormProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onSubmit: (data: { name: string; category: string; amount: number; date: string }) => void;
+  onSubmit: (data: { name: string; category: string; amount: number; date: string; description?: string }) => void;
   editExpense?: Expense | null;
-  prefillData?: { name: string; category: string; amount: number; date: string } | null;
+  prefillData?: { name: string; category: string; amount: number; date: string; description?: string } | null;
   categories: string[];
   onAddCustomCategory?: (name: string) => void;
 }
@@ -25,6 +26,7 @@ export function ExpenseForm({ open, onOpenChange, onSubmit, editExpense, prefill
   const [showCustomInput, setShowCustomInput] = useState(false);
   const [amount, setAmount] = useState("");
   const [date, setDate] = useState(new Date().toISOString().split("T")[0]);
+  const [description, setDescription] = useState("");
 
   useEffect(() => {
     if (editExpense) {
@@ -34,6 +36,7 @@ export function ExpenseForm({ open, onOpenChange, onSubmit, editExpense, prefill
       setCustomCategory("");
       setAmount(String(editExpense.amount));
       setDate(editExpense.date);
+      setDescription((editExpense as any).description || "");
     } else if (prefillData) {
       setName(prefillData.name || "");
       setCategory(prefillData.category || "Other");
@@ -41,6 +44,7 @@ export function ExpenseForm({ open, onOpenChange, onSubmit, editExpense, prefill
       setCustomCategory("");
       setAmount(prefillData.amount ? String(prefillData.amount) : "");
       setDate(prefillData.date || new Date().toISOString().split("T")[0]);
+      setDescription(prefillData.description || "");
     } else {
       setName("");
       setCategory("Food");
@@ -48,6 +52,7 @@ export function ExpenseForm({ open, onOpenChange, onSubmit, editExpense, prefill
       setCustomCategory("");
       setAmount("");
       setDate(new Date().toISOString().split("T")[0]);
+      setDescription("");
     }
   }, [editExpense, prefillData, open]);
 
@@ -76,6 +81,7 @@ export function ExpenseForm({ open, onOpenChange, onSubmit, editExpense, prefill
       category: finalCategory,
       amount: parseFloat(Number(amount).toFixed(2)),
       date,
+      description: description.trim() || undefined,
     });
     onOpenChange(false);
   };
@@ -123,6 +129,10 @@ export function ExpenseForm({ open, onOpenChange, onSubmit, editExpense, prefill
           <div className="space-y-2">
             <Label htmlFor="expense-date">Date</Label>
             <Input id="expense-date" type="date" value={date} onChange={(e) => setDate(e.target.value)} required className="rounded-xl" />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="expense-description">Description <span className="text-muted-foreground text-xs">(optional)</span></Label>
+            <Textarea id="expense-description" placeholder="Add notes about this expense..." value={description} onChange={(e) => setDescription(e.target.value)} maxLength={500} className="rounded-xl resize-none" rows={2} />
           </div>
           <Button type="submit" className="w-full rounded-xl h-12 text-base font-semibold">
             {editExpense ? "Save Changes" : "Add Expense"}

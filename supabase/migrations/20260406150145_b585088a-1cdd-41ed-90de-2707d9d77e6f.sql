@@ -1,0 +1,1 @@
+ALTER TABLE public.expenses ADD COLUMN description text NOT NULL DEFAULT '';
