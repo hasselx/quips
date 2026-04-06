@@ -81,6 +81,7 @@ export function ExpenseForm({ open, onOpenChange, onSubmit, editExpense, prefill
       category: finalCategory,
       amount: parseFloat(Number(amount).toFixed(2)),
       date,
+      description: description.trim() || undefined,
     });
     onOpenChange(false);
   };
