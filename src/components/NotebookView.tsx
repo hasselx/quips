@@ -1,5 +1,5 @@
-import { useState, useMemo, useEffect } from "react";
-import { ArrowLeft, Plus, Download } from "lucide-react";
+import { useState, useMemo, useEffect, useRef } from "react";
+import { ArrowLeft, Plus, Download, Camera } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -31,6 +31,9 @@ export function NotebookView({ notebook, onBack }: NotebookViewProps) {
   const [chartOpen, setChartOpen] = useState(false);
   const [filters, setFilters] = useState<FilterState>(DEFAULT_FILTERS);
   const { allCategories, addCategory } = useCustomCategories();
+  const [receiptParsing, setReceiptParsing] = useState(false);
+  const [prefillData, setPrefillData] = useState<{ name: string; category: string; amount: number; date: string } | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Auto-copy recurring bills when opening a recurring notebook
   useEffect(() => {
@@ -143,6 +146,53 @@ export function NotebookView({ notebook, onBack }: NotebookViewProps) {
     addCategory.mutate(name);
   };
 
+  const handleReceiptUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (!file.type.startsWith("image/")) {
+      toast.error("Please upload an image file");
+      return;
+    }
+    if (file.size > 10 * 1024 * 1024) {
+      toast.error("Image too large (max 10MB)");
+      return;
+    }
+
+    setReceiptParsing(true);
+    toast.info("Scanning receipt...");
+
+    try {
+      const reader = new FileReader();
+      const base64 = await new Promise<string>((resolve, reject) => {
+        reader.onload = () => {
+          const result = reader.result as string;
+          resolve(result.split(",")[1]);
+        };
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
+
+      const { data, error } = await supabase.functions.invoke("parse-receipt", {
+        body: { imageBase64: base64, mimeType: file.type },
+      });
+
+      if (error) throw error;
+      if (data?.expense) {
+        setPrefillData(data.expense);
+        setFormOpen(true);
+        toast.success("Receipt parsed! Review the details.");
+      } else if (data?.error) {
+        toast.error(data.error);
+      }
+    } catch (err: any) {
+      toast.error(err.message || "Failed to parse receipt");
+    } finally {
+      setReceiptParsing(false);
+      if (fileInputRef.current) fileInputRef.current.value = "";
+    }
+  };
+
+
   const exportCSV = () => {
     const headers = ["Date", "Name", "Category", "Amount"];
     const rows = filteredExpenses.map((e) => [e.date, e.name, e.category, String(e.amount)]);
@@ -192,10 +242,32 @@ export function NotebookView({ notebook, onBack }: NotebookViewProps) {
         <ExpenseTable expenses={filteredExpenses} onEdit={handleEdit} onDelete={(id) => deleteMutation.mutate(id)} customCategories={allCategories} />
       </div>
 
-      {/* FAB */}
-      <Button onClick={() => setFormOpen(true)} className="fixed bottom-20 right-6 h-14 w-14 rounded-full shadow-elevated text-lg z-40 md:bottom-6" size="icon">
-        <Plus className="h-7 w-7" />
-      </Button>
+      {/* Hidden file input for receipt scanning */}
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept="image/*"
+        capture="environment"
+        className="hidden"
+        onChange={handleReceiptUpload}
+      />
+
+      {/* FABs */}
+      <div className="fixed bottom-20 right-6 flex flex-col gap-3 z-40 md:bottom-6">
+        <Button
+          onClick={() => fileInputRef.current?.click()}
+          disabled={receiptParsing}
+          variant="outline"
+          className="h-12 w-12 rounded-full shadow-elevated bg-background"
+          size="icon"
+          title="Scan receipt"
+        >
+          <Camera className={`h-5 w-5 ${receiptParsing ? "animate-pulse" : ""}`} />
+        </Button>
+        <Button onClick={() => setFormOpen(true)} className="h-14 w-14 rounded-full shadow-elevated text-lg" size="icon">
+          <Plus className="h-7 w-7" />
+        </Button>
+      </div>
 
       {/* Form */}
       <ExpenseForm
@@ -203,6 +275,7 @@ export function NotebookView({ notebook, onBack }: NotebookViewProps) {
         onOpenChange={handleOpenChange}
         onSubmit={handleSubmit}
         editExpense={editExpense}
+        prefillData={prefillData}
         categories={allCategories}
         onAddCustomCategory={handleAddCustomCategory}
       />

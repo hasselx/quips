@@ -13,11 +13,12 @@ interface ExpenseFormProps {
   onOpenChange: (open: boolean) => void;
   onSubmit: (data: { name: string; category: string; amount: number; date: string }) => void;
   editExpense?: Expense | null;
+  prefillData?: { name: string; category: string; amount: number; date: string } | null;
   categories: string[];
   onAddCustomCategory?: (name: string) => void;
 }
 
-export function ExpenseForm({ open, onOpenChange, onSubmit, editExpense, categories, onAddCustomCategory }: ExpenseFormProps) {
+export function ExpenseForm({ open, onOpenChange, onSubmit, editExpense, prefillData, categories, onAddCustomCategory }: ExpenseFormProps) {
   const [name, setName] = useState("");
   const [category, setCategory] = useState("Food");
   const [customCategory, setCustomCategory] = useState("");
@@ -33,6 +34,13 @@ export function ExpenseForm({ open, onOpenChange, onSubmit, editExpense, categor
       setCustomCategory("");
       setAmount(String(editExpense.amount));
       setDate(editExpense.date);
+    } else if (prefillData) {
+      setName(prefillData.name || "");
+      setCategory(prefillData.category || "Other");
+      setShowCustomInput(false);
+      setCustomCategory("");
+      setAmount(prefillData.amount ? String(prefillData.amount) : "");
+      setDate(prefillData.date || new Date().toISOString().split("T")[0]);
     } else {
       setName("");
       setCategory("Food");
@@ -41,7 +49,7 @@ export function ExpenseForm({ open, onOpenChange, onSubmit, editExpense, categor
       setAmount("");
       setDate(new Date().toISOString().split("T")[0]);
     }
-  }, [editExpense, open]);
+  }, [editExpense, prefillData, open]);
 
   const handleCategoryChange = (val: string) => {
     if (val === "__other__") {
