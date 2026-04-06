@@ -52,6 +52,7 @@ export function ExpenseForm({ open, onOpenChange, onSubmit, editExpense, prefill
       setCustomCategory("");
       setAmount("");
       setDate(new Date().toISOString().split("T")[0]);
+      setDescription("");
     }
   }, [editExpense, prefillData, open]);
 
