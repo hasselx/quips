@@ -31,6 +31,9 @@ export function NotebookView({ notebook, onBack }: NotebookViewProps) {
   const [chartOpen, setChartOpen] = useState(false);
   const [filters, setFilters] = useState<FilterState>(DEFAULT_FILTERS);
   const { allCategories, addCategory } = useCustomCategories();
+  const [receiptParsing, setReceiptParsing] = useState(false);
+  const [prefillData, setPrefillData] = useState<{ name: string; category: string; amount: number; date: string } | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Auto-copy recurring bills when opening a recurring notebook
   useEffect(() => {
