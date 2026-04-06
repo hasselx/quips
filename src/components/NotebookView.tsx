@@ -242,10 +242,32 @@ export function NotebookView({ notebook, onBack }: NotebookViewProps) {
         <ExpenseTable expenses={filteredExpenses} onEdit={handleEdit} onDelete={(id) => deleteMutation.mutate(id)} customCategories={allCategories} />
       </div>
 
-      {/* FAB */}
-      <Button onClick={() => setFormOpen(true)} className="fixed bottom-20 right-6 h-14 w-14 rounded-full shadow-elevated text-lg z-40 md:bottom-6" size="icon">
-        <Plus className="h-7 w-7" />
-      </Button>
+      {/* Hidden file input for receipt scanning */}
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept="image/*"
+        capture="environment"
+        className="hidden"
+        onChange={handleReceiptUpload}
+      />
+
+      {/* FABs */}
+      <div className="fixed bottom-20 right-6 flex flex-col gap-3 z-40 md:bottom-6">
+        <Button
+          onClick={() => fileInputRef.current?.click()}
+          disabled={receiptParsing}
+          variant="outline"
+          className="h-12 w-12 rounded-full shadow-elevated bg-background"
+          size="icon"
+          title="Scan receipt"
+        >
+          <Camera className={`h-5 w-5 ${receiptParsing ? "animate-pulse" : ""}`} />
+        </Button>
+        <Button onClick={() => setFormOpen(true)} className="h-14 w-14 rounded-full shadow-elevated text-lg" size="icon">
+          <Plus className="h-7 w-7" />
+        </Button>
+      </div>
 
       {/* Form */}
       <ExpenseForm
@@ -253,6 +275,7 @@ export function NotebookView({ notebook, onBack }: NotebookViewProps) {
         onOpenChange={handleOpenChange}
         onSubmit={handleSubmit}
         editExpense={editExpense}
+        prefillData={prefillData}
         categories={allCategories}
         onAddCustomCategory={handleAddCustomCategory}
       />
