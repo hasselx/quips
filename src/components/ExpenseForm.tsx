@@ -44,6 +44,7 @@ export function ExpenseForm({ open, onOpenChange, onSubmit, editExpense, prefill
       setCustomCategory("");
       setAmount(prefillData.amount ? String(prefillData.amount) : "");
       setDate(prefillData.date || new Date().toISOString().split("T")[0]);
+      setDescription(prefillData.description || "");
     } else {
       setName("");
       setCategory("Food");
