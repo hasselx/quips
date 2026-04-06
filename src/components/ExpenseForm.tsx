@@ -12,7 +12,7 @@ type Expense = Tables<"expenses">;
 interface ExpenseFormProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onSubmit: (data: { name: string; category: string; amount: number; date: string }) => void;
+  onSubmit: (data: { name: string; category: string; amount: number; date: string; description?: string }) => void;
   editExpense?: Expense | null;
   prefillData?: { name: string; category: string; amount: number; date: string } | null;
   categories: string[];
