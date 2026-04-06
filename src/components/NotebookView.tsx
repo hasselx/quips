@@ -146,6 +146,60 @@ export function NotebookView({ notebook, onBack }: NotebookViewProps) {
     addCategory.mutate(name);
   };
 
+  const handleReceiptUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (!file.type.startsWith("image/")) {
+      toast.error("Please upload an image file");
+      return;
+    }
+    if (file.size > 10 * 1024 * 1024) {
+      toast.error("Image too large (max 10MB)");
+      return;
+    }
+
+    setReceiptParsing(true);
+    toast.info("Scanning receipt...");
+
+    try {
+      const reader = new FileReader();
+      const base64 = await new Promise<string>((resolve, reject) => {
+        reader.onload = () => {
+          const result = reader.result as string;
+          resolve(result.split(",")[1]);
+        };
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
+
+      const { data, error } = await supabase.functions.invoke("parse-receipt", {
+        body: { imageBase64: base64, mimeType: file.type },
+      });
+
+      if (error) throw error;
+      if (data?.expense) {
+        setPrefillData(data.expense);
+        setFormOpen(true);
+        toast.success("Receipt parsed! Review the details.");
+      } else if (data?.error) {
+        toast.error(data.error);
+      }
+    } catch (err: any) {
+      toast.error(err.message || "Failed to parse receipt");
+    } finally {
+      setReceiptParsing(false);
+      if (fileInputRef.current) fileInputRef.current.value = "";
+    }
+  };
+
+  const handleOpenChange = (open: boolean) => {
+    setFormOpen(open);
+    if (!open) {
+      setEditExpense(null);
+      setPrefillData(null);
+    }
+  };
+
   const exportCSV = () => {
     const headers = ["Date", "Name", "Category", "Amount"];
     const rows = filteredExpenses.map((e) => [e.date, e.name, e.category, String(e.amount)]);
