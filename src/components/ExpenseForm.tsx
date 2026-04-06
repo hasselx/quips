@@ -36,6 +36,7 @@ export function ExpenseForm({ open, onOpenChange, onSubmit, editExpense, prefill
       setCustomCategory("");
       setAmount(String(editExpense.amount));
       setDate(editExpense.date);
+      setDescription((editExpense as any).description || "");
     } else if (prefillData) {
       setName(prefillData.name || "");
       setCategory(prefillData.category || "Other");
