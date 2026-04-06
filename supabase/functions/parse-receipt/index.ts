@@ -64,6 +64,7 @@ Return a JSON object using the tool provided. Rules:
                     enum: ["Food", "Transport", "Shopping", "Entertainment", "Bills", "Health", "Education", "Travel", "Other"],
                   },
                   date: { type: "string", description: "Date in YYYY-MM-DD format" },
+                  description: { type: "string", description: "Brief description of items purchased" },
                 },
                 required: ["name", "amount", "category", "date"],
                 additionalProperties: false,
