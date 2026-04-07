@@ -1,5 +1,5 @@
 import { useState, useMemo, useEffect, useRef } from "react";
-import { ArrowLeft, Plus, Download, Camera } from "lucide-react";
+import { ArrowLeft, Plus, Download, Camera, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -32,9 +32,10 @@ export function NotebookView({ notebook, onBack }: NotebookViewProps) {
   const [chartOpen, setChartOpen] = useState(false);
   const [filters, setFilters] = useState<FilterState>(DEFAULT_FILTERS);
   const { allCategories, addCategory } = useCustomCategories();
-  const [receiptParsing, setReceiptParsing] = useState(false);
+  const [receiptStatus, setReceiptStatus] = useState<"idle" | "processing" | "adding">("idle");
   const [prefillData, setPrefillData] = useState<{ name: string; category: string; amount: number; date: string } | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const receiptBusy = receiptStatus !== "idle";
 
   // Auto-copy recurring bills when opening a recurring notebook
   useEffect(() => {
@@ -159,7 +160,7 @@ export function NotebookView({ notebook, onBack }: NotebookViewProps) {
       return;
     }
 
-    setReceiptParsing(true);
+    setReceiptStatus("processing");
     toast.info("Scanning receipt...");
 
     try {
@@ -172,8 +173,11 @@ export function NotebookView({ notebook, onBack }: NotebookViewProps) {
 
       if (error) throw error;
       if (data?.expense) {
+        setReceiptStatus("adding");
+        await new Promise((resolve) => requestAnimationFrame(() => resolve(null)));
         setPrefillData(data.expense);
         setFormOpen(true);
+        await new Promise((resolve) => requestAnimationFrame(() => resolve(null)));
         toast.success("Receipt parsed! Review the details.");
       } else if (data?.error) {
         toast.error(data.error);
@@ -181,7 +185,7 @@ export function NotebookView({ notebook, onBack }: NotebookViewProps) {
     } catch (err: any) {
       toast.error(err.message || "Failed to parse receipt");
     } finally {
-      setReceiptParsing(false);
+      setReceiptStatus("idle");
       if (fileInputRef.current) fileInputRef.current.value = "";
     }
   };
@@ -246,19 +250,39 @@ export function NotebookView({ notebook, onBack }: NotebookViewProps) {
         onChange={handleReceiptUpload}
       />
 
+      {receiptBusy && (
+        <div className="fixed inset-x-4 bottom-36 z-40 md:bottom-24">
+          <div className="mx-auto max-w-sm rounded-2xl border border-border bg-card/95 px-4 py-3 shadow-elevated backdrop-blur-sm">
+            <div className="flex items-start gap-3">
+              <Loader2 className="mt-0.5 h-4 w-4 shrink-0 animate-spin text-primary" />
+              <div>
+                <p className="text-sm font-semibold text-foreground">
+                  {receiptStatus === "processing" ? "Processing receipt" : "Adding details"}
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  {receiptStatus === "processing"
+                    ? "Compressing and analyzing your photo..."
+                    : "Opening the expense form with the extracted details..."}
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* FABs */}
       <div className="fixed bottom-20 right-6 flex flex-col gap-3 z-40 md:bottom-6">
         <Button
           onClick={() => fileInputRef.current?.click()}
-          disabled={receiptParsing}
+          disabled={receiptBusy}
           variant="outline"
           className="h-12 w-12 rounded-full shadow-elevated bg-background"
           size="icon"
           title="Scan receipt"
         >
-          <Camera className={`h-5 w-5 ${receiptParsing ? "animate-pulse" : ""}`} />
+          {receiptBusy ? <Loader2 className="h-5 w-5 animate-spin" /> : <Camera className="h-5 w-5" />}
         </Button>
-        <Button onClick={() => setFormOpen(true)} className="h-14 w-14 rounded-full shadow-elevated text-lg" size="icon">
+        <Button onClick={() => setFormOpen(true)} disabled={receiptBusy} className="h-14 w-14 rounded-full shadow-elevated text-lg" size="icon">
           <Plus className="h-7 w-7" />
         </Button>
       </div>
