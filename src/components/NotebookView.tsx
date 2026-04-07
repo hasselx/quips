@@ -14,6 +14,7 @@ import { ExpenseFilters, applyFilters, DEFAULT_FILTERS, type FilterState } from 
 import { CategoryPieChart } from "@/components/CategoryPieChart";
 import { useCustomCategories } from "@/hooks/useCustomCategories";
 import { AIInsightsCard } from "@/components/AIInsightsCard";
+import { compressReceiptImage } from "@/lib/receiptImage";
 
 type Notebook = Tables<"notebooks">;
 type Expense = Tables<"expenses">;
@@ -146,25 +147,6 @@ export function NotebookView({ notebook, onBack }: NotebookViewProps) {
     addCategory.mutate(name);
   };
 
-  const compressImage = (file: File, maxWidth = 1024, quality = 0.6): Promise<string> => {
-    return new Promise((resolve, reject) => {
-      const img = new Image();
-      img.onload = () => {
-        const canvas = document.createElement("canvas");
-        let w = img.width, h = img.height;
-        if (w > maxWidth) { h = (maxWidth / w) * h; w = maxWidth; }
-        canvas.width = w;
-        canvas.height = h;
-        const ctx = canvas.getContext("2d")!;
-        ctx.drawImage(img, 0, 0, w, h);
-        const dataUrl = canvas.toDataURL("image/jpeg", quality);
-        resolve(dataUrl.split(",")[1]);
-      };
-      img.onerror = reject;
-      img.src = URL.createObjectURL(file);
-    });
-  };
-
   const handleReceiptUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -181,10 +163,11 @@ export function NotebookView({ notebook, onBack }: NotebookViewProps) {
     toast.info("Scanning receipt...");
 
     try {
-      const base64 = await compressImage(file);
+      await new Promise((resolve) => requestAnimationFrame(() => resolve(null)));
+      const { base64, mimeType } = await compressReceiptImage(file);
 
       const { data, error } = await supabase.functions.invoke("parse-receipt", {
-        body: { imageBase64: base64, mimeType: "image/jpeg" },
+        body: { imageBase64: base64, mimeType },
       });
 
       if (error) throw error;
