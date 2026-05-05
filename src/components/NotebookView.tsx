@@ -15,6 +15,7 @@ import { CategoryPieChart } from "@/components/CategoryPieChart";
 import { useCustomCategories } from "@/hooks/useCustomCategories";
 import { AIInsightsCard } from "@/components/AIInsightsCard";
 import { compressReceiptImage } from "@/lib/receiptImage";
+import { getCurrency } from "@/lib/currency";
 
 type Notebook = Tables<"notebooks">;
 type Expense = Tables<"expenses">;
