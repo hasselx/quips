@@ -109,6 +109,7 @@ export type Database = {
       notebooks: {
         Row: {
           created_at: string
+          currency: string
           id: string
           name: string
           type: string
@@ -117,6 +118,7 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          currency?: string
           id?: string
           name: string
           type?: string
@@ -125,6 +127,7 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          currency?: string
           id?: string
           name?: string
           type?: string

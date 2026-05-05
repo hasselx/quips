@@ -1,0 +1,1 @@
+ALTER TABLE public.notebooks ADD COLUMN currency text NOT NULL DEFAULT 'INR';
