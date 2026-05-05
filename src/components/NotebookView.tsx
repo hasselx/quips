@@ -37,6 +37,7 @@ export function NotebookView({ notebook, onBack }: NotebookViewProps) {
   const [prefillData, setPrefillData] = useState<{ name: string; category: string; amount: number; date: string } | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const receiptBusy = receiptStatus !== "idle";
+  const notebookCurrency = getCurrency((notebook as any).currency);
 
   // Auto-copy recurring bills when opening a recurring notebook
   useEffect(() => {
