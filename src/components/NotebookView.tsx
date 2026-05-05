@@ -298,10 +298,11 @@ export function NotebookView({ notebook, onBack }: NotebookViewProps) {
         prefillData={prefillData}
         categories={allCategories}
         onAddCustomCategory={handleAddCustomCategory}
+        currencySymbol={notebookCurrency.symbol}
       />
 
       {/* Pie Chart */}
-      <CategoryPieChart open={chartOpen} onOpenChange={setChartOpen} expenses={filteredExpenses} />
+      <CategoryPieChart open={chartOpen} onOpenChange={setChartOpen} expenses={filteredExpenses} currency={notebookCurrency.code} />
     </div>
   );
 }
