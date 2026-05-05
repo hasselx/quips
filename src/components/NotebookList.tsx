@@ -257,6 +257,19 @@ export function NotebookList({ onSelect }: NotebookListProps) {
                 autoFocus
               />
             </div>
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-foreground">Currency</label>
+              <Select value={currency} onValueChange={setCurrency}>
+                <SelectTrigger className="rounded-xl">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent className="bg-popover z-50 max-h-60 overflow-y-auto">
+                  {CURRENCIES.map((c) => (
+                    <SelectItem key={c.code} value={c.code}>{c.label}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
             <Button type="submit" className="w-full rounded-xl h-12 font-semibold">
               {editNotebook ? "Save" : "Create Notebook"}
             </Button>
