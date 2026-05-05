@@ -10,7 +10,7 @@ serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
-    const { expenses, notebookName } = await req.json();
+    const { expenses, notebookName, currency } = await req.json();
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
 
@@ -21,15 +21,18 @@ serve(async (req) => {
       );
     }
 
+    const currencyCode = currency || "INR";
+
     const systemPrompt = `You are a smart financial analyst AI for a personal expense tracker app called "Quips". 
 Analyze the user's spending data and provide actionable insights. Be concise, friendly, and use emojis sparingly.
+Pay close attention to the optional "description" field on each expense — it contains user-provided context (notes, vendor info, purpose) that often clarifies what the expense was for. Use it to identify patterns, group related spending, and give more accurate, personalized insights.
 
 Structure your response with these sections using markdown headers:
 
 ## 📊 Spending Patterns
 - Identify top spending categories and their percentages
 - Note high-spending days or weeks
-- Detect recurring payments
+- Detect recurring payments (use descriptions to spot recurring vendors)
 
 ## ⚠️ Anomalies & Alerts
 - Flag transactions significantly larger than average
@@ -43,10 +46,10 @@ Structure your response with these sections using markdown headers:
 
 ## 💡 Recommendations
 - Suggest categories where spending could be reduced
-- Identify potential duplicate or unnecessary expenses
+- Identify potential duplicate or unnecessary expenses (descriptions can reveal duplicates)
 - Give 2-3 specific, actionable tips
 
-Keep the total response under 500 words. Use bullet points. Include specific numbers and percentages when possible. Currency is INR (₹).`;
+Keep the total response under 500 words. Use bullet points. Include specific numbers when possible. The currency for all amounts is ${currencyCode}.`;
 
     const expenseSummary = JSON.stringify(
       expenses.map((e: any) => ({
@@ -54,10 +57,11 @@ Keep the total response under 500 words. Use bullet points. Include specific num
         amount: e.amount,
         category: e.category,
         date: e.date,
+        description: e.description || undefined,
       }))
     );
 
-    const userPrompt = `Here are the expenses${notebookName ? ` from notebook "${notebookName}"` : ""} to analyze:\n\n${expenseSummary}\n\nToday's date is ${new Date().toISOString().split("T")[0]}. Please provide a comprehensive spending analysis.`;
+    const userPrompt = `Here are the expenses${notebookName ? ` from notebook "${notebookName}"` : ""} to analyze (currency: ${currencyCode}):\n\n${expenseSummary}\n\nToday's date is ${new Date().toISOString().split("T")[0]}. Please provide a comprehensive spending analysis, leveraging any descriptions provided for richer context.`;
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
