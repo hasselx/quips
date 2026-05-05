@@ -17,9 +17,10 @@ interface ExpenseFormProps {
   prefillData?: { name: string; category: string; amount: number; date: string; description?: string } | null;
   categories: string[];
   onAddCustomCategory?: (name: string) => void;
+  currencySymbol?: string;
 }
 
-export function ExpenseForm({ open, onOpenChange, onSubmit, editExpense, prefillData, categories, onAddCustomCategory }: ExpenseFormProps) {
+export function ExpenseForm({ open, onOpenChange, onSubmit, editExpense, prefillData, categories, onAddCustomCategory, currencySymbol = "₹" }: ExpenseFormProps) {
   const [name, setName] = useState("");
   const [category, setCategory] = useState("Food");
   const [customCategory, setCustomCategory] = useState("");
