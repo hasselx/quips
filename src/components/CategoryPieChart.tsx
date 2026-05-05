@@ -20,9 +20,10 @@ interface CategoryPieChartProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   expenses: Expense[];
+  currency?: string;
 }
 
-export function CategoryPieChart({ open, onOpenChange, expenses }: CategoryPieChartProps) {
+export function CategoryPieChart({ open, onOpenChange, expenses, currency }: CategoryPieChartProps) {
   const categoryMap: Record<string, number> = {};
   expenses.forEach((e) => {
     categoryMap[e.category] = (categoryMap[e.category] || 0) + Number(e.amount);
