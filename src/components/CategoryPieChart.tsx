@@ -68,7 +68,7 @@ export function CategoryPieChart({ open, onOpenChange, expenses, currency }: Cat
                       <Cell key={i} fill={COLORS[i % COLORS.length]} />
                     ))}
                   </Pie>
-                  <Tooltip formatter={(value: number) => `₹${value.toLocaleString("en-IN", { minimumFractionDigits: 2 })}`} />
+                  <Tooltip formatter={(value: number) => formatCurrency(value, currency)} />
                 </PieChart>
               </ResponsiveContainer>
             </div>
