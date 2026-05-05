@@ -13,15 +13,16 @@ interface AIInsightsCardProps {
   expenses: Expense[];
   notebookName?: string;
   notebookId?: string;
+  currency?: string;
 }
 
-export function AIInsightsCard({ expenses, notebookName, notebookId }: AIInsightsCardProps) {
+export function AIInsightsCard({ expenses, notebookName, notebookId, currency }: AIInsightsCardProps) {
   const { analysis, isLoading, error, analyze, cachedLoaded } = useAIAnalysis(notebookId);
   const [expanded, setExpanded] = useState(false);
 
 
   const handleAnalyze = () => {
-    analyze(expenses, notebookName);
+    analyze(expenses, notebookName, currency);
   };
 
   return (
