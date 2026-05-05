@@ -124,7 +124,7 @@ export function ExpenseForm({ open, onOpenChange, onSubmit, editExpense, prefill
             )}
           </div>
           <div className="space-y-2">
-            <Label htmlFor="expense-amount">Amount (₹)</Label>
+            <Label htmlFor="expense-amount">Amount ({currencySymbol})</Label>
             <Input id="expense-amount" type="number" min="0.01" step="0.01" placeholder="0.00" value={amount} onChange={(e) => setAmount(e.target.value)} required className="rounded-xl" />
           </div>
           <div className="space-y-2">
