@@ -195,7 +195,7 @@ export function NotebookList({ onSelect }: NotebookListProps) {
                     </div>
                     <h3 className="font-bold text-foreground text-lg">{nb.name}</h3>
                     <p className="text-sm text-muted-foreground mt-1">
-                      {stats ? `${stats.count} expenses · ₹${stats.total.toLocaleString("en-IN", { minimumFractionDigits: 2 })}` : "No expenses"}
+                      {stats ? `${stats.count} expenses · ${formatCurrency(stats.total, (nb as any).currency)}` : "No expenses"}
                     </p>
                     <p className="text-xs text-muted-foreground mt-1">
                       Updated {formatDate(nb.updated_at)}
