@@ -26,6 +26,7 @@ export function NotebookList({ onSelect }: NotebookListProps) {
   const [editNotebook, setEditNotebook] = useState<Notebook | null>(null);
   const [name, setName] = useState("");
   const [notebookType, setNotebookType] = useState("Notebook");
+  const [currency, setCurrency] = useState("INR");
 
   const NOTEBOOK_TYPES = ["Notebook", "Normal Expense", "Recurring Bills"];
 
