@@ -101,17 +101,17 @@ export function NotebookList({ onSelect }: NotebookListProps) {
     e.preventDefault();
     if (!name.trim()) return;
     if (editNotebook) {
-      updateMutation.mutate({ id: editNotebook.id, newName: name.trim(), type: notebookType });
+      updateMutation.mutate({ id: editNotebook.id, newName: name.trim(), type: notebookType, currency });
     } else {
-      createMutation.mutate({ notebookName: name.trim(), type: notebookType });
+      createMutation.mutate({ notebookName: name.trim(), type: notebookType, currency });
     }
     setDialogOpen(false);
     setEditNotebook(null);
     setName("");
   };
 
-  const openCreate = () => { setEditNotebook(null); setName(""); setNotebookType("Notebook"); setDialogOpen(true); };
-  const openEdit = (nb: Notebook) => { setEditNotebook(nb); setName(nb.name); setNotebookType(nb.type || "Notebook"); setDialogOpen(true); };
+  const openCreate = () => { setEditNotebook(null); setName(""); setNotebookType("Notebook"); setCurrency("INR"); setDialogOpen(true); };
+  const openEdit = (nb: Notebook) => { setEditNotebook(nb); setName(nb.name); setNotebookType(nb.type || "Notebook"); setCurrency((nb as any).currency || "INR"); setDialogOpen(true); };
 
   const TYPE_CONFIG: Record<string, { emoji: string; borderClass: string; bgClass: string }> = {
     "Notebook": { emoji: "📒", borderClass: "border-l-amber-400", bgClass: "bg-amber-50 dark:bg-amber-950/20" },
