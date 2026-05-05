@@ -57,7 +57,7 @@ export function ExpenseTable({ expenses, onEdit, onDelete, customCategories = []
                   {new Date(expense.date).toLocaleDateString("en-IN", { day: "numeric", month: "short" })}
                 </div>
                 <div className="text-right font-semibold text-foreground">
-                  ₹{Number(expense.amount).toLocaleString("en-IN", { minimumFractionDigits: 2 })}
+                  {formatCurrency(Number(expense.amount), currency)}
                 </div>
                 <div className="flex justify-end gap-1 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
                   <Button variant="ghost" size="icon" className="h-8 w-8 rounded-lg" onClick={() => onEdit(expense)}>
