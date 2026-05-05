@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { getCategoryIcon, CATEGORY_COLORS, type Category } from "@/types/expense";
 import type { Tables } from "@/integrations/supabase/types";
 import { motion, AnimatePresence } from "framer-motion";
+import { formatCurrency } from "@/lib/currency";
 
 type Expense = Tables<"expenses">;
 
@@ -11,9 +12,10 @@ interface ExpenseTableProps {
   onEdit: (expense: Expense) => void;
   onDelete: (id: string) => void;
   customCategories?: string[];
+  currency?: string;
 }
 
-export function ExpenseTable({ expenses, onEdit, onDelete, customCategories = [] }: ExpenseTableProps) {
+export function ExpenseTable({ expenses, onEdit, onDelete, customCategories = [], currency }: ExpenseTableProps) {
   if (expenses.length === 0) {
     return (
       <div className="bg-card rounded-2xl shadow-card p-12 text-center">
