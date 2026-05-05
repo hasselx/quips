@@ -11,6 +11,7 @@ import { toast } from "sonner";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { motion, AnimatePresence } from "framer-motion";
 import type { Tables } from "@/integrations/supabase/types";
+import { CURRENCIES, formatCurrency } from "@/lib/currency";
 
 type Notebook = Tables<"notebooks">;
 
@@ -25,6 +26,7 @@ export function NotebookList({ onSelect }: NotebookListProps) {
   const [editNotebook, setEditNotebook] = useState<Notebook | null>(null);
   const [name, setName] = useState("");
   const [notebookType, setNotebookType] = useState("Notebook");
+  const [currency, setCurrency] = useState("INR");
 
   const NOTEBOOK_TYPES = ["Notebook", "Normal Expense", "Recurring Bills"];
 
@@ -56,8 +58,8 @@ export function NotebookList({ onSelect }: NotebookListProps) {
   });
 
   const createMutation = useMutation({
-    mutationFn: async ({ notebookName, type }: { notebookName: string; type: string }) => {
-      const { error } = await supabase.from("notebooks").insert({ name: notebookName, user_id: user!.id, type });
+    mutationFn: async ({ notebookName, type, currency }: { notebookName: string; type: string; currency: string }) => {
+      const { error } = await supabase.from("notebooks").insert({ name: notebookName, user_id: user!.id, type, currency } as any);
       if (error) throw error;
     },
     onSuccess: () => {
@@ -68,9 +70,10 @@ export function NotebookList({ onSelect }: NotebookListProps) {
   });
 
   const updateMutation = useMutation({
-    mutationFn: async ({ id, newName, type }: { id: string; newName: string; type?: string }) => {
+    mutationFn: async ({ id, newName, type, currency }: { id: string; newName: string; type?: string; currency?: string }) => {
       const updateData: any = { name: newName };
       if (type) updateData.type = type;
+      if (currency) updateData.currency = currency;
       const { error } = await supabase.from("notebooks").update(updateData).eq("id", id);
       if (error) throw error;
     },
@@ -98,17 +101,17 @@ export function NotebookList({ onSelect }: NotebookListProps) {
     e.preventDefault();
     if (!name.trim()) return;
     if (editNotebook) {
-      updateMutation.mutate({ id: editNotebook.id, newName: name.trim(), type: notebookType });
+      updateMutation.mutate({ id: editNotebook.id, newName: name.trim(), type: notebookType, currency });
     } else {
-      createMutation.mutate({ notebookName: name.trim(), type: notebookType });
+      createMutation.mutate({ notebookName: name.trim(), type: notebookType, currency });
     }
     setDialogOpen(false);
     setEditNotebook(null);
     setName("");
   };
 
-  const openCreate = () => { setEditNotebook(null); setName(""); setNotebookType("Notebook"); setDialogOpen(true); };
-  const openEdit = (nb: Notebook) => { setEditNotebook(nb); setName(nb.name); setNotebookType(nb.type || "Notebook"); setDialogOpen(true); };
+  const openCreate = () => { setEditNotebook(null); setName(""); setNotebookType("Notebook"); setCurrency("INR"); setDialogOpen(true); };
+  const openEdit = (nb: Notebook) => { setEditNotebook(nb); setName(nb.name); setNotebookType(nb.type || "Notebook"); setCurrency((nb as any).currency || "INR"); setDialogOpen(true); };
 
   const TYPE_CONFIG: Record<string, { emoji: string; borderClass: string; bgClass: string }> = {
     "Notebook": { emoji: "📒", borderClass: "border-l-amber-400", bgClass: "bg-amber-50 dark:bg-amber-950/20" },
@@ -192,7 +195,7 @@ export function NotebookList({ onSelect }: NotebookListProps) {
                     </div>
                     <h3 className="font-bold text-foreground text-lg">{nb.name}</h3>
                     <p className="text-sm text-muted-foreground mt-1">
-                      {stats ? `${stats.count} expenses · ₹${stats.total.toLocaleString("en-IN", { minimumFractionDigits: 2 })}` : "No expenses"}
+                      {stats ? `${stats.count} expenses · ${formatCurrency(stats.total, (nb as any).currency)}` : "No expenses"}
                     </p>
                     <p className="text-xs text-muted-foreground mt-1">
                       Updated {formatDate(nb.updated_at)}
@@ -253,6 +256,19 @@ export function NotebookList({ onSelect }: NotebookListProps) {
                 className="rounded-xl"
                 autoFocus
               />
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-foreground">Currency</label>
+              <Select value={currency} onValueChange={setCurrency}>
+                <SelectTrigger className="rounded-xl">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent className="bg-popover z-50 max-h-60 overflow-y-auto">
+                  {CURRENCIES.map((c) => (
+                    <SelectItem key={c.code} value={c.code}>{c.label}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
             <Button type="submit" className="w-full rounded-xl h-12 font-semibold">
               {editNotebook ? "Save" : "Create Notebook"}

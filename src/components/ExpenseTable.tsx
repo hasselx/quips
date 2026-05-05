@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { getCategoryIcon, CATEGORY_COLORS, type Category } from "@/types/expense";
 import type { Tables } from "@/integrations/supabase/types";
 import { motion, AnimatePresence } from "framer-motion";
+import { formatCurrency } from "@/lib/currency";
 
 type Expense = Tables<"expenses">;
 
@@ -11,9 +12,10 @@ interface ExpenseTableProps {
   onEdit: (expense: Expense) => void;
   onDelete: (id: string) => void;
   customCategories?: string[];
+  currency?: string;
 }
 
-export function ExpenseTable({ expenses, onEdit, onDelete, customCategories = [] }: ExpenseTableProps) {
+export function ExpenseTable({ expenses, onEdit, onDelete, customCategories = [], currency }: ExpenseTableProps) {
   if (expenses.length === 0) {
     return (
       <div className="bg-card rounded-2xl shadow-card p-12 text-center">
@@ -55,7 +57,7 @@ export function ExpenseTable({ expenses, onEdit, onDelete, customCategories = []
                   {new Date(expense.date).toLocaleDateString("en-IN", { day: "numeric", month: "short" })}
                 </div>
                 <div className="text-right font-semibold text-foreground">
-                  ₹{Number(expense.amount).toLocaleString("en-IN", { minimumFractionDigits: 2 })}
+                  {formatCurrency(Number(expense.amount), currency)}
                 </div>
                 <div className="flex justify-end gap-1 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
                   <Button variant="ghost" size="icon" className="h-8 w-8 rounded-lg" onClick={() => onEdit(expense)}>

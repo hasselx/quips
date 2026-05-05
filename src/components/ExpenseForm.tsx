@@ -17,9 +17,10 @@ interface ExpenseFormProps {
   prefillData?: { name: string; category: string; amount: number; date: string; description?: string } | null;
   categories: string[];
   onAddCustomCategory?: (name: string) => void;
+  currencySymbol?: string;
 }
 
-export function ExpenseForm({ open, onOpenChange, onSubmit, editExpense, prefillData, categories, onAddCustomCategory }: ExpenseFormProps) {
+export function ExpenseForm({ open, onOpenChange, onSubmit, editExpense, prefillData, categories, onAddCustomCategory, currencySymbol = "₹" }: ExpenseFormProps) {
   const [name, setName] = useState("");
   const [category, setCategory] = useState("Food");
   const [customCategory, setCustomCategory] = useState("");
@@ -123,7 +124,7 @@ export function ExpenseForm({ open, onOpenChange, onSubmit, editExpense, prefill
             )}
           </div>
           <div className="space-y-2">
-            <Label htmlFor="expense-amount">Amount (₹)</Label>
+            <Label htmlFor="expense-amount">Amount ({currencySymbol})</Label>
             <Input id="expense-amount" type="number" min="0.01" step="0.01" placeholder="0.00" value={amount} onChange={(e) => setAmount(e.target.value)} required className="rounded-xl" />
           </div>
           <div className="space-y-2">

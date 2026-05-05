@@ -1,6 +1,7 @@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from "recharts";
 import type { Tables } from "@/integrations/supabase/types";
+import { formatCurrency } from "@/lib/currency";
 
 type Expense = Tables<"expenses">;
 
@@ -19,9 +20,10 @@ interface CategoryPieChartProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   expenses: Expense[];
+  currency?: string;
 }
 
-export function CategoryPieChart({ open, onOpenChange, expenses }: CategoryPieChartProps) {
+export function CategoryPieChart({ open, onOpenChange, expenses, currency }: CategoryPieChartProps) {
   const categoryMap: Record<string, number> = {};
   expenses.forEach((e) => {
     categoryMap[e.category] = (categoryMap[e.category] || 0) + Number(e.amount);
@@ -66,7 +68,7 @@ export function CategoryPieChart({ open, onOpenChange, expenses }: CategoryPieCh
                       <Cell key={i} fill={COLORS[i % COLORS.length]} />
                     ))}
                   </Pie>
-                  <Tooltip formatter={(value: number) => `₹${value.toLocaleString("en-IN", { minimumFractionDigits: 2 })}`} />
+                  <Tooltip formatter={(value: number) => formatCurrency(value, currency)} />
                 </PieChart>
               </ResponsiveContainer>
             </div>

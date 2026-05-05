@@ -15,6 +15,7 @@ import { CategoryPieChart } from "@/components/CategoryPieChart";
 import { useCustomCategories } from "@/hooks/useCustomCategories";
 import { AIInsightsCard } from "@/components/AIInsightsCard";
 import { compressReceiptImage } from "@/lib/receiptImage";
+import { getCurrency } from "@/lib/currency";
 
 type Notebook = Tables<"notebooks">;
 type Expense = Tables<"expenses">;
@@ -36,6 +37,7 @@ export function NotebookView({ notebook, onBack }: NotebookViewProps) {
   const [prefillData, setPrefillData] = useState<{ name: string; category: string; amount: number; date: string } | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const receiptBusy = receiptStatus !== "idle";
+  const notebookCurrency = getCurrency((notebook as any).currency);
 
   // Auto-copy recurring bills when opening a recurring notebook
   useEffect(() => {
@@ -223,12 +225,12 @@ export function NotebookView({ notebook, onBack }: NotebookViewProps) {
 
         {/* AI Insights */}
         <div className="mb-4">
-          <AIInsightsCard expenses={expenses} notebookName={notebook.name} notebookId={notebook.id} />
+          <AIInsightsCard expenses={expenses} notebookName={notebook.name} notebookId={notebook.id} currency={notebookCurrency.code} />
         </div>
 
         {/* Dashboard */}
         <div className="mb-4">
-          <DashboardSummary total={total} count={filteredExpenses.length} topCategory={topCategory} onTotalClick={() => setChartOpen(true)} customCategories={allCategories} />
+          <DashboardSummary total={total} count={filteredExpenses.length} topCategory={topCategory} onTotalClick={() => setChartOpen(true)} customCategories={allCategories} currency={notebookCurrency.code} />
         </div>
 
         {/* Filters */}
@@ -237,7 +239,7 @@ export function NotebookView({ notebook, onBack }: NotebookViewProps) {
         </div>
 
         {/* Table */}
-        <ExpenseTable expenses={filteredExpenses} onEdit={handleEdit} onDelete={(id) => deleteMutation.mutate(id)} customCategories={allCategories} />
+        <ExpenseTable expenses={filteredExpenses} onEdit={handleEdit} onDelete={(id) => deleteMutation.mutate(id)} customCategories={allCategories} currency={notebookCurrency.code} />
       </div>
 
       {/* Hidden file input for receipt scanning */}
@@ -296,10 +298,11 @@ export function NotebookView({ notebook, onBack }: NotebookViewProps) {
         prefillData={prefillData}
         categories={allCategories}
         onAddCustomCategory={handleAddCustomCategory}
+        currencySymbol={notebookCurrency.symbol}
       />
 
       {/* Pie Chart */}
-      <CategoryPieChart open={chartOpen} onOpenChange={setChartOpen} expenses={filteredExpenses} />
+      <CategoryPieChart open={chartOpen} onOpenChange={setChartOpen} expenses={filteredExpenses} currency={notebookCurrency.code} />
     </div>
   );
 }

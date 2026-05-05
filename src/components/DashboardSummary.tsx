@@ -1,6 +1,7 @@
 import { DollarSign, Hash, TrendingUp } from "lucide-react";
 import { getCategoryIcon } from "@/types/expense";
 import { motion } from "framer-motion";
+import { formatCurrency } from "@/lib/currency";
 
 interface DashboardSummaryProps {
   total: number;
@@ -8,14 +9,15 @@ interface DashboardSummaryProps {
   topCategory: string | null;
   onTotalClick?: () => void;
   customCategories?: string[];
+  currency?: string;
 }
 
-export function DashboardSummary({ total, count, topCategory, onTotalClick, customCategories = [] }: DashboardSummaryProps) {
+export function DashboardSummary({ total, count, topCategory, onTotalClick, customCategories = [], currency }: DashboardSummaryProps) {
   const cards = [
     {
       icon: <DollarSign className="h-6 w-6 text-primary" />,
       label: "Total Spent",
-      value: `₹${total.toLocaleString("en-IN", { minimumFractionDigits: 2 })}`,
+      value: formatCurrency(total, currency),
       bg: "bg-primary/10",
       onClick: onTotalClick,
       clickable: true,
