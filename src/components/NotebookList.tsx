@@ -58,8 +58,8 @@ export function NotebookList({ onSelect }: NotebookListProps) {
   });
 
   const createMutation = useMutation({
-    mutationFn: async ({ notebookName, type }: { notebookName: string; type: string }) => {
-      const { error } = await supabase.from("notebooks").insert({ name: notebookName, user_id: user!.id, type });
+    mutationFn: async ({ notebookName, type, currency }: { notebookName: string; type: string; currency: string }) => {
+      const { error } = await supabase.from("notebooks").insert({ name: notebookName, user_id: user!.id, type, currency } as any);
       if (error) throw error;
     },
     onSuccess: () => {
@@ -70,9 +70,10 @@ export function NotebookList({ onSelect }: NotebookListProps) {
   });
 
   const updateMutation = useMutation({
-    mutationFn: async ({ id, newName, type }: { id: string; newName: string; type?: string }) => {
+    mutationFn: async ({ id, newName, type, currency }: { id: string; newName: string; type?: string; currency?: string }) => {
       const updateData: any = { name: newName };
       if (type) updateData.type = type;
+      if (currency) updateData.currency = currency;
       const { error } = await supabase.from("notebooks").update(updateData).eq("id", id);
       if (error) throw error;
     },
