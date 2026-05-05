@@ -224,12 +224,12 @@ export function NotebookView({ notebook, onBack }: NotebookViewProps) {
 
         {/* AI Insights */}
         <div className="mb-4">
-          <AIInsightsCard expenses={expenses} notebookName={notebook.name} notebookId={notebook.id} />
+          <AIInsightsCard expenses={expenses} notebookName={notebook.name} notebookId={notebook.id} currency={notebookCurrency.code} />
         </div>
 
         {/* Dashboard */}
         <div className="mb-4">
-          <DashboardSummary total={total} count={filteredExpenses.length} topCategory={topCategory} onTotalClick={() => setChartOpen(true)} customCategories={allCategories} />
+          <DashboardSummary total={total} count={filteredExpenses.length} topCategory={topCategory} onTotalClick={() => setChartOpen(true)} customCategories={allCategories} currency={notebookCurrency.code} />
         </div>
 
         {/* Filters */}
@@ -238,7 +238,7 @@ export function NotebookView({ notebook, onBack }: NotebookViewProps) {
         </div>
 
         {/* Table */}
-        <ExpenseTable expenses={filteredExpenses} onEdit={handleEdit} onDelete={(id) => deleteMutation.mutate(id)} customCategories={allCategories} />
+        <ExpenseTable expenses={filteredExpenses} onEdit={handleEdit} onDelete={(id) => deleteMutation.mutate(id)} customCategories={allCategories} currency={notebookCurrency.code} />
       </div>
 
       {/* Hidden file input for receipt scanning */}
