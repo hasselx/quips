@@ -12,6 +12,7 @@ import { ExpenseForm } from "@/components/ExpenseForm";
 import { ExpenseTable } from "@/components/ExpenseTable";
 import { ExpenseFilters, applyFilters, DEFAULT_FILTERS, type FilterState } from "@/components/ExpenseFilters";
 import { CategoryPieChart } from "@/components/CategoryPieChart";
+import { CategoryBarChart } from "@/components/CategoryBarChart";
 import { useCustomCategories } from "@/hooks/useCustomCategories";
 import { AIInsightsCard } from "@/components/AIInsightsCard";
 import { compressReceiptImage } from "@/lib/receiptImage";
