@@ -1,5 +1,5 @@
 import { useState, useMemo, useEffect, useRef } from "react";
-import { ArrowLeft, Plus, Download, Camera, Loader2 } from "lucide-react";
+import { ArrowLeft, Plus, Download, Camera, Loader2, PieChart, BarChart3 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -12,6 +12,7 @@ import { ExpenseForm } from "@/components/ExpenseForm";
 import { ExpenseTable } from "@/components/ExpenseTable";
 import { ExpenseFilters, applyFilters, DEFAULT_FILTERS, type FilterState } from "@/components/ExpenseFilters";
 import { CategoryPieChart } from "@/components/CategoryPieChart";
+import { CategoryBarChart } from "@/components/CategoryBarChart";
 import { useCustomCategories } from "@/hooks/useCustomCategories";
 import { AIInsightsCard } from "@/components/AIInsightsCard";
 import { compressReceiptImage } from "@/lib/receiptImage";
@@ -31,6 +32,7 @@ export function NotebookView({ notebook, onBack }: NotebookViewProps) {
   const [formOpen, setFormOpen] = useState(false);
   const [editExpense, setEditExpense] = useState<Expense | null>(null);
   const [chartOpen, setChartOpen] = useState(false);
+  const [barChartOpen, setBarChartOpen] = useState(false);
   const [filters, setFilters] = useState<FilterState>(DEFAULT_FILTERS);
   const { allCategories, addCategory } = useCustomCategories();
   const [receiptStatus, setReceiptStatus] = useState<"idle" | "processing" | "adding">("idle");
@@ -229,6 +231,12 @@ export function NotebookView({ notebook, onBack }: NotebookViewProps) {
           <div className="min-w-0 flex-1">
             <h1 className="text-2xl font-extrabold text-foreground truncate">{notebook.name}</h1>
           </div>
+          <Button variant="outline" size="icon" className="rounded-xl shrink-0" onClick={() => setChartOpen(true)} title="Pie chart">
+            <PieChart className="h-4 w-4" />
+          </Button>
+          <Button variant="outline" size="icon" className="rounded-xl shrink-0" onClick={() => setBarChartOpen(true)} title="Bar chart">
+            <BarChart3 className="h-4 w-4" />
+          </Button>
           <Button variant="outline" size="icon" className="rounded-xl shrink-0" onClick={exportCSV} title="Export CSV">
             <Download className="h-4 w-4" />
           </Button>
@@ -314,6 +322,7 @@ export function NotebookView({ notebook, onBack }: NotebookViewProps) {
 
       {/* Pie Chart */}
       <CategoryPieChart open={chartOpen} onOpenChange={setChartOpen} expenses={filteredExpenses} currency={notebookCurrency.code} />
+      <CategoryBarChart open={barChartOpen} onOpenChange={setBarChartOpen} expenses={filteredExpenses} currency={notebookCurrency.code} />
     </div>
   );
 }
