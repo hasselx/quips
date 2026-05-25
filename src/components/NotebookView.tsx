@@ -322,6 +322,7 @@ export function NotebookView({ notebook, onBack }: NotebookViewProps) {
 
       {/* Pie Chart */}
       <CategoryPieChart open={chartOpen} onOpenChange={setChartOpen} expenses={filteredExpenses} currency={notebookCurrency.code} />
+      <CategoryBarChart open={barChartOpen} onOpenChange={setBarChartOpen} expenses={filteredExpenses} currency={notebookCurrency.code} />
     </div>
   );
 }
