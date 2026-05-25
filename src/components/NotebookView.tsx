@@ -231,6 +231,12 @@ export function NotebookView({ notebook, onBack }: NotebookViewProps) {
           <div className="min-w-0 flex-1">
             <h1 className="text-2xl font-extrabold text-foreground truncate">{notebook.name}</h1>
           </div>
+          <Button variant="outline" size="icon" className="rounded-xl shrink-0" onClick={() => setChartOpen(true)} title="Pie chart">
+            <PieChart className="h-4 w-4" />
+          </Button>
+          <Button variant="outline" size="icon" className="rounded-xl shrink-0" onClick={() => setBarChartOpen(true)} title="Bar chart">
+            <BarChart3 className="h-4 w-4" />
+          </Button>
           <Button variant="outline" size="icon" className="rounded-xl shrink-0" onClick={exportCSV} title="Export CSV">
             <Download className="h-4 w-4" />
           </Button>
