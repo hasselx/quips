@@ -77,8 +77,9 @@ export function NotebookList({ onSelect }: NotebookListProps) {
       const { error } = await supabase.from("notebooks").update(updateData).eq("id", id);
       if (error) throw error;
     },
-    onSuccess: () => {
+    onSuccess: (_data, vars) => {
       queryClient.invalidateQueries({ queryKey: ["notebooks"] });
+      queryClient.invalidateQueries({ queryKey: ["notebook", vars.id] });
       toast.success("Notebook updated!");
     },
     onError: (err: any) => toast.error(err.message),

@@ -37,7 +37,18 @@ export function NotebookView({ notebook, onBack }: NotebookViewProps) {
   const [prefillData, setPrefillData] = useState<{ name: string; category: string; amount: number; date: string } | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const receiptBusy = receiptStatus !== "idle";
-  const notebookCurrency = getCurrency((notebook as any).currency);
+
+  const { data: liveNotebook } = useQuery({
+    queryKey: ["notebook", notebook.id],
+    queryFn: async () => {
+      const { data, error } = await supabase.from("notebooks").select("*").eq("id", notebook.id).maybeSingle();
+      if (error) throw error;
+      return data as Notebook | null;
+    },
+    initialData: notebook,
+  });
+  const activeNotebook = liveNotebook ?? notebook;
+  const notebookCurrency = getCurrency((activeNotebook as any).currency);
 
   // Auto-copy recurring bills when opening a recurring notebook
   useEffect(() => {
