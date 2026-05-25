@@ -32,6 +32,7 @@ export function NotebookView({ notebook, onBack }: NotebookViewProps) {
   const [formOpen, setFormOpen] = useState(false);
   const [editExpense, setEditExpense] = useState<Expense | null>(null);
   const [chartOpen, setChartOpen] = useState(false);
+  const [barChartOpen, setBarChartOpen] = useState(false);
   const [filters, setFilters] = useState<FilterState>(DEFAULT_FILTERS);
   const { allCategories, addCategory } = useCustomCategories();
   const [receiptStatus, setReceiptStatus] = useState<"idle" | "processing" | "adding">("idle");
