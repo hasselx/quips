@@ -9,14 +9,34 @@ const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/analyze-spen
 
 export const GLOBAL_ANALYSIS_ID = "all-notebooks-global";
 
+export interface InsightsData {
+  summary: { metrics: { label: string; value: string }[] };
+  categories: { name: string; percent: number; amount: string }[];
+  topVendors?: { name: string; amount: string; count: number }[];
+  comparison: {
+    previousLabel?: string;
+    currentLabel?: string;
+    rows: { label: string; from?: string; to: string; trend: "up" | "down" | "stable" | "new"; note: string }[];
+    projection?: string;
+  };
+  fixedVariable: {
+    fixedPercent: number;
+    variablePercent: number;
+    oneTimePercent: number;
+    fixedItems?: { name: string; amount: string; cadence: string }[];
+    oneTimeItems?: { name: string; amount: string; date: string }[];
+  };
+  alerts: { title: string; detail: string; severity: "warning" | "info" }[];
+  tips: { title: string; detail: string }[];
+}
+
 export function useAIAnalysis(notebookId?: string) {
   const { user } = useAuth();
-  const [analysis, setAnalysis] = useState("");
+  const [insights, setInsights] = useState<InsightsData | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [cachedLoaded, setCachedLoaded] = useState(false);
 
-  // Load cached analysis on mount
   useEffect(() => {
     if (!notebookId || !user) return;
     supabase
@@ -26,7 +46,14 @@ export function useAIAnalysis(notebookId?: string) {
       .maybeSingle()
       .then(({ data }) => {
         if (data?.content) {
-          setAnalysis(data.content);
+          try {
+            const parsed = JSON.parse(data.content);
+            if (parsed && typeof parsed === "object" && parsed.summary) {
+              setInsights(parsed as InsightsData);
+            }
+          } catch {
+            // Old markdown cache — ignore
+          }
         }
         setCachedLoaded(true);
       });
@@ -34,31 +61,18 @@ export function useAIAnalysis(notebookId?: string) {
 
   const saveAnalysis = useCallback(async (content: string) => {
     if (!notebookId || !user) return;
-    // Try upsert: delete old then insert
-    const { error: delError } = await supabase
-      .from("ai_analyses")
-      .delete()
-      .eq("notebook_id", notebookId)
-      .eq("user_id", user.id);
-    console.log("ai_analyses delete result:", { delError });
-    
-    const { error: insError } = await supabase.from("ai_analyses").insert({
-      notebook_id: notebookId,
-      user_id: user.id,
-      content,
-    });
-    console.log("ai_analyses insert result:", { insError });
+    await supabase.from("ai_analyses").delete().eq("notebook_id", notebookId).eq("user_id", user.id);
+    await supabase.from("ai_analyses").insert({ notebook_id: notebookId, user_id: user.id, content });
   }, [notebookId, user]);
 
   const clearAnalysis = useCallback(async () => {
     if (!notebookId || !user) return;
     await supabase.from("ai_analyses").delete().eq("notebook_id", notebookId).eq("user_id", user.id);
-    setAnalysis("");
-  }, [notebookId]);
+    setInsights(null);
+  }, [notebookId, user]);
 
   const analyze = useCallback(async (expenses: Expense[], notebookName?: string, currency?: string, period?: "all" | "week" | "month") => {
     setIsLoading(true);
-    setAnalysis("");
     setError(null);
 
     try {
@@ -71,70 +85,12 @@ export function useAIAnalysis(notebookId?: string) {
         body: JSON.stringify({ expenses, notebookName, currency, period }),
       });
 
-      if (!resp.ok) {
-        const data = await resp.json().catch(() => ({}));
-        throw new Error(data.error || `Analysis failed (${resp.status})`);
-      }
+      const data = await resp.json();
+      if (!resp.ok) throw new Error(data.error || `Analysis failed (${resp.status})`);
+      if (!data.insights) throw new Error("No insights returned");
 
-      if (!resp.body) throw new Error("No response body");
-
-      const reader = resp.body.getReader();
-      const decoder = new TextDecoder();
-      let textBuffer = "";
-      let fullText = "";
-      let streamDone = false;
-
-      while (!streamDone) {
-        const { done, value } = await reader.read();
-        if (done) break;
-        textBuffer += decoder.decode(value, { stream: true });
-
-        let newlineIndex: number;
-        while ((newlineIndex = textBuffer.indexOf("\n")) !== -1) {
-          let line = textBuffer.slice(0, newlineIndex);
-          textBuffer = textBuffer.slice(newlineIndex + 1);
-          if (line.endsWith("\r")) line = line.slice(0, -1);
-          if (line.startsWith(":") || line.trim() === "") continue;
-          if (!line.startsWith("data: ")) continue;
-          const jsonStr = line.slice(6).trim();
-          if (jsonStr === "[DONE]") { streamDone = true; break; }
-          try {
-            const parsed = JSON.parse(jsonStr);
-            const content = parsed.choices?.[0]?.delta?.content;
-            if (content) {
-              fullText += content;
-              setAnalysis(fullText);
-            }
-          } catch {
-            textBuffer = line + "\n" + textBuffer;
-            break;
-          }
-        }
-      }
-
-      // flush remaining
-      if (textBuffer.trim()) {
-        for (let raw of textBuffer.split("\n")) {
-          if (!raw) continue;
-          if (raw.endsWith("\r")) raw = raw.slice(0, -1);
-          if (!raw.startsWith("data: ")) continue;
-          const jsonStr = raw.slice(6).trim();
-          if (jsonStr === "[DONE]") continue;
-          try {
-            const parsed = JSON.parse(jsonStr);
-            const content = parsed.choices?.[0]?.delta?.content;
-            if (content) {
-              fullText += content;
-              setAnalysis(fullText);
-            }
-          } catch { /* ignore */ }
-        }
-      }
-
-      // Save completed analysis
-      if (fullText) {
-        await saveAnalysis(fullText);
-      }
+      setInsights(data.insights as InsightsData);
+      await saveAnalysis(JSON.stringify(data.insights));
     } catch (e: any) {
       setError(e.message || "Analysis failed");
     } finally {
@@ -142,5 +98,5 @@ export function useAIAnalysis(notebookId?: string) {
     }
   }, [saveAnalysis]);
 
-  return { analysis, isLoading, error, analyze, clearAnalysis, cachedLoaded };
+  return { insights, isLoading, error, analyze, clearAnalysis, cachedLoaded };
 }
