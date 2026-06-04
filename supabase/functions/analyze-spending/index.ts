@@ -6,6 +6,168 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
+const insightsTool = {
+  type: "function",
+  function: {
+    name: "render_insights",
+    description: "Return a fully-structured spending insights dashboard.",
+    parameters: {
+      type: "object",
+      properties: {
+        summary: {
+          type: "object",
+          description: "Top KPI tiles. 2-4 items.",
+          properties: {
+            metrics: {
+              type: "array",
+              minItems: 2,
+              maxItems: 4,
+              items: {
+                type: "object",
+                properties: {
+                  label: { type: "string", description: "Short label e.g. 'total spent'" },
+                  value: { type: "string", description: "Formatted value with currency, e.g. '€624' or '~€30/wk'" },
+                },
+                required: ["label", "value"],
+                additionalProperties: false,
+              },
+            },
+          },
+          required: ["metrics"],
+          additionalProperties: false,
+        },
+        categories: {
+          type: "array",
+          description: "Spending categories with percentages of total spend, sorted desc. Up to 6.",
+          maxItems: 6,
+          items: {
+            type: "object",
+            properties: {
+              name: { type: "string" },
+              percent: { type: "number", description: "0-100" },
+              amount: { type: "string", description: "Formatted, e.g. '€260'" },
+            },
+            required: ["name", "percent", "amount"],
+            additionalProperties: false,
+          },
+        },
+        topVendors: {
+          type: "array",
+          description: "Most frequent vendors detected from names/descriptions. Up to 4.",
+          maxItems: 4,
+          items: {
+            type: "object",
+            properties: {
+              name: { type: "string" },
+              amount: { type: "string" },
+              count: { type: "integer" },
+            },
+            required: ["name", "amount", "count"],
+            additionalProperties: false,
+          },
+        },
+        comparison: {
+          type: "object",
+          description: "Period-over-period comparison.",
+          properties: {
+            previousLabel: { type: "string", description: "e.g. 'april'" },
+            currentLabel: { type: "string", description: "e.g. 'may'" },
+            rows: {
+              type: "array",
+              maxItems: 6,
+              items: {
+                type: "object",
+                properties: {
+                  label: { type: "string" },
+                  from: { type: "string", description: "Previous value formatted, may be empty" },
+                  to: { type: "string", description: "Current value formatted" },
+                  trend: { type: "string", enum: ["up", "down", "stable", "new"] },
+                  note: { type: "string", description: "Short qualifier e.g. '+22%', 'stable', 'winding down', 'first charge'" },
+                },
+                required: ["label", "to", "trend", "note"],
+                additionalProperties: false,
+              },
+            },
+            projection: { type: "string", description: "One-line projection for next period, e.g. 'projected june: €380–€400 (rent + groceries, no big one-offs)'. Empty if not enough data." },
+          },
+          required: ["rows"],
+          additionalProperties: false,
+        },
+        fixedVariable: {
+          type: "object",
+          description: "Breakdown of fixed vs variable vs one-time spend.",
+          properties: {
+            fixedPercent: { type: "number" },
+            variablePercent: { type: "number" },
+            oneTimePercent: { type: "number" },
+            fixedItems: {
+              type: "array",
+              maxItems: 6,
+              items: {
+                type: "object",
+                properties: {
+                  name: { type: "string" },
+                  amount: { type: "string" },
+                  cadence: { type: "string", description: "e.g. 'monthly', 'weekly'" },
+                },
+                required: ["name", "amount", "cadence"],
+                additionalProperties: false,
+              },
+            },
+            oneTimeItems: {
+              type: "array",
+              maxItems: 6,
+              items: {
+                type: "object",
+                properties: {
+                  name: { type: "string" },
+                  amount: { type: "string" },
+                  date: { type: "string" },
+                },
+                required: ["name", "amount", "date"],
+                additionalProperties: false,
+              },
+            },
+          },
+          required: ["fixedPercent", "variablePercent", "oneTimePercent"],
+          additionalProperties: false,
+        },
+        alerts: {
+          type: "array",
+          description: "Anomalies / things to watch. Up to 4.",
+          maxItems: 4,
+          items: {
+            type: "object",
+            properties: {
+              title: { type: "string" },
+              detail: { type: "string" },
+              severity: { type: "string", enum: ["warning", "info"] },
+            },
+            required: ["title", "detail", "severity"],
+            additionalProperties: false,
+          },
+        },
+        tips: {
+          type: "array",
+          description: "2-3 specific quick-win actions.",
+          maxItems: 3,
+          items: {
+            type: "object",
+            properties: {
+              title: { type: "string", description: "Short imperative phrase e.g. 'one big shop per week'" },
+              detail: { type: "string", description: "Why / how, includes specific numbers from the data" },
+            },
+            required: ["title", "detail"],
+            additionalProperties: false,
+          },
+        },
+      },
+      required: ["summary", "categories", "comparison", "fixedVariable", "alerts", "tips"],
+      additionalProperties: false,
+    },
+  },
+};
+
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
@@ -16,8 +178,8 @@ serve(async (req) => {
 
     if (!expenses || expenses.length === 0) {
       return new Response(
-        JSON.stringify({ analysis: "Not enough data to analyze. Add some expenses first!" }),
-        { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        JSON.stringify({ error: "Not enough data to analyze. Add some expenses first!" }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
@@ -25,42 +187,22 @@ serve(async (req) => {
     const periodLabel = period === "week" ? "this week" : period === "month" ? "this month" : "all time";
     const previousLabel = period === "week" ? "last week" : period === "month" ? "last month" : "the previous period";
 
-    const systemPrompt = `You are a smart financial analyst AI for a personal expense tracker app called "Quips".
-Analyze the user's spending data and provide actionable insights. Be concise, friendly, and use emojis sparingly.
-Pay close attention to the optional "description" field on each expense — it contains user-provided context (notes, vendor info, purpose) that often clarifies what the expense was for. Use it to identify patterns, group related spending, and give more accurate, personalized insights.
+    const systemPrompt = `You are a financial analyst AI for an expense tracker called "Quips".
+You receive the FULL expense history (currency: ${currencyCode}). The user is currently viewing **${periodLabel}**.
 
-The user is currently viewing: **${periodLabel}**. You receive the FULL expense history so you can compare ${periodLabel} vs ${previousLabel}.
+Your job: produce a structured insights dashboard by calling the render_insights tool. Use the optional "description" field on each expense to identify vendors, recurring patterns, and duplicates.
 
-Structure your response with these sections using markdown headers:
-
-## 📊 Spending Patterns (${periodLabel})
-- Top categories with amounts and % of total
-- Recurring vendors (use descriptions)
-
-## 🔁 Fixed vs Variable vs One-Time
-- **Fixed costs**: expenses that repeat at similar amounts on a regular cadence (rent, subscriptions, EMIs, utilities, insurance). List each with the recurring amount and cadence (weekly/monthly).
-- **Variable costs**: recurring categories with fluctuating amounts (groceries, fuel, food, shopping). Give the total and % of overall spend.
-- **One-time payments**: large or notable expenses that appear only once and are not part of a recurring pattern (gadgets, travel, gifts, repairs). List them with amount and date.
-- Show the fixed : variable : one-time ratio of total spend.
-
-## 📈 Change vs ${previousLabel}
-- Compare total spend ${periodLabel} vs ${previousLabel} — give absolute change and %.
-- Call out categories that grew or shrank the most (with numbers).
-- Flag any NEW recurring charges that appeared, or recurring charges that stopped.
-
-## 📉 Trend
-- Describe the overall direction of spending across the last several ${period === "week" ? "weeks" : period === "month" ? "months" : "periods"} (rising, falling, stable, volatile).
-- Note the trend for fixed costs separately from variable costs.
-- Project the likely total for the next ${period === "week" ? "week" : period === "month" ? "month" : "period"} based on the trend.
-
-## ⚠️ Anomalies & Alerts
-- Transactions significantly larger than the user's average
-- Unexpected spikes or duplicates (descriptions can reveal duplicates)
-
-## 💡 Recommendations
-- 2-3 specific, actionable tips focused on the biggest opportunities
-
-Keep the total response under 650 words. Use bullet points. Always include specific numbers. The currency is ${currencyCode}.`;
+Rules:
+- All monetary values MUST be formatted with the proper symbol for ${currencyCode} (e.g. €624, ₹1,200, $50).
+- Percentages are numbers 0-100 (no % sign).
+- Sort categories descending by spend.
+- For fixed costs: identify expenses that repeat at similar amounts on a regular cadence (rent, subscriptions, EMIs).
+- For one-time payments: large or notable expenses appearing only once (gadgets, travel, gifts).
+- Comparison: compare ${periodLabel} vs ${previousLabel}. Use trend "new" if a charge appeared this period for the first time, "stable" if change is <5%, "up" if increased, "down" if decreased. Include "+22%" style notes.
+- If period is "all time", comparison rows should compare the most recent month vs the previous month.
+- Alerts: flag unexpected spikes, frequent small trips (impulse buying), possible duplicates.
+- Tips: 2-3 actionable wins with specific numbers from the data.
+- Be concise. Every label/detail under 90 chars.`;
 
     const expenseSummary = JSON.stringify(
       expenses.map((e: any) => ({
@@ -72,7 +214,7 @@ Keep the total response under 650 words. Use bullet points. Always include speci
       }))
     );
 
-    const userPrompt = `Here is the FULL expense history${notebookName ? ` from notebook "${notebookName}"` : ""} (currency: ${currencyCode}). The user is viewing **${periodLabel}**.\n\n${expenseSummary}\n\nToday's date is ${new Date().toISOString().split("T")[0]}. Provide the analysis as specified, including the fixed vs variable breakdown and the comparison vs ${previousLabel}.`;
+    const userPrompt = `Expenses${notebookName ? ` from "${notebookName}"` : ""}. Today: ${new Date().toISOString().split("T")[0]}. Viewing **${periodLabel}**.\n\n${expenseSummary}\n\nCall render_insights now.`;
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
@@ -81,12 +223,13 @@ Keep the total response under 650 words. Use bullet points. Always include speci
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "google/gemini-3-flash-preview",
+        model: "google/gemini-2.5-flash",
         messages: [
           { role: "system", content: systemPrompt },
           { role: "user", content: userPrompt },
         ],
-        stream: true,
+        tools: [insightsTool],
+        tool_choice: { type: "function", function: { name: "render_insights" } },
       }),
     });
 
@@ -111,8 +254,29 @@ Keep the total response under 650 words. Use bullet points. Always include speci
       });
     }
 
-    return new Response(response.body, {
-      headers: { ...corsHeaders, "Content-Type": "text/event-stream" },
+    const data = await response.json();
+    const toolCall = data.choices?.[0]?.message?.tool_calls?.[0];
+    if (!toolCall?.function?.arguments) {
+      console.error("No tool call in AI response:", JSON.stringify(data).slice(0, 500));
+      return new Response(JSON.stringify({ error: "AI did not return structured insights" }), {
+        status: 500,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    let insights;
+    try {
+      insights = JSON.parse(toolCall.function.arguments);
+    } catch (e) {
+      console.error("Failed to parse tool arguments:", toolCall.function.arguments);
+      return new Response(JSON.stringify({ error: "Malformed AI response" }), {
+        status: 500,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    return new Response(JSON.stringify({ insights }), {
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (e) {
     console.error("analyze-spending error:", e);
