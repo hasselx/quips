@@ -17,6 +17,7 @@ import { useCustomCategories } from "@/hooks/useCustomCategories";
 import { AIInsightsCard } from "@/components/AIInsightsCard";
 import { compressReceiptImage } from "@/lib/receiptImage";
 import { getCurrency } from "@/lib/currency";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 type Notebook = Tables<"notebooks">;
 type Expense = Tables<"expenses">;
