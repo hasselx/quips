@@ -243,9 +243,22 @@ export function NotebookView({ notebook, onBack }: NotebookViewProps) {
           </Button>
         </div>
 
+        {/* Period Tabs */}
+        <Tabs
+          value={filters.timeRange === "week" || filters.timeRange === "month" ? filters.timeRange : "all"}
+          onValueChange={(v) => setFilters({ ...filters, timeRange: v })}
+          className="mb-4"
+        >
+          <TabsList className="grid w-full grid-cols-3 rounded-xl">
+            <TabsTrigger value="all" className="rounded-lg text-xs sm:text-sm">All Time</TabsTrigger>
+            <TabsTrigger value="month" className="rounded-lg text-xs sm:text-sm">This Month</TabsTrigger>
+            <TabsTrigger value="week" className="rounded-lg text-xs sm:text-sm">This Week</TabsTrigger>
+          </TabsList>
+        </Tabs>
+
         {/* AI Insights */}
         <div className="mb-4">
-          <AIInsightsCard expenses={expenses} notebookName={notebook.name} notebookId={notebook.id} currency={notebookCurrency.code} />
+          <AIInsightsCard expenses={expenses} notebookName={notebook.name} notebookId={notebook.id} currency={notebookCurrency.code} period={filters.timeRange === "week" || filters.timeRange === "month" ? filters.timeRange : "all"} />
         </div>
 
         {/* Dashboard */}
