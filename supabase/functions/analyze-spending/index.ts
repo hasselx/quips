@@ -37,15 +37,21 @@ Structure your response with these sections using markdown headers:
 - Top categories with amounts and % of total
 - Recurring vendors (use descriptions)
 
-## 🔁 Fixed vs Variable Costs
-- **Fixed costs**: expenses that repeat at similar amounts on a regular cadence (rent, subscriptions, EMIs, utilities, insurance). List each with the recurring amount.
-- **Variable costs**: discretionary / fluctuating spend (food, shopping, entertainment, travel). Give the total and % of overall spend.
-- Show the fixed : variable ratio.
+## 🔁 Fixed vs Variable vs One-Time
+- **Fixed costs**: expenses that repeat at similar amounts on a regular cadence (rent, subscriptions, EMIs, utilities, insurance). List each with the recurring amount and cadence (weekly/monthly).
+- **Variable costs**: recurring categories with fluctuating amounts (groceries, fuel, food, shopping). Give the total and % of overall spend.
+- **One-time payments**: large or notable expenses that appear only once and are not part of a recurring pattern (gadgets, travel, gifts, repairs). List them with amount and date.
+- Show the fixed : variable : one-time ratio of total spend.
 
 ## 📈 Change vs ${previousLabel}
 - Compare total spend ${periodLabel} vs ${previousLabel} — give absolute change and %.
 - Call out categories that grew or shrank the most (with numbers).
 - Flag any NEW recurring charges that appeared, or recurring charges that stopped.
+
+## 📉 Trend
+- Describe the overall direction of spending across the last several ${period === "week" ? "weeks" : period === "month" ? "months" : "periods"} (rising, falling, stable, volatile).
+- Note the trend for fixed costs separately from variable costs.
+- Project the likely total for the next ${period === "week" ? "week" : period === "month" ? "month" : "period"} based on the trend.
 
 ## ⚠️ Anomalies & Alerts
 - Transactions significantly larger than the user's average
@@ -54,7 +60,7 @@ Structure your response with these sections using markdown headers:
 ## 💡 Recommendations
 - 2-3 specific, actionable tips focused on the biggest opportunities
 
-Keep the total response under 550 words. Use bullet points. Always include specific numbers. The currency is ${currencyCode}.`;
+Keep the total response under 650 words. Use bullet points. Always include specific numbers. The currency is ${currencyCode}.`;
 
     const expenseSummary = JSON.stringify(
       expenses.map((e: any) => ({
