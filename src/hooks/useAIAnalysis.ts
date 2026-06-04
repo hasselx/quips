@@ -56,7 +56,7 @@ export function useAIAnalysis(notebookId?: string) {
     setAnalysis("");
   }, [notebookId]);
 
-  const analyze = useCallback(async (expenses: Expense[], notebookName?: string, currency?: string) => {
+  const analyze = useCallback(async (expenses: Expense[], notebookName?: string, currency?: string, period?: "all" | "week" | "month") => {
     setIsLoading(true);
     setAnalysis("");
     setError(null);
@@ -68,7 +68,7 @@ export function useAIAnalysis(notebookId?: string) {
           "Content-Type": "application/json",
           Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
         },
-        body: JSON.stringify({ expenses, notebookName, currency }),
+        body: JSON.stringify({ expenses, notebookName, currency, period }),
       });
 
       if (!resp.ok) {

@@ -14,15 +14,16 @@ interface AIInsightsCardProps {
   notebookName?: string;
   notebookId?: string;
   currency?: string;
+  period?: "all" | "week" | "month";
 }
 
-export function AIInsightsCard({ expenses, notebookName, notebookId, currency }: AIInsightsCardProps) {
+export function AIInsightsCard({ expenses, notebookName, notebookId, currency, period }: AIInsightsCardProps) {
   const { analysis, isLoading, error, analyze, cachedLoaded } = useAIAnalysis(notebookId);
   const [expanded, setExpanded] = useState(false);
 
 
   const handleAnalyze = () => {
-    analyze(expenses, notebookName, currency);
+    analyze(expenses, notebookName, currency, period);
   };
 
   return (
