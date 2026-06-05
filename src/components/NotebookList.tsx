@@ -25,10 +25,13 @@ export function NotebookList({ onSelect }: NotebookListProps) {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editNotebook, setEditNotebook] = useState<Notebook | null>(null);
   const [name, setName] = useState("");
-  const [notebookType, setNotebookType] = useState("Notebook");
+  const [notebookType, setNotebookType] = useState("Expense");
   const [currency, setCurrency] = useState("INR");
 
-  const NOTEBOOK_TYPES = ["Notebook", "Normal Expense", "Recurring Bills"];
+  const NOTEBOOK_TYPES = ["Expense", "Income"];
+
+  // Normalize legacy types to Expense/Income
+  const normalizeType = (t?: string) => (t === "Income" ? "Income" : "Expense");
 
   const { data: notebooks = [], isLoading } = useQuery({
     queryKey: ["notebooks"],
@@ -111,13 +114,12 @@ export function NotebookList({ onSelect }: NotebookListProps) {
     setName("");
   };
 
-  const openCreate = () => { setEditNotebook(null); setName(""); setNotebookType("Notebook"); setCurrency("INR"); setDialogOpen(true); };
-  const openEdit = (nb: Notebook) => { setEditNotebook(nb); setName(nb.name); setNotebookType(nb.type || "Notebook"); setCurrency((nb as any).currency || "INR"); setDialogOpen(true); };
+  const openCreate = () => { setEditNotebook(null); setName(""); setNotebookType("Expense"); setCurrency("INR"); setDialogOpen(true); };
+  const openEdit = (nb: Notebook) => { setEditNotebook(nb); setName(nb.name); setNotebookType(normalizeType(nb.type)); setCurrency((nb as any).currency || "INR"); setDialogOpen(true); };
 
   const TYPE_CONFIG: Record<string, { emoji: string; borderClass: string; bgClass: string }> = {
-    "Notebook": { emoji: "📒", borderClass: "border-l-amber-400", bgClass: "bg-amber-50 dark:bg-amber-950/20" },
-    "Normal Expense": { emoji: "💳", borderClass: "border-l-emerald-400", bgClass: "bg-emerald-50 dark:bg-emerald-950/20" },
-    "Recurring Bills": { emoji: "🔁", borderClass: "border-l-violet-400", bgClass: "bg-violet-50 dark:bg-violet-950/20" },
+    "Expense": { emoji: "💳", borderClass: "border-l-emerald-400", bgClass: "bg-emerald-50 dark:bg-emerald-950/20" },
+    "Income": { emoji: "💰", borderClass: "border-l-sky-400", bgClass: "bg-sky-50 dark:bg-sky-950/20" },
   };
   const FALLBACK_EMOJIS = ["📗", "📘", "📕", "📓", "📔"];
 
@@ -155,6 +157,8 @@ export function NotebookList({ onSelect }: NotebookListProps) {
             <AnimatePresence>
               {notebooks.map((nb, i) => {
                 const stats = expenseCounts[nb.id];
+                const tType = normalizeType(nb.type);
+                const cfg = TYPE_CONFIG[tType];
                 return (
                   <motion.div
                     key={nb.id}
@@ -162,9 +166,7 @@ export function NotebookList({ onSelect }: NotebookListProps) {
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, scale: 0.95 }}
                     transition={{ delay: i * 0.03 }}
-                    className={`rounded-2xl shadow-card p-5 cursor-pointer hover:shadow-elevated transition-shadow relative group border-l-4 ${
-                      (TYPE_CONFIG[nb.type] || TYPE_CONFIG["Notebook"]).borderClass
-                    } ${(TYPE_CONFIG[nb.type] || TYPE_CONFIG["Notebook"]).bgClass}`}
+                    className={`rounded-2xl shadow-card p-5 cursor-pointer hover:shadow-elevated transition-shadow relative group border-l-4 ${cfg.borderClass} ${cfg.bgClass}`}
                     onClick={() => onSelect(nb)}
                   >
                     <div className="absolute top-3 right-3 z-10" onClick={(e) => e.stopPropagation()}>
@@ -185,13 +187,13 @@ export function NotebookList({ onSelect }: NotebookListProps) {
                       </DropdownMenu>
                     </div>
                     <div className="flex items-center gap-2 mb-1">
-                      <span className="text-2xl">{(TYPE_CONFIG[nb.type] || TYPE_CONFIG["Notebook"]).emoji}</span>
+                      <span className="text-2xl">{cfg.emoji}</span>
                       <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${
-                        nb.type === "Recurring Bills" ? "bg-violet-100 text-violet-700 dark:bg-violet-900/30 dark:text-violet-300" :
-                        nb.type === "Normal Expense" ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300" :
-                        "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300"
+                        tType === "Income"
+                          ? "bg-sky-100 text-sky-700 dark:bg-sky-900/30 dark:text-sky-300"
+                          : "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300"
                       }`}>
-                        {nb.type || "Notebook"}
+                        {tType}
                       </span>
                     </div>
                     <h3 className="font-bold text-foreground text-lg">{nb.name}</h3>
