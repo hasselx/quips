@@ -223,22 +223,22 @@ export function NotebookView({ notebook, onBack }: NotebookViewProps) {
 
   return (
     <div className="min-h-screen bg-background">
-      <div className="max-w-2xl mx-auto px-4 py-8 pb-24">
+      <div className="max-w-2xl mx-auto px-3 sm:px-4 py-4 sm:py-8 pb-24">
         {/* Header */}
-        <div className="flex items-center gap-3 mb-6">
-          <Button variant="ghost" size="icon" className="rounded-xl shrink-0" onClick={onBack}>
+        <div className="flex items-center gap-1.5 sm:gap-3 mb-4 sm:mb-6">
+          <Button variant="ghost" size="icon" className="rounded-xl shrink-0 h-9 w-9 sm:h-10 sm:w-10" onClick={onBack}>
             <ArrowLeft className="h-5 w-5" />
           </Button>
           <div className="min-w-0 flex-1">
-            <h1 className="text-2xl font-extrabold text-foreground truncate">{notebook.name}</h1>
+            <h1 className="text-lg sm:text-2xl font-extrabold text-foreground truncate">{notebook.name}</h1>
           </div>
-          <Button variant="outline" size="icon" className="rounded-xl shrink-0" onClick={() => setChartOpen(true)} title="Pie chart">
+          <Button variant="outline" size="icon" className="rounded-xl shrink-0 h-9 w-9 sm:h-10 sm:w-10" onClick={() => setChartOpen(true)} title="Pie chart">
             <PieChart className="h-4 w-4" />
           </Button>
-          <Button variant="outline" size="icon" className="rounded-xl shrink-0" onClick={() => setBarChartOpen(true)} title="Bar chart">
+          <Button variant="outline" size="icon" className="rounded-xl shrink-0 h-9 w-9 sm:h-10 sm:w-10" onClick={() => setBarChartOpen(true)} title="Bar chart">
             <BarChart3 className="h-4 w-4" />
           </Button>
-          <Button variant="outline" size="icon" className="rounded-xl shrink-0" onClick={exportCSV} title="Export CSV">
+          <Button variant="outline" size="icon" className="rounded-xl shrink-0 h-9 w-9 sm:h-10 sm:w-10" onClick={exportCSV} title="Export CSV">
             <Download className="h-4 w-4" />
           </Button>
         </div>
