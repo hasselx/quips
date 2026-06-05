@@ -21,7 +21,10 @@ export function AIInsightsCard({ expenses, notebookName, notebookId, currency, p
   const { insights, isLoading, error, analyze } = useAIAnalysis(notebookId);
   const [expanded, setExpanded] = useState(false);
 
-  const handleAnalyze = () => analyze(expenses, notebookName, currency, period);
+  const handleAnalyze = async () => {
+    await analyze(expenses, notebookName, currency, period);
+    setExpanded(true);
+  };
 
   return (
     <Card className="border-primary/20 bg-gradient-to-br from-primary/5 to-accent/5 overflow-hidden">
