@@ -45,9 +45,9 @@ export function ExpenseTable({ expenses, onEdit, onDelete, customCategories = []
                 initial={{ opacity: 0, x: -10 }}
                 animate={{ opacity: 1, x: 0 }}
                 exit={{ opacity: 0, x: 10 }}
-                className="grid grid-cols-1 sm:grid-cols-[1fr_120px_100px_100px_80px] gap-1 sm:gap-2 px-5 py-4 items-center hover:bg-muted/30 transition-colors group"
+                className="hidden sm:grid sm:grid-cols-[1fr_120px_100px_100px_80px] gap-2 px-5 py-4 items-center hover:bg-muted/30 transition-colors group"
               >
-                <div className="font-medium text-foreground">{expense.name}</div>
+                <div className="font-medium text-foreground truncate">{expense.name}</div>
                 <div>
                   <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-medium ${CATEGORY_COLORS[cat] || "bg-gray-100 text-gray-700"}`}>
                     {getCategoryIcon(expense.category, customCategories)} {expense.category}
@@ -66,6 +66,42 @@ export function ExpenseTable({ expenses, onEdit, onDelete, customCategories = []
                   <Button variant="ghost" size="icon" className="h-8 w-8 rounded-lg text-destructive hover:text-destructive" onClick={() => onDelete(expense.id)}>
                     <Trash2 className="h-4 w-4" />
                   </Button>
+                </div>
+              </motion.div>
+            );
+          })}
+          {/* Mobile compact rows */}
+          {expenses.map((expense) => {
+            const cat = expense.category as Category;
+            return (
+              <motion.div
+                key={`m-${expense.id}`}
+                initial={{ opacity: 0, x: -10 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: 10 }}
+                className="sm:hidden px-3 py-2.5 hover:bg-muted/30 transition-colors"
+              >
+                <div className="flex items-center justify-between gap-2">
+                  <p className="font-semibold text-sm text-foreground truncate min-w-0 flex-1">{expense.name}</p>
+                  <p className="text-sm font-bold text-foreground shrink-0">{formatCurrency(Number(expense.amount), currency)}</p>
+                </div>
+                <div className="flex items-center justify-between gap-2 mt-1">
+                  <div className="flex items-center gap-1.5 min-w-0">
+                    <span className={`inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[10px] font-medium ${CATEGORY_COLORS[cat] || "bg-gray-100 text-gray-700"}`}>
+                      {getCategoryIcon(expense.category, customCategories)} {expense.category}
+                    </span>
+                    <span className="text-[10px] text-muted-foreground shrink-0">
+                      {new Date(expense.date).toLocaleDateString("en-IN", { day: "numeric", month: "short" })}
+                    </span>
+                  </div>
+                  <div className="flex gap-0.5 shrink-0">
+                    <Button variant="ghost" size="icon" className="h-6 w-6 rounded-md" onClick={() => onEdit(expense)}>
+                      <Pencil className="h-3 w-3" />
+                    </Button>
+                    <Button variant="ghost" size="icon" className="h-6 w-6 rounded-md text-destructive hover:text-destructive" onClick={() => onDelete(expense.id)}>
+                      <Trash2 className="h-3 w-3" />
+                    </Button>
+                  </div>
                 </div>
               </motion.div>
             );
