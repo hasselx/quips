@@ -23,7 +23,6 @@ export function AIInsightsCard({ expenses, notebookName, notebookId, currency, p
 
   const handleAnalyze = async () => {
     await analyze(expenses, notebookName, currency, period);
-    setExpanded(true);
   };
 
   return (
