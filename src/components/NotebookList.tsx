@@ -157,6 +157,8 @@ export function NotebookList({ onSelect }: NotebookListProps) {
             <AnimatePresence>
               {notebooks.map((nb, i) => {
                 const stats = expenseCounts[nb.id];
+                const tType = normalizeType(nb.type);
+                const cfg = TYPE_CONFIG[tType];
                 return (
                   <motion.div
                     key={nb.id}
@@ -164,9 +166,7 @@ export function NotebookList({ onSelect }: NotebookListProps) {
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, scale: 0.95 }}
                     transition={{ delay: i * 0.03 }}
-                    className={`rounded-2xl shadow-card p-5 cursor-pointer hover:shadow-elevated transition-shadow relative group border-l-4 ${
-                      (TYPE_CONFIG[nb.type] || TYPE_CONFIG["Notebook"]).borderClass
-                    } ${(TYPE_CONFIG[nb.type] || TYPE_CONFIG["Notebook"]).bgClass}`}
+                    className={`rounded-2xl shadow-card p-5 cursor-pointer hover:shadow-elevated transition-shadow relative group border-l-4 ${cfg.borderClass} ${cfg.bgClass}`}
                     onClick={() => onSelect(nb)}
                   >
                     <div className="absolute top-3 right-3 z-10" onClick={(e) => e.stopPropagation()}>
@@ -187,13 +187,13 @@ export function NotebookList({ onSelect }: NotebookListProps) {
                       </DropdownMenu>
                     </div>
                     <div className="flex items-center gap-2 mb-1">
-                      <span className="text-2xl">{(TYPE_CONFIG[nb.type] || TYPE_CONFIG["Notebook"]).emoji}</span>
+                      <span className="text-2xl">{cfg.emoji}</span>
                       <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${
-                        nb.type === "Recurring Bills" ? "bg-violet-100 text-violet-700 dark:bg-violet-900/30 dark:text-violet-300" :
-                        nb.type === "Normal Expense" ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300" :
-                        "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300"
+                        tType === "Income"
+                          ? "bg-sky-100 text-sky-700 dark:bg-sky-900/30 dark:text-sky-300"
+                          : "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300"
                       }`}>
-                        {nb.type || "Notebook"}
+                        {tType}
                       </span>
                     </div>
                     <h3 className="font-bold text-foreground text-lg">{nb.name}</h3>
