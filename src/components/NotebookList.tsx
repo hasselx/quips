@@ -114,13 +114,12 @@ export function NotebookList({ onSelect }: NotebookListProps) {
     setName("");
   };
 
-  const openCreate = () => { setEditNotebook(null); setName(""); setNotebookType("Notebook"); setCurrency("INR"); setDialogOpen(true); };
-  const openEdit = (nb: Notebook) => { setEditNotebook(nb); setName(nb.name); setNotebookType(nb.type || "Notebook"); setCurrency((nb as any).currency || "INR"); setDialogOpen(true); };
+  const openCreate = () => { setEditNotebook(null); setName(""); setNotebookType("Expense"); setCurrency("INR"); setDialogOpen(true); };
+  const openEdit = (nb: Notebook) => { setEditNotebook(nb); setName(nb.name); setNotebookType(normalizeType(nb.type)); setCurrency((nb as any).currency || "INR"); setDialogOpen(true); };
 
   const TYPE_CONFIG: Record<string, { emoji: string; borderClass: string; bgClass: string }> = {
-    "Notebook": { emoji: "📒", borderClass: "border-l-amber-400", bgClass: "bg-amber-50 dark:bg-amber-950/20" },
-    "Normal Expense": { emoji: "💳", borderClass: "border-l-emerald-400", bgClass: "bg-emerald-50 dark:bg-emerald-950/20" },
-    "Recurring Bills": { emoji: "🔁", borderClass: "border-l-violet-400", bgClass: "bg-violet-50 dark:bg-violet-950/20" },
+    "Expense": { emoji: "💳", borderClass: "border-l-emerald-400", bgClass: "bg-emerald-50 dark:bg-emerald-950/20" },
+    "Income": { emoji: "💰", borderClass: "border-l-sky-400", bgClass: "bg-sky-50 dark:bg-sky-950/20" },
   };
   const FALLBACK_EMOJIS = ["📗", "📘", "📕", "📓", "📔"];
 
