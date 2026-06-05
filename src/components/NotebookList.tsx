@@ -25,10 +25,13 @@ export function NotebookList({ onSelect }: NotebookListProps) {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editNotebook, setEditNotebook] = useState<Notebook | null>(null);
   const [name, setName] = useState("");
-  const [notebookType, setNotebookType] = useState("Notebook");
+  const [notebookType, setNotebookType] = useState("Expense");
   const [currency, setCurrency] = useState("INR");
 
-  const NOTEBOOK_TYPES = ["Notebook", "Normal Expense", "Recurring Bills"];
+  const NOTEBOOK_TYPES = ["Expense", "Income"];
+
+  // Normalize legacy types to Expense/Income
+  const normalizeType = (t?: string) => (t === "Income" ? "Income" : "Expense");
 
   const { data: notebooks = [], isLoading } = useQuery({
     queryKey: ["notebooks"],
