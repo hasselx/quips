@@ -34,11 +34,15 @@ function colorFor(name: string, i = 0): string {
 }
 
 /* -------- badges (fixed / variable / one-time / recurring) -------- */
+// fixed=red, variable=yellow, one-time=green
+const FIXED_COLOR = "#e34948";
+const VARIABLE_COLOR = "#eda100";
+const ONETIME_COLOR = "#1baf7a";
 const BADGE_STYLES: Record<string, { bg: string; fg: string; label: string }> = {
-  fixed: { bg: "#E6F1FB", fg: "#0C447C", label: "fixed" },
-  variable: { bg: "#E1F5EE", fg: "#085041", label: "variable" },
-  "one-time": { bg: "#FAEEDA", fg: "#633806", label: "one-time" },
-  onetime: { bg: "#FAEEDA", fg: "#633806", label: "one-time" },
+  fixed: { bg: "#FBE7E7", fg: FIXED_COLOR, label: "fixed" },
+  variable: { bg: "#FAEEDA", fg: "#8a5d00", label: "variable" },
+  "one-time": { bg: "#E1F5EE", fg: "#085041", label: "one-time" },
+  onetime: { bg: "#E1F5EE", fg: "#085041", label: "one-time" },
   recurring: { bg: "#EEEDFE", fg: "#3C3489", label: "recurring" },
 };
 function Badge({ kind }: { kind: string }) {
@@ -302,9 +306,9 @@ export function AIInsightsDashboard({ insights }: Props) {
                 background: "hsl(var(--muted))",
               }}
             >
-              <div style={{ width: `${fixedVariable.fixedPercent}%`, background: "#0C447C" }} />
-              <div style={{ width: `${fixedVariable.variablePercent}%`, background: "#085041" }} />
-              <div style={{ width: `${fixedVariable.oneTimePercent}%`, background: "#633806" }} />
+              <div style={{ width: `${fixedVariable.fixedPercent}%`, background: FIXED_COLOR }} />
+              <div style={{ width: `${fixedVariable.variablePercent}%`, background: VARIABLE_COLOR }} />
+              <div style={{ width: `${fixedVariable.oneTimePercent}%`, background: ONETIME_COLOR }} />
             </div>
             <div
               className="flex items-center justify-between text-muted-foreground"
@@ -313,21 +317,21 @@ export function AIInsightsDashboard({ insights }: Props) {
               <span className="flex items-center" style={{ gap: 6 }}>
                 <i
                   aria-hidden
-                  style={{ width: 8, height: 8, borderRadius: 2, background: "#0C447C", display: "inline-block" }}
+                  style={{ width: 8, height: 8, borderRadius: 2, background: FIXED_COLOR, display: "inline-block" }}
                 />
                 fixed {Math.round(fixedVariable.fixedPercent)}%
               </span>
               <span className="flex items-center" style={{ gap: 6 }}>
                 <i
                   aria-hidden
-                  style={{ width: 8, height: 8, borderRadius: 2, background: "#085041", display: "inline-block" }}
+                  style={{ width: 8, height: 8, borderRadius: 2, background: VARIABLE_COLOR, display: "inline-block" }}
                 />
                 variable {Math.round(fixedVariable.variablePercent)}%
               </span>
               <span className="flex items-center" style={{ gap: 6 }}>
                 <i
                   aria-hidden
-                  style={{ width: 8, height: 8, borderRadius: 2, background: "#633806", display: "inline-block" }}
+                  style={{ width: 8, height: 8, borderRadius: 2, background: ONETIME_COLOR, display: "inline-block" }}
                 />
                 one-time {Math.round(fixedVariable.oneTimePercent)}%
               </span>
