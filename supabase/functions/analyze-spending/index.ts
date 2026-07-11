@@ -339,10 +339,11 @@ Rules:
     // Enforce deterministic ground truth so the dashboard matches the app's totals.
     const truthMetrics = [
       { label: "total spent", value: groundTruth.total },
+      { label: "avg / month", value: fmtMoney(avgPerMonth) },
       { label: "transactions", value: String(groundTruth.count) },
     ];
     const aiExtras = (insights.summary?.metrics || []).filter(
-      (m: any) => !["total spent", "transactions", "total", "entries", "count"].includes((m.label || "").toLowerCase())
+      (m: any) => !["total spent", "transactions", "total", "entries", "count", "avg / month", "avg/month", "monthly average", "average per month"].includes((m.label || "").toLowerCase())
     );
     insights.summary = { metrics: [...truthMetrics, ...aiExtras].slice(0, 4) };
     insights.categories = groundTruth.categories;
