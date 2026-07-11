@@ -327,6 +327,17 @@ Rules:
       });
     }
 
+    // Enforce deterministic ground truth so the dashboard matches the app's totals.
+    const truthMetrics = [
+      { label: "total spent", value: groundTruth.total },
+      { label: "transactions", value: String(groundTruth.count) },
+    ];
+    const aiExtras = (insights.summary?.metrics || []).filter(
+      (m: any) => !["total spent", "transactions", "total", "entries", "count"].includes((m.label || "").toLowerCase())
+    );
+    insights.summary = { metrics: [...truthMetrics, ...aiExtras].slice(0, 4) };
+    insights.categories = groundTruth.categories;
+
     return new Response(JSON.stringify({ insights }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
