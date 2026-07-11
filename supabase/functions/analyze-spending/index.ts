@@ -208,10 +208,19 @@ serve(async (req) => {
     const total = scoped.reduce((s: number, e: any) => s + Number(e.amount || 0), 0);
     const count = scoped.length;
     const byCategory: Record<string, number> = {};
+    const byMonth: Record<string, number> = {};
     for (const e of scoped) {
       const c = e.category || "Other";
       byCategory[c] = (byCategory[c] || 0) + Number(e.amount || 0);
+      const d = new Date(e.date);
+      if (!isNaN(d.getTime())) {
+        const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
+        byMonth[key] = (byMonth[key] || 0) + Number(e.amount || 0);
+      }
     }
+    const monthKeys = Object.keys(byMonth);
+    const monthCount = Math.max(monthKeys.length, 1);
+    const avgPerMonth = total / monthCount;
     const sortedCats = Object.entries(byCategory).sort((a, b) => b[1] - a[1]);
 
     const fmtMoney = (n: number) => {
