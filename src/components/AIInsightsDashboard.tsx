@@ -306,9 +306,9 @@ export function AIInsightsDashboard({ insights }: Props) {
                 background: "hsl(var(--muted))",
               }}
             >
-              <div style={{ width: `${fixedVariable.fixedPercent}%`, background: "#0C447C" }} />
-              <div style={{ width: `${fixedVariable.variablePercent}%`, background: "#085041" }} />
-              <div style={{ width: `${fixedVariable.oneTimePercent}%`, background: "#633806" }} />
+              <div style={{ width: `${fixedVariable.fixedPercent}%`, background: FIXED_COLOR }} />
+              <div style={{ width: `${fixedVariable.variablePercent}%`, background: VARIABLE_COLOR }} />
+              <div style={{ width: `${fixedVariable.oneTimePercent}%`, background: ONETIME_COLOR }} />
             </div>
             <div
               className="flex items-center justify-between text-muted-foreground"
@@ -317,21 +317,21 @@ export function AIInsightsDashboard({ insights }: Props) {
               <span className="flex items-center" style={{ gap: 6 }}>
                 <i
                   aria-hidden
-                  style={{ width: 8, height: 8, borderRadius: 2, background: "#0C447C", display: "inline-block" }}
+                  style={{ width: 8, height: 8, borderRadius: 2, background: FIXED_COLOR, display: "inline-block" }}
                 />
                 fixed {Math.round(fixedVariable.fixedPercent)}%
               </span>
               <span className="flex items-center" style={{ gap: 6 }}>
                 <i
                   aria-hidden
-                  style={{ width: 8, height: 8, borderRadius: 2, background: "#085041", display: "inline-block" }}
+                  style={{ width: 8, height: 8, borderRadius: 2, background: VARIABLE_COLOR, display: "inline-block" }}
                 />
                 variable {Math.round(fixedVariable.variablePercent)}%
               </span>
               <span className="flex items-center" style={{ gap: 6 }}>
                 <i
                   aria-hidden
-                  style={{ width: 8, height: 8, borderRadius: 2, background: "#633806", display: "inline-block" }}
+                  style={{ width: 8, height: 8, borderRadius: 2, background: ONETIME_COLOR, display: "inline-block" }}
                 />
                 one-time {Math.round(fixedVariable.oneTimePercent)}%
               </span>
