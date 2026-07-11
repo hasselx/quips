@@ -187,15 +187,67 @@ serve(async (req) => {
     const periodLabel = period === "week" ? "this week" : period === "month" ? "this month" : "all time";
     const previousLabel = period === "week" ? "last week" : period === "month" ? "last month" : "the previous period";
 
+    // Filter expenses to the viewed period so AI context matches the dashboard.
+    const now = new Date();
+    const startOfPeriod = (() => {
+      if (period === "week") {
+        const d = new Date(now);
+        d.setDate(d.getDate() - 7);
+        return d;
+      }
+      if (period === "month") {
+        return new Date(now.getFullYear(), now.getMonth(), 1);
+      }
+      return null;
+    })();
+    const scoped = startOfPeriod
+      ? expenses.filter((e: any) => new Date(e.date) >= startOfPeriod)
+      : expenses;
+
+    // Deterministic totals (used to override AI hallucinations).
+    const total = scoped.reduce((s: number, e: any) => s + Number(e.amount || 0), 0);
+    const count = scoped.length;
+    const byCategory: Record<string, number> = {};
+    for (const e of scoped) {
+      const c = e.category || "Other";
+      byCategory[c] = (byCategory[c] || 0) + Number(e.amount || 0);
+    }
+    const sortedCats = Object.entries(byCategory).sort((a, b) => b[1] - a[1]);
+
+    const fmtMoney = (n: number) => {
+      try {
+        return new Intl.NumberFormat("en-US", { style: "currency", currency: currencyCode, maximumFractionDigits: 2 }).format(n);
+      } catch {
+        return `${currencyCode} ${n.toFixed(2)}`;
+      }
+    };
+
+    const groundTruth = {
+      total: fmtMoney(total),
+      count,
+      categories: sortedCats.slice(0, 6).map(([name, amt]) => ({
+        name,
+        amount: fmtMoney(amt),
+        percent: total > 0 ? Math.round((amt / total) * 1000) / 10 : 0,
+      })),
+    };
+
     const systemPrompt = `You are a financial analyst AI for an expense tracker called "Quips".
-You receive the FULL expense history (currency: ${currencyCode}). The user is currently viewing **${periodLabel}**.
+You receive expenses already scoped to **${periodLabel}** (currency: ${currencyCode}).
 
 Your job: produce a structured insights dashboard by calling the render_insights tool. Use the optional "description" field on each expense to identify vendors, recurring patterns, and duplicates.
 
+CRITICAL — GROUND TRUTH (do NOT recompute, use these exact numbers):
+- Total spent: ${groundTruth.total}
+- Transaction count: ${groundTruth.count}
+- Category breakdown (name, amount, percent of total):
+${groundTruth.categories.map(c => `  • ${c.name}: ${c.amount} (${c.percent}%)`).join("\n")}
+
 Rules:
-- All monetary values MUST be formatted with the proper symbol for ${currencyCode} (e.g. €624, ₹1,200, $50).
+- summary.metrics MUST include "total spent" = ${groundTruth.total} and "transactions" = ${groundTruth.count}. Fill the other 1-2 tiles with derived metrics (e.g. avg per day, top category amount).
+- categories array MUST reproduce the ground-truth list above verbatim (same names, amounts, percents, same order).
+- All other monetary values MUST use the ${currencyCode} symbol/format.
 - Percentages are numbers 0-100 (no % sign).
-- Sort categories descending by spend.
 - For fixed costs: identify expenses that repeat at similar amounts on a regular cadence (rent, subscriptions, EMIs).
 - For one-time payments: large or notable expenses appearing only once (gadgets, travel, gifts).
 - Comparison: compare ${periodLabel} vs ${previousLabel}. Use trend "new" if a charge appeared this period for the first time, "stable" if change is <5%, "up" if increased, "down" if decreased. Include "+22%" style notes.
@@ -205,7 +257,7 @@ Rules:
 - Be concise. Every label/detail under 90 chars.`;
 
     const expenseSummary = JSON.stringify(
-      expenses.map((e: any) => ({
+      scoped.map((e: any) => ({
         name: e.name,
         amount: e.amount,
         category: e.category,
