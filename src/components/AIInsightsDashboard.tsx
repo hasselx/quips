@@ -34,11 +34,15 @@ function colorFor(name: string, i = 0): string {
 }
 
 /* -------- badges (fixed / variable / one-time / recurring) -------- */
+// fixed=red, variable=yellow, one-time=green
+const FIXED_COLOR = "#e34948";
+const VARIABLE_COLOR = "#eda100";
+const ONETIME_COLOR = "#1baf7a";
 const BADGE_STYLES: Record<string, { bg: string; fg: string; label: string }> = {
-  fixed: { bg: "#E6F1FB", fg: "#0C447C", label: "fixed" },
-  variable: { bg: "#E1F5EE", fg: "#085041", label: "variable" },
-  "one-time": { bg: "#FAEEDA", fg: "#633806", label: "one-time" },
-  onetime: { bg: "#FAEEDA", fg: "#633806", label: "one-time" },
+  fixed: { bg: "#FBE7E7", fg: FIXED_COLOR, label: "fixed" },
+  variable: { bg: "#FAEEDA", fg: "#8a5d00", label: "variable" },
+  "one-time": { bg: "#E1F5EE", fg: "#085041", label: "one-time" },
+  onetime: { bg: "#E1F5EE", fg: "#085041", label: "one-time" },
   recurring: { bg: "#EEEDFE", fg: "#3C3489", label: "recurring" },
 };
 function Badge({ kind }: { kind: string }) {
