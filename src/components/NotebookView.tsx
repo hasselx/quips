@@ -321,7 +321,7 @@ export function NotebookView({ notebook, onBack }: NotebookViewProps) {
                 <p className="text-xs text-muted-foreground">
                   {receiptStatus === "processing"
                     ? "Parsing your selected gallery image..."
-                    : "Opening the expense form with the extracted details..."}
+                    : "Saving the verified details to this notebook..."}
                 </p>
               </div>
             </div>
