@@ -280,7 +280,6 @@ export function NotebookView({ notebook, onBack }: NotebookViewProps) {
         ref={fileInputRef}
         type="file"
         accept="image/*"
-        capture="environment"
         className="hidden"
         onChange={handleReceiptUpload}
       />
