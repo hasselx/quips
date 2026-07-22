@@ -1,5 +1,5 @@
 import { useState, useMemo, useEffect, useRef } from "react";
-import { ArrowLeft, Plus, Download, Camera, Loader2, PieChart, BarChart3 } from "lucide-react";
+import { ArrowLeft, Plus, Download, Image as ImageIcon, Loader2, PieChart, BarChart3 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -280,7 +280,6 @@ export function NotebookView({ notebook, onBack }: NotebookViewProps) {
         ref={fileInputRef}
         type="file"
         accept="image/*"
-        capture="environment"
         className="hidden"
         onChange={handleReceiptUpload}
       />
@@ -313,9 +312,9 @@ export function NotebookView({ notebook, onBack }: NotebookViewProps) {
           variant="outline"
           className="h-12 w-12 rounded-full shadow-elevated bg-background"
           size="icon"
-          title="Scan receipt"
+          title="Upload receipt image"
         >
-          {receiptBusy ? <Loader2 className="h-5 w-5 animate-spin" /> : <Camera className="h-5 w-5" />}
+          {receiptBusy ? <Loader2 className="h-5 w-5 animate-spin" /> : <ImageIcon className="h-5 w-5" />}
         </Button>
         <Button onClick={() => setFormOpen(true)} disabled={receiptBusy} className="h-14 w-14 rounded-full shadow-elevated text-lg" size="icon">
           <Plus className="h-7 w-7" />
