@@ -1,6 +1,7 @@
 import { useState, useMemo, useEffect, useRef } from "react";
-import { ArrowLeft, Plus, Download, Image as ImageIcon, Loader2, PieChart, BarChart3 } from "lucide-react";
+import { ArrowLeft, Plus, Download, Images, Loader2, PieChart, BarChart3, CheckCircle2, Pencil } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
@@ -21,6 +22,7 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 type Notebook = Tables<"notebooks">;
 type Expense = Tables<"expenses">;
+type ExpenseDraft = { name: string; category: string; amount: number; date: string; description?: string };
 
 interface NotebookViewProps {
   notebook: Notebook;
@@ -37,7 +39,9 @@ export function NotebookView({ notebook, onBack }: NotebookViewProps) {
   const [filters, setFilters] = useState<FilterState>(DEFAULT_FILTERS);
   const { allCategories, addCategory } = useCustomCategories();
   const [receiptStatus, setReceiptStatus] = useState<"idle" | "processing" | "adding">("idle");
-  const [prefillData, setPrefillData] = useState<{ name: string; category: string; amount: number; date: string } | null>(null);
+  const [prefillData, setPrefillData] = useState<ExpenseDraft | null>(null);
+  const [parsedExpense, setParsedExpense] = useState<ExpenseDraft | null>(null);
+  const [parsedDialogOpen, setParsedDialogOpen] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const receiptBusy = receiptStatus !== "idle";
 
@@ -111,7 +115,7 @@ export function NotebookView({ notebook, onBack }: NotebookViewProps) {
   };
 
   const addMutation = useMutation({
-    mutationFn: async (data: { name: string; category: string; amount: number; date: string; description?: string }) => {
+    mutationFn: async (data: ExpenseDraft) => {
       const { error } = await supabase.from("expenses").insert({
         ...data,
         notebook_id: notebook.id,
@@ -141,7 +145,7 @@ export function NotebookView({ notebook, onBack }: NotebookViewProps) {
     onError: (err: any) => toast.error(err.message),
   });
 
-  const handleSubmit = (data: { name: string; category: string; amount: number; date: string }) => {
+  const handleSubmit = (data: ExpenseDraft) => {
     if (editExpense) {
       updateMutation.mutate({ id: editExpense.id, data });
       setEditExpense(null);
@@ -157,7 +161,10 @@ export function NotebookView({ notebook, onBack }: NotebookViewProps) {
 
   const handleOpenChange = (open: boolean) => {
     setFormOpen(open);
-    if (!open) setEditExpense(null);
+    if (!open) {
+      setEditExpense(null);
+      setPrefillData(null);
+    }
   };
 
   const handleAddCustomCategory = (name: string) => {
@@ -177,7 +184,7 @@ export function NotebookView({ notebook, onBack }: NotebookViewProps) {
     }
 
     setReceiptStatus("processing");
-    toast.info("Scanning receipt...");
+    toast.info("Reading selected image...");
 
     try {
       await new Promise((resolve) => requestAnimationFrame(() => resolve(null)));
@@ -189,12 +196,10 @@ export function NotebookView({ notebook, onBack }: NotebookViewProps) {
 
       if (error) throw error;
       if (data?.expense) {
-        setReceiptStatus("adding");
+        setParsedExpense(data.expense);
+        setParsedDialogOpen(true);
         await new Promise((resolve) => requestAnimationFrame(() => resolve(null)));
-        setPrefillData(data.expense);
-        setFormOpen(true);
-        await new Promise((resolve) => requestAnimationFrame(() => resolve(null)));
-        toast.success("Receipt parsed! Review the details.");
+        toast.success("Image parsed. Verify the details before adding.");
       } else if (data?.error) {
         toast.error(data.error);
       }
@@ -203,6 +208,25 @@ export function NotebookView({ notebook, onBack }: NotebookViewProps) {
     } finally {
       setReceiptStatus("idle");
       if (fileInputRef.current) fileInputRef.current.value = "";
+    }
+  };
+
+  const handleEditParsedExpense = () => {
+    if (!parsedExpense) return;
+    setPrefillData(parsedExpense);
+    setParsedDialogOpen(false);
+    setFormOpen(true);
+  };
+
+  const handleAddParsedExpense = async () => {
+    if (!parsedExpense) return;
+    setReceiptStatus("adding");
+    try {
+      await addMutation.mutateAsync(parsedExpense);
+      setParsedExpense(null);
+      setParsedDialogOpen(false);
+    } finally {
+      setReceiptStatus("idle");
     }
   };
 
@@ -279,9 +303,10 @@ export function NotebookView({ notebook, onBack }: NotebookViewProps) {
       <input
         ref={fileInputRef}
         type="file"
-        accept="image/*"
+        accept="image/jpeg,image/png,image/webp,image/heic,image/heif"
         className="hidden"
         onChange={handleReceiptUpload}
+        aria-label="Choose receipt image from gallery"
       />
 
       {receiptBusy && (
@@ -295,8 +320,8 @@ export function NotebookView({ notebook, onBack }: NotebookViewProps) {
                 </p>
                 <p className="text-xs text-muted-foreground">
                   {receiptStatus === "processing"
-                    ? "Compressing and analyzing your photo..."
-                    : "Opening the expense form with the extracted details..."}
+                    ? "Parsing your selected gallery image..."
+                    : "Saving the verified details to this notebook..."}
                 </p>
               </div>
             </div>
@@ -310,16 +335,52 @@ export function NotebookView({ notebook, onBack }: NotebookViewProps) {
           onClick={() => fileInputRef.current?.click()}
           disabled={receiptBusy}
           variant="outline"
-          className="h-12 w-12 rounded-full shadow-elevated bg-background"
-          size="icon"
-          title="Upload receipt image"
+          className="h-12 rounded-full shadow-elevated bg-background px-4 gap-2"
+          title="Choose image from gallery"
         >
-          {receiptBusy ? <Loader2 className="h-5 w-5 animate-spin" /> : <ImageIcon className="h-5 w-5" />}
+          {receiptBusy ? <Loader2 className="h-5 w-5 animate-spin" /> : <Images className="h-5 w-5" />}
+          <span className="text-sm font-semibold">Gallery</span>
         </Button>
         <Button onClick={() => setFormOpen(true)} disabled={receiptBusy} className="h-14 w-14 rounded-full shadow-elevated text-lg" size="icon">
           <Plus className="h-7 w-7" />
         </Button>
       </div>
+
+      <Dialog open={parsedDialogOpen} onOpenChange={setParsedDialogOpen}>
+        <DialogContent className="sm:max-w-md rounded-2xl">
+          <DialogHeader>
+            <DialogTitle className="text-xl font-bold">Parsed details</DialogTitle>
+          </DialogHeader>
+          {parsedExpense && (
+            <div className="space-y-4 mt-2">
+              <div className="rounded-xl border border-border bg-card p-4 space-y-3">
+                {[
+                  ["Name", parsedExpense.name || "Not found"],
+                  ["Category", parsedExpense.category || "Other"],
+                  ["Amount", `${notebookCurrency.symbol}${Number(parsedExpense.amount || 0).toFixed(2)}`],
+                  ["Date", parsedExpense.date || new Date().toISOString().split("T")[0]],
+                  ["Description", parsedExpense.description || "No description"],
+                ].map(([label, value]) => (
+                  <div key={label} className="flex items-start justify-between gap-4 border-b border-border/60 pb-2 last:border-0 last:pb-0">
+                    <span className="text-xs font-medium uppercase tracking-wide text-muted-foreground">{label}</span>
+                    <span className="max-w-[65%] text-right text-sm font-medium text-foreground break-words">{value}</span>
+                  </div>
+                ))}
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <Button type="button" variant="outline" className="rounded-xl h-11 gap-2" onClick={handleEditParsedExpense} disabled={receiptBusy}>
+                  <Pencil className="h-4 w-4" />
+                  Edit
+                </Button>
+                <Button type="button" className="rounded-xl h-11 gap-2" onClick={handleAddParsedExpense} disabled={receiptBusy}>
+                  {receiptBusy ? <Loader2 className="h-4 w-4 animate-spin" /> : <CheckCircle2 className="h-4 w-4" />}
+                  Add
+                </Button>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
 
       {/* Form */}
       <ExpenseForm
