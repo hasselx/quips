@@ -428,6 +428,13 @@ Rules:
     );
     insights.summary = { metrics: [...truthMetrics, ...aiExtras].slice(0, 4) };
     insights.categories = groundTruth.categories;
+    insights.comparison = {
+      previousLabel: prevName,
+      currentLabel: currName,
+      rows: comparisonRows,
+      projection: insights.comparison?.projection || "",
+    };
+
 
     return new Response(JSON.stringify({ insights }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
