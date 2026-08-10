@@ -241,6 +241,87 @@ serve(async (req) => {
       })),
     };
 
+    // ---- Deterministic period-over-period comparison ----
+    const inRange = (e: any, from: Date, to: Date) => {
+      const d = new Date(e.date);
+      return !isNaN(d.getTime()) && d >= from && d < to;
+    };
+    const sumBy = (list: any[]) => {
+      const m: Record<string, number> = {};
+      let t = 0;
+      for (const e of list) {
+        const c = e.category || "Other";
+        const a = Number(e.amount || 0);
+        m[c] = (m[c] || 0) + a;
+        t += a;
+      }
+      return { byCat: m, total: t };
+    };
+
+    let currRange: [Date, Date];
+    let prevRange: [Date, Date];
+    let currName = "current";
+    let prevName = "previous";
+    const monthName = (d: Date) => d.toLocaleString("en-US", { month: "long" }).toLowerCase();
+
+    if (period === "week") {
+      const end = new Date(now);
+      const curStart = new Date(now); curStart.setDate(curStart.getDate() - 7);
+      const prevStart = new Date(now); prevStart.setDate(prevStart.getDate() - 14);
+      currRange = [curStart, end];
+      prevRange = [prevStart, curStart];
+      currName = "this week";
+      prevName = "last week";
+    } else {
+      // month view AND all-time both compare the latest month vs the one before.
+      let ref = new Date(now.getFullYear(), now.getMonth(), 1);
+      if (period !== "month") {
+        const keys = monthKeys.sort();
+        const last = keys[keys.length - 1];
+        if (last) {
+          const [y, m] = last.split("-").map(Number);
+          ref = new Date(y, m - 1, 1);
+        }
+      }
+      const nextMonth = new Date(ref.getFullYear(), ref.getMonth() + 1, 1);
+      const prevMonth = new Date(ref.getFullYear(), ref.getMonth() - 1, 1);
+      currRange = [ref, nextMonth];
+      prevRange = [prevMonth, ref];
+      currName = monthName(ref);
+      prevName = monthName(prevMonth);
+    }
+
+    const currSet = sumBy(expenses.filter((e: any) => inRange(e, currRange[0], currRange[1])));
+    const prevSet = sumBy(expenses.filter((e: any) => inRange(e, prevRange[0], prevRange[1])));
+
+    const mkRow = (label: string, from: number, to: number) => {
+      let trend: "up" | "down" | "stable" | "new" = "stable";
+      let note = "stable";
+      if (from === 0 && to > 0) {
+        trend = "new";
+        note = "first charge";
+      } else if (from > 0 && to === 0) {
+        trend = "down";
+        note = "-100%";
+      } else if (from > 0) {
+        const pct = ((to - from) / from) * 100;
+        const r = Math.round(pct * 10) / 10;
+        if (Math.abs(r) < 5) { trend = "stable"; note = "stable"; }
+        else { trend = r > 0 ? "up" : "down"; note = `${r > 0 ? "+" : ""}${r}%`; }
+      }
+      return { label, from: from > 0 ? fmtMoney(from) : "", to: fmtMoney(to), trend, note };
+    };
+
+    const catNames = Array.from(new Set([...Object.keys(currSet.byCat), ...Object.keys(prevSet.byCat)]))
+      .sort((a, b) => (currSet.byCat[b] || 0) - (currSet.byCat[a] || 0))
+      .slice(0, 5);
+
+    const comparisonRows = [
+      mkRow("Total spent", prevSet.total, currSet.total),
+      ...catNames.map((c) => mkRow(c, prevSet.byCat[c] || 0, currSet.byCat[c] || 0)),
+    ];
+
+
     const systemPrompt = `You are a financial analyst AI for an expense tracker called "Quips".
 You receive expenses already scoped to **${periodLabel}** (currency: ${currencyCode}).
 
@@ -347,6 +428,13 @@ Rules:
     );
     insights.summary = { metrics: [...truthMetrics, ...aiExtras].slice(0, 4) };
     insights.categories = groundTruth.categories;
+    insights.comparison = {
+      previousLabel: prevName,
+      currentLabel: currName,
+      rows: comparisonRows,
+      projection: insights.comparison?.projection || "",
+    };
+
 
     return new Response(JSON.stringify({ insights }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
