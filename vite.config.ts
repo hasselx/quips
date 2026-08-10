@@ -31,8 +31,8 @@ export default defineConfig(({ mode }) => ({
             options: { cacheName: "page-navigation", networkTimeoutSeconds: 3 },
           },
           {
-            urlPattern: ({ url }) =>
-              url.origin === self.location.origin && /\.[a-f0-9]{8,}\.(?:js|css)$/.test(url.pathname),
+            urlPattern: ({ url, sameOrigin }) =>
+              sameOrigin && /\.[a-f0-9]{8,}\.(?:js|css)$/.test(url.pathname),
             handler: "CacheFirst",
             options: { cacheName: "hashed-assets" },
           },
