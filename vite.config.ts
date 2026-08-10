@@ -18,9 +18,25 @@ export default defineConfig(({ mode }) => ({
     mode === "development" && componentTagger(),
     VitePWA({
       registerType: "autoUpdate",
+      injectRegister: null,
+      filename: "sw.js",
+      devOptions: { enabled: false },
       includeAssets: ["favicon.ico", "placeholder.svg"],
       workbox: {
         navigateFallbackDenylist: [/^\/~oauth/],
+        runtimeCaching: [
+          {
+            urlPattern: ({ request }) => request.mode === "navigate",
+            handler: "NetworkFirst",
+            options: { cacheName: "page-navigation", networkTimeoutSeconds: 3 },
+          },
+          {
+            urlPattern: ({ url, sameOrigin }) =>
+              sameOrigin && /\.[a-f0-9]{8,}\.(?:js|css)$/.test(url.pathname),
+            handler: "CacheFirst",
+            options: { cacheName: "hashed-assets" },
+          },
+        ],
       },
       manifest: {
         name: "Quips - Quick Expense Tracker",

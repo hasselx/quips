@@ -171,8 +171,7 @@ export function NotebookView({ notebook, onBack }: NotebookViewProps) {
     addCategory.mutate(name);
   };
 
-  const handleReceiptUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
+  const handleReceiptFile = async (file?: File) => {
     if (!file) return;
     if (!file.type.startsWith("image/")) {
       toast.error("Please upload an image file");
@@ -209,6 +208,46 @@ export function NotebookView({ notebook, onBack }: NotebookViewProps) {
       setReceiptStatus("idle");
       if (fileInputRef.current) fileInputRef.current.value = "";
     }
+  };
+
+  const handleReceiptUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    void handleReceiptFile(e.target.files?.[0]);
+  };
+
+  const openGallery = async () => {
+    if (receiptBusy) return;
+
+    const windowWithPicker = window as typeof window & {
+      showOpenFilePicker?: (options?: {
+        multiple?: boolean;
+        types?: Array<{ description: string; accept: Record<string, string[]> }>;
+      }) => Promise<Array<{ getFile: () => Promise<File> }>>;
+    };
+
+    if (windowWithPicker.showOpenFilePicker) {
+      try {
+        const [handle] = await windowWithPicker.showOpenFilePicker({
+          multiple: false,
+          types: [
+            {
+              description: "Receipt images",
+              accept: {
+                "image/jpeg": [".jpg", ".jpeg"],
+                "image/png": [".png"],
+                "image/webp": [".webp"],
+                "image/heic": [".heic", ".heif"],
+              },
+            },
+          ],
+        });
+        if (handle) await handleReceiptFile(await handle.getFile());
+        return;
+      } catch (error) {
+        if (error instanceof DOMException && error.name === "AbortError") return;
+      }
+    }
+
+    fileInputRef.current?.click();
   };
 
   const handleEditParsedExpense = () => {
@@ -303,7 +342,7 @@ export function NotebookView({ notebook, onBack }: NotebookViewProps) {
       <input
         ref={fileInputRef}
         type="file"
-        accept="image/jpeg,image/png,image/webp,image/heic,image/heif"
+        accept=".jpg,.jpeg,.png,.webp,.heic,.heif"
         className="hidden"
         onChange={handleReceiptUpload}
         aria-label="Choose receipt image from gallery"
@@ -332,7 +371,7 @@ export function NotebookView({ notebook, onBack }: NotebookViewProps) {
       {/* FABs */}
       <div className="fixed bottom-20 right-6 flex flex-col gap-3 z-40 md:bottom-6">
         <Button
-          onClick={() => fileInputRef.current?.click()}
+          onClick={() => void openGallery()}
           disabled={receiptBusy}
           variant="outline"
           className="h-12 rounded-full shadow-elevated bg-background px-4 gap-2"
