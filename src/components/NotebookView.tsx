@@ -435,11 +435,12 @@ export function NotebookView({ notebook, onBack }: NotebookViewProps) {
                 <div className="rounded-xl border border-border bg-card overflow-hidden">
                   <div className="flex items-center justify-between px-3 py-2 bg-muted/50">
                     <span className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Items</span>
-                    <span className="text-[11px] text-muted-foreground">{parsedItems.length || 0} lines</span>
+                    <span className="text-[11px] text-muted-foreground">{parsedItems.length} items</span>
                   </div>
                   {parsedItems.length > 0 ? (
                     <div className="max-h-56 overflow-y-auto">
-                      <table className="w-full text-xs">
+                      <table className="w-full table-fixed text-xs">
+
                         <colgroup>
                           <col />
                           <col className="w-12" />
