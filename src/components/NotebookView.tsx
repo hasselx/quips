@@ -45,6 +45,17 @@ export function NotebookView({ notebook, onBack }: NotebookViewProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const receiptBusy = receiptStatus !== "idle";
 
+  const parsedItems = useMemo(() => {
+    const raw = parsedExpense?.description ?? "";
+    return raw
+      .split("\n")
+      .map((line) => line.trim())
+      .filter((line) => line && line.includes("|"))
+      .map((line) => line.split("|").map((p) => p.trim()))
+      .filter(([name, , price]) => name && !/^item$/i.test(name) && !/^price$/i.test(price ?? ""))
+      .map(([name, qty, price]) => ({ name, qty: qty || "1", price: price || "-" }));
+  }, [parsedExpense]);
+
   const { data: liveNotebook } = useQuery({
     queryKey: ["notebook", notebook.id],
     queryFn: async () => {
