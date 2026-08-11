@@ -46,15 +46,29 @@ export function NotebookView({ notebook, onBack }: NotebookViewProps) {
   const receiptBusy = receiptStatus !== "idle";
 
   const parsedItems = useMemo(() => {
-    const raw = parsedExpense?.description ?? "";
-    return raw
-      .split("\n")
-      .map((line) => line.trim())
-      .filter((line) => line && line.includes("|"))
-      .map((line) => line.split("|").map((p) => p.trim()))
-      .filter(([name, , price]) => name && !/^item$/i.test(name) && !/^price$/i.test(price ?? ""))
-      .map(([name, qty, price]) => ({ name, qty: qty || "1", price: price || "-" }));
+    const raw = (parsedExpense?.description ?? "").replace(/\s*\n\s*/g, " ").trim();
+    if (!raw.includes("|")) return [] as { name: string; qty: string; price: string }[];
+
+    const parts = raw.split("|").map((p) => p.trim());
+    const items: { name: string; qty: string; price: string }[] = [];
+    let name = parts[0] ?? "";
+
+    for (let i = 1; i + 1 < parts.length + 1; i += 2) {
+      const qty = parts[i];
+      const priceToken = parts[i + 1];
+      if (qty === undefined || priceToken === undefined) break;
+      const match = priceToken.match(/^(-?\d+(?:[.,]\d+)?)\s*([\s\S]*)$/);
+      const price = match ? match[1] : priceToken;
+      const nextName = match ? match[2].trim() : "";
+      if (name && !/^item$/i.test(name)) {
+        items.push({ name, qty: qty || "1", price: price || "-" });
+      }
+      name = nextName;
+    }
+
+    return items;
   }, [parsedExpense]);
+
 
   const { data: liveNotebook } = useQuery({
     queryKey: ["notebook", notebook.id],
