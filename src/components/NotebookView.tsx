@@ -398,14 +398,20 @@ export function NotebookView({ notebook, onBack }: NotebookViewProps) {
                   ["Category", parsedExpense.category || "Other"],
                   ["Amount", `${notebookCurrency.symbol}${Number(parsedExpense.amount || 0).toFixed(2)}`],
                   ["Date", parsedExpense.date || new Date().toISOString().split("T")[0]],
-                  ["Description", parsedExpense.description || "No description"],
                 ].map(([label, value]) => (
                   <div key={label} className="flex items-start justify-between gap-4 border-b border-border/60 pb-2 last:border-0 last:pb-0">
                     <span className="text-xs font-medium uppercase tracking-wide text-muted-foreground">{label}</span>
                     <span className="max-w-[65%] text-right text-sm font-medium text-foreground break-words">{value}</span>
                   </div>
                 ))}
+                <div className="space-y-1.5">
+                  <span className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Items</span>
+                  <pre className="max-h-48 overflow-auto whitespace-pre-wrap rounded-lg bg-muted/50 p-2 text-xs font-mono text-foreground">
+                    {parsedExpense.description || "No items detected"}
+                  </pre>
+                </div>
               </div>
+
               <div className="grid grid-cols-2 gap-3">
                 <Button type="button" variant="outline" className="rounded-xl h-11 gap-2" onClick={handleEditParsedExpense} disabled={receiptBusy}>
                   <Pencil className="h-4 w-4" />
