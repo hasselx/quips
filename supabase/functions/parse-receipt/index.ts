@@ -28,6 +28,10 @@ Return a JSON object using the tool provided. Rules:
 - name should be a short description of the purchase (store name or main item)
 - category should be one of: Food, Transport, Shopping, Entertainment, Bills, Health, Education, Travel, Other
 - If multiple items, summarize as one expense with the total amount
+- description MUST be a simple plain-text table of every line item read from the receipt, one item per line, in the format:
+  Item | Qty | Price
+  Milk | 2 | 3.98
+  Use the exact item names printed on the receipt. Use 1 as quantity when not printed. Prices are numeric only, no currency symbols. Do not add totals, taxes or extra commentary rows.
 - If you can't read something clearly, make your best guess`;
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
