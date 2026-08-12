@@ -411,7 +411,7 @@ export function NotebookView({ notebook, onBack }: NotebookViewProps) {
       </div>
 
       <Dialog open={parsedDialogOpen} onOpenChange={(open) => !receiptBusy && setParsedDialogOpen(open)}>
-        <DialogContent className="inset-x-0 bottom-0 left-0 top-auto flex h-[100dvh] max-h-[100dvh] w-full max-w-none translate-x-0 translate-y-0 flex-col gap-0 overflow-hidden rounded-none border-x-0 border-b-0 p-0 sm:left-1/2 sm:top-1/2 sm:h-auto sm:max-h-[90dvh] sm:max-w-md sm:-translate-x-1/2 sm:-translate-y-1/2 sm:rounded-xl sm:border">
+        <DialogContent className="inset-0 flex h-[100svh] max-h-[100svh] w-screen max-w-none translate-x-0 translate-y-0 grid-rows-none flex-col gap-0 overflow-hidden rounded-none border-0 p-0 sm:inset-auto sm:left-1/2 sm:top-1/2 sm:h-[90dvh] sm:max-h-[90dvh] sm:w-full sm:max-w-md sm:-translate-x-1/2 sm:-translate-y-1/2 sm:rounded-xl sm:border">
           <DialogHeader className="shrink-0 border-b border-border px-4 py-3 text-left">
             <div className="flex items-center justify-between gap-3 pr-8">
               <DialogTitle className="text-lg font-bold">Parsed details</DialogTitle>
@@ -423,7 +423,7 @@ export function NotebookView({ notebook, onBack }: NotebookViewProps) {
           </DialogHeader>
           {parsedExpense && (
             <>
-              <div className="min-h-0 flex-1 space-y-3 overflow-y-auto overscroll-contain px-3 py-3 sm:px-5 sm:py-4">
+              <div className="flex min-h-0 flex-1 flex-col gap-3 overflow-hidden px-3 py-3 sm:px-5 sm:py-4">
                 <div className="grid grid-cols-2 gap-x-4 gap-y-3 rounded-lg border border-border bg-card p-3">
                   {[
                     ["Name", parsedExpense.name || "Not found"],
@@ -438,13 +438,13 @@ export function NotebookView({ notebook, onBack }: NotebookViewProps) {
                   ))}
                 </div>
 
-                <div className="overflow-hidden rounded-lg border border-border bg-card">
+                <div className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-lg border border-border bg-card">
                   <div className="flex items-center justify-between px-3 py-2 bg-muted/50">
                     <span className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Items</span>
                     <span className="text-[11px] text-muted-foreground">{parsedItems.length} items</span>
                   </div>
                   {parsedItems.length > 0 ? (
-                    <div className="overflow-x-hidden">
+                    <div className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden overscroll-contain">
                       <table className="w-full table-fixed text-xs">
 
                         <colgroup>
@@ -477,7 +477,7 @@ export function NotebookView({ notebook, onBack }: NotebookViewProps) {
                 </div>
               </div>
 
-              <div className="grid shrink-0 grid-cols-2 gap-3 border-t border-border bg-background px-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-3 sm:px-4 sm:pb-4">
+              <div className="relative z-10 grid shrink-0 grid-cols-2 gap-3 border-t border-border bg-background px-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-3 shadow-elevated sm:px-4 sm:pb-4">
                 <Button type="button" variant="outline" className="h-12 rounded-lg" onClick={() => setParsedDialogOpen(false)} disabled={receiptBusy}>
                   Cancel
                 </Button>
