@@ -411,7 +411,7 @@ export function NotebookView({ notebook, onBack }: NotebookViewProps) {
       </div>
 
       <Dialog open={parsedDialogOpen} onOpenChange={(open) => !receiptBusy && setParsedDialogOpen(open)}>
-        <DialogContent className="inset-0 flex h-[100svh] max-h-[100svh] w-screen max-w-none translate-x-0 translate-y-0 grid-rows-none flex-col gap-0 overflow-hidden rounded-none border-0 p-0 sm:inset-auto sm:left-1/2 sm:top-1/2 sm:h-[90dvh] sm:max-h-[90dvh] sm:w-full sm:max-w-md sm:-translate-x-1/2 sm:-translate-y-1/2 sm:rounded-xl sm:border">
+        <DialogContent className="!inset-0 !flex h-[100dvh] max-h-[100dvh] w-screen max-w-none !translate-x-0 !translate-y-0 flex-col gap-0 overflow-hidden rounded-none border-0 p-0 sm:!inset-auto sm:!left-1/2 sm:!top-1/2 sm:h-[90dvh] sm:max-h-[90dvh] sm:w-full sm:max-w-md sm:!-translate-x-1/2 sm:!-translate-y-1/2 sm:rounded-xl sm:border">
           <DialogHeader className="shrink-0 border-b border-border px-4 py-3 text-left">
             <div className="flex items-center justify-between gap-3 pr-8">
               <DialogTitle className="text-lg font-bold">Parsed details</DialogTitle>
