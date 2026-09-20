@@ -106,6 +106,39 @@ export type Database = {
           },
         ]
       }
+      ledger_entries: {
+        Row: {
+          amount: number
+          created_at: string
+          date: string
+          id: string
+          note: string
+          person_name: string
+          type: string
+          user_id: string
+        }
+        Insert: {
+          amount?: number
+          created_at?: string
+          date?: string
+          id?: string
+          note?: string
+          person_name: string
+          type?: string
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          date?: string
+          id?: string
+          note?: string
+          person_name?: string
+          type?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       notebooks: {
         Row: {
           created_at: string
@@ -131,6 +164,24 @@ export type Database = {
           id?: string
           name?: string
           type?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_settings: {
+        Row: {
+          currency: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          currency?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          currency?: string
           updated_at?: string
           user_id?: string
         }
