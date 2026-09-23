@@ -1,0 +1,2 @@
+ALTER TABLE public.ledger_entries DROP CONSTRAINT IF EXISTS ledger_entries_type_check;
+ALTER TABLE public.ledger_entries ADD CONSTRAINT ledger_entries_type_check CHECK (type IN ('lent','borrowed','income'));
