@@ -4,7 +4,7 @@ import { useAuth } from "@/hooks/useAuth";
 import type { Tables } from "@/integrations/supabase/types";
 
 export type LedgerEntry = Tables<"ledger_entries">;
-export type EntryType = "lent" | "borrowed";
+export type EntryType = "lent" | "borrowed" | "income";
 
 export interface NewEntry {
   person_name: string;

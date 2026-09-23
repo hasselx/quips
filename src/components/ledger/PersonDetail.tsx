@@ -11,7 +11,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
-import { ArrowDownLeft, ArrowUpRight, Share2, Trash2 } from "lucide-react";
+import { ArrowDownLeft, ArrowUpRight, Share2, Trash2, Wallet } from "lucide-react";
 import { formatCurrency } from "@/lib/currency";
 import { cn } from "@/lib/utils";
 import type { PersonSummary } from "@/hooks/useLedger";
@@ -60,24 +60,42 @@ export function PersonDetail({ person, currency, onOpenChange, onShare, onDelete
           <div className="flex-1 overflow-y-auto border-t border-border">
             {person.entries.map((e) => {
               const lent = e.type === "lent";
+              const income = e.type === "income";
               return (
                 <div key={e.id} className="flex items-center gap-3 px-5 py-3 border-b border-border">
                   <div
                     className={cn(
                       "h-8 w-8 rounded-lg flex items-center justify-center shrink-0",
-                      lent ? "bg-primary/10 text-primary" : "bg-destructive/10 text-destructive"
+                      lent
+                        ? "bg-primary/10 text-primary"
+                        : income
+                          ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
+                          : "bg-destructive/10 text-destructive"
                     )}
                   >
-                    {lent ? <ArrowDownLeft className="h-4 w-4" /> : <ArrowUpRight className="h-4 w-4" />}
+                    {lent ? (
+                      <ArrowDownLeft className="h-4 w-4" />
+                    ) : income ? (
+                      <Wallet className="h-4 w-4" />
+                    ) : (
+                      <ArrowUpRight className="h-4 w-4" />
+                    )}
                   </div>
                   <div className="min-w-0 flex-1">
-                    <p className="text-sm font-medium text-foreground">{lent ? "Lent" : "Borrowed"}</p>
+                    <p className="text-sm font-medium text-foreground">
+                      {lent ? "Lent" : income ? "Income received" : "Borrowed"}
+                    </p>
                     <p className="text-xs text-muted-foreground truncate">
                       {new Date(e.date).toLocaleDateString(undefined, { day: "2-digit", month: "short", year: "numeric" })}
                       {e.note ? ` · ${e.note}` : ""}
                     </p>
                   </div>
-                  <span className={cn("text-sm font-semibold", lent ? "text-primary" : "text-destructive")}>
+                  <span
+                    className={cn(
+                      "text-sm font-semibold",
+                      lent ? "text-primary" : income ? "text-emerald-600 dark:text-emerald-400" : "text-destructive"
+                    )}
+                  >
                     {lent ? "+" : "-"}
                     {formatCurrency(Number(e.amount), currency)}
                   </span>
