@@ -8,7 +8,7 @@ export function buildPersonSummaryText(person: PersonSummary, currency: string):
   const sorted = [...person.entries].sort((a, b) => a.date.localeCompare(b.date));
   for (const e of sorted) {
     const sign = e.type === "lent" ? "+" : "-";
-    const label = e.type === "lent" ? "Lent" : "Borrowed";
+    const label = e.type === "lent" ? "Lent" : e.type === "income" ? "Income received" : "Borrowed";
     const date = new Date(e.date).toLocaleDateString(undefined, {
       day: "2-digit",
       month: "short",
