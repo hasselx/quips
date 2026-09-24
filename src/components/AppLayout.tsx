@@ -1,9 +1,10 @@
 import { Outlet, useLocation, Link } from "react-router-dom";
-import { Home, BookUser, Settings } from "lucide-react";
+import { Home, BookUser, Settings, TrendingUp } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const NAV_ITEMS = [
   { label: "Home", icon: Home, path: "/dashboard" },
+  { label: "Income", icon: TrendingUp, path: "/dashboard/income" },
   { label: "Ledger", icon: BookUser, path: "/dashboard/ledger" },
   { label: "Settings", icon: Settings, path: "/dashboard/settings" },
 ];

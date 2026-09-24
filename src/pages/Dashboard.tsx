@@ -5,74 +5,81 @@ import { NotebookView } from "@/components/NotebookView";
 import type { Tables } from "@/integrations/supabase/types";
 
 type Notebook = Tables<"notebooks">;
-const SELECTED_NOTEBOOK_STORAGE_KEY = "expensebook:selected-notebook";
 
-const clearStoredNotebook = () => {
+interface DashboardProps {
+  notebookType?: "Expense" | "Income";
+}
+
+const storageKeyFor = (notebookType: "Expense" | "Income") =>
+  `expensebook:selected-${notebookType.toLowerCase()}-notebook`;
+
+const clearStoredNotebook = (storageKey: string) => {
   if (typeof window === "undefined") return;
 
-  window.sessionStorage.removeItem(SELECTED_NOTEBOOK_STORAGE_KEY);
-  window.localStorage.removeItem(SELECTED_NOTEBOOK_STORAGE_KEY);
+  window.sessionStorage.removeItem(storageKey);
+  window.localStorage.removeItem(storageKey);
 };
 
-const storeNotebook = (notebook: Notebook) => {
+const storeNotebook = (storageKey: string, notebook: Notebook) => {
   if (typeof window === "undefined") return;
 
   const serializedNotebook = JSON.stringify(notebook);
-  window.sessionStorage.setItem(SELECTED_NOTEBOOK_STORAGE_KEY, serializedNotebook);
-  window.localStorage.setItem(SELECTED_NOTEBOOK_STORAGE_KEY, serializedNotebook);
+  window.sessionStorage.setItem(storageKey, serializedNotebook);
+  window.localStorage.setItem(storageKey, serializedNotebook);
 };
 
-const getStoredNotebook = () => {
+const getStoredNotebook = (storageKey: string) => {
   if (typeof window === "undefined") return null;
 
   try {
     const rawNotebook =
-      window.sessionStorage.getItem(SELECTED_NOTEBOOK_STORAGE_KEY) ??
-      window.localStorage.getItem(SELECTED_NOTEBOOK_STORAGE_KEY);
+      window.sessionStorage.getItem(storageKey) ??
+      window.localStorage.getItem(storageKey);
 
     return rawNotebook ? (JSON.parse(rawNotebook) as Notebook) : null;
   } catch {
-    clearStoredNotebook();
+    clearStoredNotebook(storageKey);
     return null;
   }
 };
 
-const Dashboard = () => {
+const Dashboard = ({ notebookType = "Expense" }: DashboardProps) => {
   const { user } = useAuth();
-  const [selectedNotebook, setSelectedNotebook] = useState<Notebook | null>(() => getStoredNotebook());
+  const storageKey = storageKeyFor(notebookType);
+  const [selectedNotebook, setSelectedNotebook] = useState<Notebook | null>(() => getStoredNotebook(storageKey));
 
   useEffect(() => {
     if (!user) {
       setSelectedNotebook(null);
-      clearStoredNotebook();
+      clearStoredNotebook(storageKey);
       return;
     }
 
-    const storedNotebook = getStoredNotebook();
-    if (storedNotebook?.user_id === user.id) {
+    const storedNotebook = getStoredNotebook(storageKey);
+    if (storedNotebook?.user_id === user.id && storedNotebook.type === notebookType) {
       setSelectedNotebook((currentNotebook) => currentNotebook ?? storedNotebook);
       return;
     }
 
-    clearStoredNotebook();
-  }, [user]);
+    clearStoredNotebook(storageKey);
+  }, [notebookType, storageKey, user]);
 
   useEffect(() => {
     if (!selectedNotebook) {
-      clearStoredNotebook();
+      clearStoredNotebook(storageKey);
       return;
     }
 
-    storeNotebook(selectedNotebook);
-  }, [selectedNotebook]);
+    storeNotebook(storageKey, selectedNotebook);
+  }, [selectedNotebook, storageKey]);
 
   const handleSelectNotebook = (notebook: Notebook) => {
-    storeNotebook(notebook);
+    storeNotebook(storageKey, notebook);
     setSelectedNotebook(notebook);
   };
 
   const handleBack = () => {
-    clearStoredNotebook();
+    clearStoredNotebook(storageKey);
     setSelectedNotebook(null);
   };
 
@@ -80,7 +87,7 @@ const Dashboard = () => {
     return <NotebookView notebook={selectedNotebook} onBack={handleBack} />;
   }
 
-  return <NotebookList onSelect={handleSelectNotebook} />;
+  return <NotebookList onSelect={handleSelectNotebook} notebookType={notebookType} />;
 };
 
 export default Dashboard;
