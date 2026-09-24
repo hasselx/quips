@@ -18,9 +18,11 @@ interface ExpenseFormProps {
   categories: string[];
   onAddCustomCategory?: (name: string) => void;
   currencySymbol?: string;
+  recordType?: "expense" | "income";
 }
 
-export function ExpenseForm({ open, onOpenChange, onSubmit, editExpense, prefillData, categories, onAddCustomCategory, currencySymbol = "₹" }: ExpenseFormProps) {
+export function ExpenseForm({ open, onOpenChange, onSubmit, editExpense, prefillData, categories, onAddCustomCategory, currencySymbol = "₹", recordType = "expense" }: ExpenseFormProps) {
+  const isIncome = recordType === "income";
   const [name, setName] = useState("");
   const [category, setCategory] = useState("Food");
   const [customCategory, setCustomCategory] = useState("");
@@ -48,14 +50,14 @@ export function ExpenseForm({ open, onOpenChange, onSubmit, editExpense, prefill
       setDescription(prefillData.description || "");
     } else {
       setName("");
-      setCategory("Food");
+      setCategory(isIncome ? categories[0] ?? "Salary" : "Food");
       setShowCustomInput(false);
       setCustomCategory("");
       setAmount("");
       setDate(new Date().toISOString().split("T")[0]);
       setDescription("");
     }
-  }, [editExpense, prefillData, open]);
+  }, [categories, editExpense, isIncome, prefillData, open]);
 
   const handleCategoryChange = (val: string) => {
     if (val === "__other__") {
@@ -92,13 +94,13 @@ export function ExpenseForm({ open, onOpenChange, onSubmit, editExpense, prefill
       <DialogContent className="sm:max-w-md rounded-2xl">
         <DialogHeader>
           <DialogTitle className="text-xl font-bold">
-            {editExpense ? "Edit Expense" : "Add Expense"}
+            {editExpense ? `Edit ${isIncome ? "Income" : "Expense"}` : `Add ${isIncome ? "Income" : "Expense"}`}
           </DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4 mt-2">
           <div className="space-y-2">
-            <Label htmlFor="expense-name">Expense Name</Label>
-            <Input id="expense-name" placeholder="e.g. Coffee" value={name} onChange={(e) => setName(e.target.value)} required maxLength={100} className="rounded-xl" />
+            <Label htmlFor="expense-name">{isIncome ? "Income Source" : "Expense Name"}</Label>
+            <Input id="expense-name" placeholder={isIncome ? "e.g. Monthly salary" : "e.g. Coffee"} value={name} onChange={(e) => setName(e.target.value)} required maxLength={100} className="rounded-xl" />
           </div>
           <div className="space-y-2">
             <Label htmlFor="expense-category">Category</Label>
@@ -110,7 +112,7 @@ export function ExpenseForm({ open, onOpenChange, onSubmit, editExpense, prefill
                 {categories.map((c) => (
                   <SelectItem key={c} value={c}>{c}</SelectItem>
                 ))}
-                <SelectItem value="__other__">+ Add Custom Category</SelectItem>
+                {!isIncome && <SelectItem value="__other__">+ Add Custom Category</SelectItem>}
               </SelectContent>
             </Select>
             {showCustomInput && (
@@ -133,10 +135,10 @@ export function ExpenseForm({ open, onOpenChange, onSubmit, editExpense, prefill
           </div>
           <div className="space-y-2">
             <Label htmlFor="expense-description">Description <span className="text-muted-foreground text-xs">(optional)</span></Label>
-            <Textarea id="expense-description" placeholder="Add notes about this expense..." value={description} onChange={(e) => setDescription(e.target.value)} maxLength={500} className="rounded-xl resize-none" rows={2} />
+            <Textarea id="expense-description" placeholder={`Add notes about this ${isIncome ? "income" : "expense"}...`} value={description} onChange={(e) => setDescription(e.target.value)} maxLength={500} className="rounded-xl resize-none" rows={2} />
           </div>
           <Button type="submit" className="w-full rounded-xl h-12 text-base font-semibold">
-            {editExpense ? "Save Changes" : "Add Expense"}
+            {editExpense ? "Save Changes" : `Add ${isIncome ? "Income" : "Expense"}`}
           </Button>
         </form>
       </DialogContent>
