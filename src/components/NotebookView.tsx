@@ -44,6 +44,9 @@ export function NotebookView({ notebook, onBack }: NotebookViewProps) {
   const [parsedDialogOpen, setParsedDialogOpen] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const receiptBusy = receiptStatus !== "idle";
+  const isIncomeNotebook = notebook.type === "Income";
+  const incomeCategories = ["Salary", "Allowance", "Compensation"];
+  const visibleCategories = isIncomeNotebook ? incomeCategories : allCategories;
 
   const parsedItems = useMemo(() => {
     const raw = (parsedExpense?.description ?? "").replace(/\s*\n\s*/g, " ").trim();
@@ -148,7 +151,7 @@ export function NotebookView({ notebook, onBack }: NotebookViewProps) {
       });
       if (error) throw error;
     },
-    onSuccess: () => { invalidate(); toast.success("Expense added!"); },
+    onSuccess: () => { invalidate(); toast.success(isIncomeNotebook ? "Income added!" : "Expense added!"); },
     onError: (err: any) => toast.error(err.message),
   });
 
@@ -157,7 +160,7 @@ export function NotebookView({ notebook, onBack }: NotebookViewProps) {
       const { error } = await supabase.from("expenses").update(data).eq("id", id);
       if (error) throw error;
     },
-    onSuccess: () => { invalidate(); toast.success("Expense updated!"); },
+    onSuccess: () => { invalidate(); toast.success(isIncomeNotebook ? "Income updated!" : "Expense updated!"); },
     onError: (err: any) => toast.error(err.message),
   });
 
@@ -166,7 +169,7 @@ export function NotebookView({ notebook, onBack }: NotebookViewProps) {
       const { error } = await supabase.from("expenses").delete().eq("id", id);
       if (error) throw error;
     },
-    onSuccess: () => { invalidate(); toast.success("Expense deleted!"); },
+    onSuccess: () => { invalidate(); toast.success(isIncomeNotebook ? "Income deleted!" : "Expense deleted!"); },
     onError: (err: any) => toast.error(err.message),
   });
 
@@ -351,16 +354,16 @@ export function NotebookView({ notebook, onBack }: NotebookViewProps) {
 
         {/* Dashboard */}
         <div className="mb-4">
-          <DashboardSummary total={total} count={filteredExpenses.length} topCategory={topCategory} onTotalClick={() => setChartOpen(true)} customCategories={allCategories} currency={notebookCurrency.code} />
+          <DashboardSummary total={total} count={filteredExpenses.length} topCategory={topCategory} onTotalClick={() => setChartOpen(true)} customCategories={visibleCategories} currency={notebookCurrency.code} />
         </div>
 
         {/* Filters */}
         <div className="mb-4">
-          <ExpenseFilters filters={filters} onChange={setFilters} categories={allCategories} />
+          <ExpenseFilters filters={filters} onChange={setFilters} categories={visibleCategories} />
         </div>
 
         {/* Table */}
-        <ExpenseTable expenses={filteredExpenses} onEdit={handleEdit} onDelete={(id) => deleteMutation.mutate(id)} customCategories={allCategories} currency={notebookCurrency.code} />
+        <ExpenseTable expenses={filteredExpenses} onEdit={handleEdit} onDelete={(id) => deleteMutation.mutate(id)} customCategories={visibleCategories} currency={notebookCurrency.code} />
       </div>
 
       {/* Hidden file input for receipt scanning */}
@@ -499,9 +502,10 @@ export function NotebookView({ notebook, onBack }: NotebookViewProps) {
         onSubmit={handleSubmit}
         editExpense={editExpense}
         prefillData={prefillData}
-        categories={allCategories}
-        onAddCustomCategory={handleAddCustomCategory}
+        categories={visibleCategories}
+        onAddCustomCategory={isIncomeNotebook ? undefined : handleAddCustomCategory}
         currencySymbol={notebookCurrency.symbol}
+        recordType={isIncomeNotebook ? "income" : "expense"}
       />
 
       {/* Pie Chart */}
