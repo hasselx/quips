@@ -6,7 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ArrowDownLeft, ArrowUpRight, Plus, Trash2, User, Users, Wallet } from "lucide-react";
+import { ArrowDownLeft, ArrowUpRight, Plus, Trash2, User, Users } from "lucide-react";
 import { getCurrency } from "@/lib/currency";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
@@ -117,14 +117,12 @@ export function AddLedgerEntry({ open, onOpenChange, currency, knownPeople, onSu
   };
 
   const TypeToggle = (
-    <div className="grid grid-cols-3 gap-2">
-      {(["lent", "borrowed", "income"] as EntryType[]).map((t) => {
+    <div className="grid grid-cols-2 gap-2">
+      {(["lent", "borrowed"] as EntryType[]).map((t) => {
         const active = type === t;
-        const Icon = t === "lent" ? ArrowDownLeft : t === "income" ? Wallet : ArrowUpRight;
+        const Icon = t === "lent" ? ArrowDownLeft : ArrowUpRight;
         const label =
-          t === "income"
-            ? "Income"
-            : mode === "split"
+          mode === "split"
               ? t === "lent"
                 ? "I paid"
                 : "They paid"
@@ -141,9 +139,7 @@ export function AddLedgerEntry({ open, onOpenChange, currency, knownPeople, onSu
               active
                 ? t === "lent"
                   ? "border-primary bg-primary/10 text-primary"
-                  : t === "income"
-                    ? "border-emerald-500 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
-                    : "border-destructive bg-destructive/10 text-destructive"
+                  : "border-destructive bg-destructive/10 text-destructive"
                 : "border-border text-muted-foreground hover:bg-muted"
             )}
           >

@@ -17,18 +17,16 @@ type Notebook = Tables<"notebooks">;
 
 interface NotebookListProps {
   onSelect: (notebook: Notebook) => void;
+  notebookType: "Expense" | "Income";
 }
 
-export function NotebookList({ onSelect }: NotebookListProps) {
-  const { user, signOut } = useAuth();
+export function NotebookList({ onSelect, notebookType }: NotebookListProps) {
+  const { user } = useAuth();
   const queryClient = useQueryClient();
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editNotebook, setEditNotebook] = useState<Notebook | null>(null);
   const [name, setName] = useState("");
-  const [notebookType, setNotebookType] = useState("Expense");
   const [currency, setCurrency] = useState("INR");
-
-  const NOTEBOOK_TYPES = ["Expense", "Income"];
 
   // Normalize legacy types to Expense/Income
   const normalizeType = (t?: string) => (t === "Income" ? "Income" : "Expense");
@@ -41,7 +39,7 @@ export function NotebookList({ onSelect }: NotebookListProps) {
         .select("*")
         .order("updated_at", { ascending: false });
       if (error) throw error;
-      return data as Notebook[];
+      return (data as Notebook[]).filter((notebook) => normalizeType(notebook.type) === notebookType);
     },
   });
 
@@ -114,8 +112,8 @@ export function NotebookList({ onSelect }: NotebookListProps) {
     setName("");
   };
 
-  const openCreate = () => { setEditNotebook(null); setName(""); setNotebookType("Expense"); setCurrency("INR"); setDialogOpen(true); };
-  const openEdit = (nb: Notebook) => { setEditNotebook(nb); setName(nb.name); setNotebookType(normalizeType(nb.type)); setCurrency((nb as any).currency || "INR"); setDialogOpen(true); };
+  const openCreate = () => { setEditNotebook(null); setName(""); setCurrency("INR"); setDialogOpen(true); };
+  const openEdit = (nb: Notebook) => { setEditNotebook(nb); setName(nb.name); setCurrency((nb as any).currency || "INR"); setDialogOpen(true); };
 
   const TYPE_CONFIG: Record<string, { emoji: string; borderClass: string; bgClass: string }> = {
     "Expense": { emoji: "💳", borderClass: "border-l-emerald-400", bgClass: "bg-emerald-50 dark:bg-emerald-950/20" },
@@ -133,11 +131,15 @@ export function NotebookList({ onSelect }: NotebookListProps) {
         {/* Landing Header */}
         <div className="flex items-center justify-between mb-2">
           <div>
-            <h1 className="text-3xl font-extrabold text-foreground tracking-tight">💰 ExpenseBook</h1>
+            <h1 className="text-3xl font-extrabold text-foreground tracking-tight">
+              {notebookType === "Income" ? "Income" : "ExpenseBook"}
+            </h1>
           </div>
         </div>
         <p className="text-muted-foreground mb-8">
-          Track expenses across multiple notebooks. Create one for every trip, month, or purpose.
+          {notebookType === "Income"
+            ? "Track income across separate notebooks for every source or purpose."
+            : "Track expenses across multiple notebooks. Create one for every trip, month, or purpose."}
         </p>
 
         {/* Notebooks */}
@@ -147,7 +149,9 @@ export function NotebookList({ onSelect }: NotebookListProps) {
           <div className="bg-card rounded-2xl shadow-card p-12 text-center">
             <BookOpen className="h-12 w-12 text-muted-foreground mx-auto mb-3" />
             <p className="text-muted-foreground font-medium">No notebooks yet</p>
-            <p className="text-sm text-muted-foreground mt-1">Create one to start tracking expenses</p>
+            <p className="text-sm text-muted-foreground mt-1">
+              Create one to start tracking {notebookType.toLowerCase()}
+            </p>
             <Button onClick={openCreate} className="mt-4 rounded-xl">
               <Plus className="h-4 w-4 mr-2" /> Create Notebook
             </Button>
@@ -225,29 +229,6 @@ export function NotebookList({ onSelect }: NotebookListProps) {
             </DialogTitle>
           </DialogHeader>
           <form onSubmit={handleSubmit} className="space-y-4 mt-2">
-            {(
-              <div className="space-y-2">
-                <label className="text-sm font-medium text-foreground">Type</label>
-                <Select
-                  value={notebookType}
-                  onValueChange={(val) => {
-                    setNotebookType(val);
-                    if (!name || NOTEBOOK_TYPES.includes(name)) {
-                      setName(val);
-                    }
-                  }}
-                >
-                  <SelectTrigger className="rounded-xl">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {NOTEBOOK_TYPES.map((t) => (
-                      <SelectItem key={t} value={t}>{t}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            )}
             <div className="space-y-2">
               <label className="text-sm font-medium text-foreground">Name</label>
               <Input

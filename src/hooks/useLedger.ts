@@ -4,7 +4,7 @@ import { useAuth } from "@/hooks/useAuth";
 import type { Tables } from "@/integrations/supabase/types";
 
 export type LedgerEntry = Tables<"ledger_entries">;
-export type EntryType = "lent" | "borrowed" | "income";
+export type EntryType = "lent" | "borrowed";
 
 export interface NewEntry {
   person_name: string;
@@ -34,7 +34,7 @@ export function useLedger() {
         .order("date", { ascending: false })
         .order("created_at", { ascending: false });
       if (error) throw error;
-      return data as LedgerEntry[];
+      return (data as LedgerEntry[]).filter((entry) => entry.type === "lent" || entry.type === "borrowed");
     },
   });
 
