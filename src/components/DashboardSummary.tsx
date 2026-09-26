@@ -10,13 +10,15 @@ interface DashboardSummaryProps {
   onTotalClick?: () => void;
   customCategories?: string[];
   currency?: string;
+  recordType?: "expense" | "income";
 }
 
-export function DashboardSummary({ total, count, topCategory, onTotalClick, customCategories = [], currency }: DashboardSummaryProps) {
+export function DashboardSummary({ total, count, topCategory, onTotalClick, customCategories = [], currency, recordType = "expense" }: DashboardSummaryProps) {
+  const isIncome = recordType === "income";
   const cards = [
     {
       icon: <DollarSign className="h-6 w-6 text-primary" />,
-      label: "Total Spent",
+      label: isIncome ? "Total Income" : "Total Spent",
       value: formatCurrency(total, currency),
       bg: "bg-primary/10",
       onClick: onTotalClick,
@@ -24,7 +26,7 @@ export function DashboardSummary({ total, count, topCategory, onTotalClick, cust
     },
     {
       icon: <Hash className="h-6 w-6 text-info" />,
-      label: "Entries",
+      label: isIncome ? "Income Entries" : "Expense Entries",
       value: String(count),
       bg: "bg-info/10",
     },

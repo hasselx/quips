@@ -4,6 +4,7 @@ import type { Tables } from "@/integrations/supabase/types";
 import { formatCurrency } from "@/lib/currency";
 
 type Expense = Tables<"expenses">;
+type Income = Tables<"income_entries">;
 
 const COLORS = [
   "hsl(25, 80%, 55%)",
@@ -19,11 +20,13 @@ const COLORS = [
 interface CategoryPieChartProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  expenses: Expense[];
+  expenses: Array<Expense | Income>;
   currency?: string;
+  recordType?: "expense" | "income";
 }
 
-export function CategoryPieChart({ open, onOpenChange, expenses, currency }: CategoryPieChartProps) {
+export function CategoryPieChart({ open, onOpenChange, expenses, currency, recordType = "expense" }: CategoryPieChartProps) {
+  const isIncome = recordType === "income";
   const categoryMap: Record<string, number> = {};
   expenses.forEach((e) => {
     categoryMap[e.category] = (categoryMap[e.category] || 0) + Number(e.amount);
@@ -43,10 +46,10 @@ export function CategoryPieChart({ open, onOpenChange, expenses, currency }: Cat
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md rounded-2xl">
         <DialogHeader>
-          <DialogTitle className="text-xl font-bold">Spending by Category</DialogTitle>
+          <DialogTitle className="text-xl font-bold">{isIncome ? "Income by Category" : "Spending by Category"}</DialogTitle>
         </DialogHeader>
         {data.length === 0 ? (
-          <p className="text-center text-muted-foreground py-8">No expenses to chart</p>
+          <p className="text-center text-muted-foreground py-8">No {isIncome ? "income" : "expenses"} to chart</p>
         ) : (
           <div>
             <div className="h-64">

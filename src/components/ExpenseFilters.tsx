@@ -29,9 +29,10 @@ interface ExpenseFiltersProps {
   filters: FilterState;
   onChange: (filters: FilterState) => void;
   categories: string[];
+  recordType?: "expense" | "income";
 }
 
-export function ExpenseFilters({ filters, onChange, categories }: ExpenseFiltersProps) {
+export function ExpenseFilters({ filters, onChange, categories, recordType = "expense" }: ExpenseFiltersProps) {
   const [open, setOpen] = useState(false);
   const hasFilters = filters.timeRange !== "all" || filters.category !== "all" || filters.minAmount || filters.maxAmount || filters.search;
 
@@ -41,7 +42,7 @@ export function ExpenseFilters({ filters, onChange, categories }: ExpenseFilters
     <div className="space-y-2">
       <div className="flex items-center gap-2">
         <Input
-          placeholder="Search expenses..."
+          placeholder={recordType === "income" ? "Search income..." : "Search expenses..."}
           value={filters.search}
           onChange={(e) => update({ search: e.target.value })}
           className="rounded-xl flex-1"

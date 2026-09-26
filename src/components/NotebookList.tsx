@@ -43,10 +43,13 @@ export function NotebookList({ onSelect, notebookType }: NotebookListProps) {
     },
   });
 
-  const { data: expenseCounts = {} } = useQuery({
-    queryKey: ["notebook-counts"],
+  const { data: recordCounts = {} } = useQuery({
+    queryKey: ["notebook-counts", notebookType],
     queryFn: async () => {
-      const { data, error } = await supabase.from("expenses").select("notebook_id, amount");
+      const result = notebookType === "Income"
+        ? await supabase.from("income_entries").select("notebook_id, amount")
+        : await supabase.from("expenses").select("notebook_id, amount");
+      const { data, error } = result;
       if (error) throw error;
       const counts: Record<string, { count: number; total: number }> = {};
       data.forEach((e) => {
@@ -60,7 +63,8 @@ export function NotebookList({ onSelect, notebookType }: NotebookListProps) {
 
   const createMutation = useMutation({
     mutationFn: async ({ notebookName, type, currency }: { notebookName: string; type: string; currency: string }) => {
-      const { error } = await supabase.from("notebooks").insert({ name: notebookName, user_id: user!.id, type, currency } as any);
+      if (!user) throw new Error("Please sign in to create a notebook");
+      const { error } = await supabase.from("notebooks").insert({ name: notebookName, user_id: user.id, type, currency } as any);
       if (error) throw error;
     },
     onSuccess: () => {
@@ -93,7 +97,7 @@ export function NotebookList({ onSelect, notebookType }: NotebookListProps) {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["notebooks"] });
-      queryClient.invalidateQueries({ queryKey: ["notebook-counts"] });
+      queryClient.invalidateQueries({ queryKey: ["notebook-counts", notebookType] });
       toast.success("Notebook deleted!");
     },
     onError: (err: any) => toast.error(err.message),
@@ -160,7 +164,7 @@ export function NotebookList({ onSelect, notebookType }: NotebookListProps) {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <AnimatePresence>
               {notebooks.map((nb, i) => {
-                const stats = expenseCounts[nb.id];
+                const stats = recordCounts[nb.id];
                 const tType = normalizeType(nb.type);
                 const cfg = TYPE_CONFIG[tType];
                 return (
@@ -202,7 +206,9 @@ export function NotebookList({ onSelect, notebookType }: NotebookListProps) {
                     </div>
                     <h3 className="font-bold text-foreground text-lg">{nb.name}</h3>
                     <p className="text-sm text-muted-foreground mt-1">
-                      {stats ? `${stats.count} expenses · ${formatCurrency(stats.total, (nb as any).currency)}` : "No expenses"}
+                      {stats
+                        ? `${stats.count} ${notebookType === "Income" ? "income entries" : "expenses"} · ${formatCurrency(stats.total, (nb as any).currency)}`
+                        : notebookType === "Income" ? "No income" : "No expenses"}
                     </p>
                     <p className="text-xs text-muted-foreground mt-1">
                       Updated {formatDate(nb.updated_at)}

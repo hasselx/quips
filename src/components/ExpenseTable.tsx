@@ -6,22 +6,26 @@ import { motion, AnimatePresence } from "framer-motion";
 import { formatCurrency } from "@/lib/currency";
 
 type Expense = Tables<"expenses">;
+type Income = Tables<"income_entries">;
+type FinancialRecord = Expense | Income;
 
 interface ExpenseTableProps {
-  expenses: Expense[];
-  onEdit: (expense: Expense) => void;
+  expenses: FinancialRecord[];
+  onEdit: (expense: FinancialRecord) => void;
   onDelete: (id: string) => void;
   customCategories?: string[];
   currency?: string;
+  recordType?: "expense" | "income";
 }
 
-export function ExpenseTable({ expenses, onEdit, onDelete, customCategories = [], currency }: ExpenseTableProps) {
+export function ExpenseTable({ expenses, onEdit, onDelete, customCategories = [], currency, recordType = "expense" }: ExpenseTableProps) {
+  const isIncome = recordType === "income";
   if (expenses.length === 0) {
     return (
       <div className="bg-card rounded-2xl shadow-card p-12 text-center">
-        <p className="text-4xl mb-3">💸</p>
-        <p className="text-muted-foreground font-medium">No expenses yet</p>
-        <p className="text-sm text-muted-foreground mt-1">Tap the + button to add your first expense</p>
+        <p className="text-4xl mb-3">{isIncome ? "💰" : "💸"}</p>
+        <p className="text-muted-foreground font-medium">{isIncome ? "No income yet" : "No expenses yet"}</p>
+        <p className="text-sm text-muted-foreground mt-1">Tap the + button to add your first {isIncome ? "income entry" : "expense"}</p>
       </div>
     );
   }
