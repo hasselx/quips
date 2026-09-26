@@ -22,6 +22,8 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 type Notebook = Tables<"notebooks">;
 type Expense = Tables<"expenses">;
+type Income = Tables<"income_entries">;
+type FinancialRecord = Expense | Income;
 type ExpenseDraft = { name: string; category: string; amount: number; date: string; description?: string };
 
 interface NotebookViewProps {
@@ -33,7 +35,7 @@ export function NotebookView({ notebook, onBack }: NotebookViewProps) {
   const { user } = useAuth();
   const queryClient = useQueryClient();
   const [formOpen, setFormOpen] = useState(false);
-  const [editExpense, setEditExpense] = useState<Expense | null>(null);
+  const [editExpense, setEditExpense] = useState<FinancialRecord | null>(null);
   const [chartOpen, setChartOpen] = useState(false);
   const [barChartOpen, setBarChartOpen] = useState(false);
   const [filters, setFilters] = useState<FilterState>(DEFAULT_FILTERS);
@@ -105,20 +107,19 @@ export function NotebookView({ notebook, onBack }: NotebookViewProps) {
     }
   }, [notebook.id]);
 
-  const { data: expenses = [] } = useQuery({
-    queryKey: ["expenses", notebook.id],
+  const { data: records = [] } = useQuery({
+    queryKey: [isIncomeNotebook ? "income" : "expenses", notebook.id],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("expenses")
-        .select("*")
-        .eq("notebook_id", notebook.id)
-        .order("date", { ascending: false });
+      const result = isIncomeNotebook
+        ? await supabase.from("income_entries").select("*").eq("notebook_id", notebook.id).order("date", { ascending: false })
+        : await supabase.from("expenses").select("*").eq("notebook_id", notebook.id).order("date", { ascending: false });
+      const { data, error } = result;
       if (error) throw error;
-      return data as Expense[];
+      return data as FinancialRecord[];
     },
   });
 
-  const filteredExpenses = useMemo(() => applyFilters(expenses, filters), [expenses, filters]);
+  const filteredExpenses = useMemo(() => applyFilters(records, filters) as FinancialRecord[], [records, filters]);
   const total = useMemo(() => filteredExpenses.reduce((s, e) => s + Number(e.amount), 0), [filteredExpenses]);
 
   const topCategory = useMemo(() => {
@@ -136,19 +137,21 @@ export function NotebookView({ notebook, onBack }: NotebookViewProps) {
   };
 
   const invalidate = () => {
-    queryClient.invalidateQueries({ queryKey: ["expenses", notebook.id] });
-    queryClient.invalidateQueries({ queryKey: ["notebook-counts"] });
-    queryClient.invalidateQueries({ queryKey: ["all-expenses-analytics"] });
-    clearAnalysesOnChange();
+    queryClient.invalidateQueries({ queryKey: [isIncomeNotebook ? "income" : "expenses", notebook.id] });
+    queryClient.invalidateQueries({ queryKey: ["notebook-counts", isIncomeNotebook ? "Income" : "Expense"] });
+    if (!isIncomeNotebook) {
+      queryClient.invalidateQueries({ queryKey: ["all-expenses-analytics"] });
+      clearAnalysesOnChange();
+    }
   };
 
   const addMutation = useMutation({
     mutationFn: async (data: ExpenseDraft) => {
-      const { error } = await supabase.from("expenses").insert({
-        ...data,
-        notebook_id: notebook.id,
-        user_id: user!.id,
-      });
+      if (!user) throw new Error("Please sign in to add an entry");
+      const entry = { ...data, notebook_id: notebook.id, user_id: user.id };
+      const { error } = isIncomeNotebook
+        ? await supabase.from("income_entries").insert(entry)
+        : await supabase.from("expenses").insert(entry);
       if (error) throw error;
     },
     onSuccess: () => { invalidate(); toast.success(isIncomeNotebook ? "Income added!" : "Expense added!"); },
@@ -157,7 +160,9 @@ export function NotebookView({ notebook, onBack }: NotebookViewProps) {
 
   const updateMutation = useMutation({
     mutationFn: async ({ id, data }: { id: string; data: { name: string; category: string; amount: number; date: string; description?: string } }) => {
-      const { error } = await supabase.from("expenses").update(data).eq("id", id);
+      const { error } = isIncomeNotebook
+        ? await supabase.from("income_entries").update(data).eq("id", id)
+        : await supabase.from("expenses").update(data).eq("id", id);
       if (error) throw error;
     },
     onSuccess: () => { invalidate(); toast.success(isIncomeNotebook ? "Income updated!" : "Expense updated!"); },
@@ -166,7 +171,9 @@ export function NotebookView({ notebook, onBack }: NotebookViewProps) {
 
   const deleteMutation = useMutation({
     mutationFn: async (id: string) => {
-      const { error } = await supabase.from("expenses").delete().eq("id", id);
+      const { error } = isIncomeNotebook
+        ? await supabase.from("income_entries").delete().eq("id", id)
+        : await supabase.from("expenses").delete().eq("id", id);
       if (error) throw error;
     },
     onSuccess: () => { invalidate(); toast.success(isIncomeNotebook ? "Income deleted!" : "Expense deleted!"); },
@@ -182,7 +189,7 @@ export function NotebookView({ notebook, onBack }: NotebookViewProps) {
     }
   };
 
-  const handleEdit = (expense: Expense) => {
+  const handleEdit = (expense: FinancialRecord) => {
     setEditExpense(expense);
     setFormOpen(true);
   };
@@ -306,7 +313,7 @@ export function NotebookView({ notebook, onBack }: NotebookViewProps) {
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `${notebook.name}-expenses.csv`;
+    a.download = `${notebook.name}-${isIncomeNotebook ? "income" : "expenses"}.csv`;
     a.click();
     URL.revokeObjectURL(url);
     toast.success("CSV exported!");
@@ -347,34 +354,35 @@ export function NotebookView({ notebook, onBack }: NotebookViewProps) {
           </TabsList>
         </Tabs>
 
-        {/* AI Insights */}
-        <div className="mb-4">
-          <AIInsightsCard expenses={expenses} notebookName={notebook.name} notebookId={notebook.id} currency={notebookCurrency.code} period={filters.timeRange === "week" || filters.timeRange === "month" ? filters.timeRange : "all"} />
-        </div>
+        {!isIncomeNotebook && (
+          <div className="mb-4">
+            <AIInsightsCard expenses={records as Expense[]} notebookName={notebook.name} notebookId={notebook.id} currency={notebookCurrency.code} period={filters.timeRange === "week" || filters.timeRange === "month" ? filters.timeRange : "all"} />
+          </div>
+        )}
 
         {/* Dashboard */}
         <div className="mb-4">
-          <DashboardSummary total={total} count={filteredExpenses.length} topCategory={topCategory} onTotalClick={() => setChartOpen(true)} customCategories={visibleCategories} currency={notebookCurrency.code} />
+          <DashboardSummary total={total} count={filteredExpenses.length} topCategory={topCategory} onTotalClick={() => setChartOpen(true)} customCategories={visibleCategories} currency={notebookCurrency.code} recordType={isIncomeNotebook ? "income" : "expense"} />
         </div>
 
         {/* Filters */}
         <div className="mb-4">
-          <ExpenseFilters filters={filters} onChange={setFilters} categories={visibleCategories} />
+          <ExpenseFilters filters={filters} onChange={setFilters} categories={visibleCategories} recordType={isIncomeNotebook ? "income" : "expense"} />
         </div>
 
         {/* Table */}
-        <ExpenseTable expenses={filteredExpenses} onEdit={handleEdit} onDelete={(id) => deleteMutation.mutate(id)} customCategories={visibleCategories} currency={notebookCurrency.code} />
+        <ExpenseTable expenses={filteredExpenses} onEdit={handleEdit} onDelete={(id) => deleteMutation.mutate(id)} customCategories={visibleCategories} currency={notebookCurrency.code} recordType={isIncomeNotebook ? "income" : "expense"} />
       </div>
 
       {/* Hidden file input for receipt scanning */}
-      <input
+      {!isIncomeNotebook && <input
         ref={fileInputRef}
         type="file"
         accept=".jpg,.jpeg,.png,.webp,.heic,.heif"
         className="hidden"
         onChange={handleReceiptUpload}
         aria-label="Choose receipt image from gallery"
-      />
+      />}
 
       {receiptBusy && (
         <div className="fixed inset-x-4 bottom-36 z-40 md:bottom-24">
@@ -398,7 +406,7 @@ export function NotebookView({ notebook, onBack }: NotebookViewProps) {
 
       {/* FABs */}
       <div className="fixed bottom-20 right-6 flex flex-col gap-3 z-40 md:bottom-6">
-        <Button
+        {!isIncomeNotebook && <Button
           onClick={() => void openGallery()}
           disabled={receiptBusy}
           variant="outline"
@@ -407,7 +415,7 @@ export function NotebookView({ notebook, onBack }: NotebookViewProps) {
         >
           {receiptBusy ? <Loader2 className="h-5 w-5 animate-spin" /> : <Images className="h-5 w-5" />}
           <span className="text-sm font-semibold">Gallery</span>
-        </Button>
+        </Button>}
         <Button onClick={() => setFormOpen(true)} disabled={receiptBusy} className="h-14 w-14 rounded-full shadow-elevated text-lg" size="icon">
           <Plus className="h-7 w-7" />
         </Button>
@@ -500,7 +508,7 @@ export function NotebookView({ notebook, onBack }: NotebookViewProps) {
         open={formOpen}
         onOpenChange={handleOpenChange}
         onSubmit={handleSubmit}
-        editExpense={editExpense}
+        editExpense={editExpense as Expense | null}
         prefillData={prefillData}
         categories={visibleCategories}
         onAddCustomCategory={isIncomeNotebook ? undefined : handleAddCustomCategory}
@@ -509,8 +517,8 @@ export function NotebookView({ notebook, onBack }: NotebookViewProps) {
       />
 
       {/* Pie Chart */}
-      <CategoryPieChart open={chartOpen} onOpenChange={setChartOpen} expenses={filteredExpenses} currency={notebookCurrency.code} />
-      <CategoryBarChart open={barChartOpen} onOpenChange={setBarChartOpen} expenses={filteredExpenses} currency={notebookCurrency.code} />
+      <CategoryPieChart open={chartOpen} onOpenChange={setChartOpen} expenses={filteredExpenses} currency={notebookCurrency.code} recordType={isIncomeNotebook ? "income" : "expense"} />
+      <CategoryBarChart open={barChartOpen} onOpenChange={setBarChartOpen} expenses={filteredExpenses} currency={notebookCurrency.code} recordType={isIncomeNotebook ? "income" : "expense"} />
     </div>
   );
 }
