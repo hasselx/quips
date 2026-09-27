@@ -1,11 +1,12 @@
 import { Outlet, useLocation, Link } from "react-router-dom";
-import { Home, BookUser, Settings, TrendingUp } from "lucide-react";
+import { Home, BookUser, Settings, TrendingUp, PieChart } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const NAV_ITEMS = [
   { label: "Home", icon: Home, path: "/dashboard" },
   { label: "Income", icon: TrendingUp, path: "/dashboard/income" },
   { label: "Ledger", icon: BookUser, path: "/dashboard/ledger" },
+  { label: "Analyze", icon: PieChart, path: "/dashboard/analyze" },
   { label: "Settings", icon: Settings, path: "/dashboard/settings" },
 ];
 
@@ -54,7 +55,7 @@ export default function AppLayout() {
             key={item.path}
             to={item.path}
             className={cn(
-              "flex flex-col items-center gap-0.5 px-4 py-1.5 rounded-xl text-xs font-medium transition-colors",
+              "flex flex-col items-center gap-0.5 px-2 py-1.5 rounded-xl text-xs font-medium transition-colors",
               isActive(item.path)
                 ? "text-primary"
                 : "text-muted-foreground"

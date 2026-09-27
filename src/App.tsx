@@ -10,6 +10,7 @@ import Auth from "./pages/Auth";
 import Dashboard from "./pages/Dashboard";
 import IncomePage from "./pages/IncomePage";
 import LedgerPage from "./pages/LedgerPage";
+import AnalyzePage from "./pages/AnalyzePage";
 import SettingsPage from "./pages/SettingsPage";
 import AppLayout from "./components/AppLayout";
 import NotFound from "./pages/NotFound";
@@ -30,6 +31,7 @@ const App = () => (
               <Route index element={<Dashboard />} />
               <Route path="income" element={<IncomePage />} />
               <Route path="ledger" element={<LedgerPage />} />
+              <Route path="analyze" element={<AnalyzePage />} />
               <Route path="settings" element={<SettingsPage />} />
             </Route>
             <Route path="*" element={<NotFound />} />
