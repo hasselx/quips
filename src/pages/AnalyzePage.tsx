@@ -119,6 +119,35 @@ export default function AnalyzePage() {
         }
         const avg = monthly.reduce((s, x) => s + x.Expense, 0) / monthly.length;
         points.push({ tone: "info", text: `Average monthly spending: ${formatCurrency(avg, cur)}.` });
+
+        // Per-category trend: compare each category's last two months
+        const prevByCat: Record<string, number> = {};
+        const curByCat: Record<string, number> = {};
+        exp.forEach((e) => {
+          const k = monthKey(e.date);
+          if (k === a.month) prevByCat[e.category] = (prevByCat[e.category] || 0) + Number(e.amount);
+          else if (k === b.month) curByCat[e.category] = (curByCat[e.category] || 0) + Number(e.amount);
+        });
+        const catNames = [...new Set([...Object.keys(prevByCat), ...Object.keys(curByCat)])];
+        const catTrends = catNames
+          .map((name) => {
+            const prev = prevByCat[name] || 0;
+            const curv = curByCat[name] || 0;
+            const ch = prev > 0 ? ((curv - prev) / prev) * 100 : curv > 0 ? Infinity : 0;
+            return { name, prev, curv, ch };
+          })
+          .sort((x, y) => Math.abs(y.curv - y.prev) - Math.abs(x.curv - x.prev));
+        catTrends.slice(0, 5).forEach((t) => {
+          if (t.prev === 0 && t.curv > 0)
+            points.push({ tone: "info", text: `${t.name}: new spending of ${formatCurrency(t.curv, cur)} in ${b.label} (none in ${a.label}).` });
+          else if (t.prev > 0 && t.curv === 0)
+            points.push({ tone: "good", text: `${t.name}: no spending in ${b.label} (was ${formatCurrency(t.prev, cur)} in ${a.label}).` });
+          else if (t.prev > 0)
+            points.push({
+              tone: t.ch > 15 ? "bad" : t.ch < -15 ? "good" : "info",
+              text: `${t.name}: ${formatCurrency(t.prev, cur)} → ${formatCurrency(t.curv, cur)} (${t.ch >= 0 ? "+" : ""}${t.ch.toFixed(0)}% vs ${a.label}).`,
+            });
+        });
       }
       if (led.length) {
         const bal = lent - borrowed;
