@@ -11,6 +11,7 @@ import {
   BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Legend, PieChart, Pie, Cell, CartesianGrid,
 } from "recharts";
 import { TrendingUp, TrendingDown, BookUser, Lightbulb } from "lucide-react";
+import SavingsGoals from "@/components/SavingsGoals";
 
 type Period = "all" | "month" | "3m" | "year";
 const COLORS = ["hsl(25,80%,55%)", "hsl(210,70%,55%)", "hsl(340,65%,55%)", "hsl(45,85%,50%)", "hsl(270,55%,55%)", "hsl(160,55%,42%)", "hsl(190,60%,50%)", "hsl(0,65%,55%)"];
@@ -211,6 +212,8 @@ export default function AnalyzePage() {
         {tile("Net", (r.net >= 0 ? "+" : "-") + fmt(Math.abs(r.net)), r.net >= 0 ? "text-primary" : "text-destructive")}
         {tile("Ledger net", (r.lent - r.borrowed >= 0 ? "+" : "-") + fmt(Math.abs(r.lent - r.borrowed)), "text-foreground")}
       </div>
+
+      <SavingsGoals currency={cur} net={r.net} />
 
       <div className="bg-card rounded-2xl p-4 shadow-card">
         <h2 className="text-sm font-bold mb-2 flex items-center gap-1.5"><Lightbulb className="h-4 w-4 text-primary" /> Noted points</h2>
